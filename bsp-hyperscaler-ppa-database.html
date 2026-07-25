@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BSP Hyperscaler PPA &amp; Community Impact Database</title>
+<style>
+  :root{
+    --teal-dark:#1A4444; --teal:#2ABFBF; --teal-deep:#14807f;
+    --ink:#16201f; --muted:#5f6b6a; --faint:#8a9594;
+    --line:#e3e8e7; --line-strong:#cfd6d5;
+    --bg:#f6f8f8; --card:#ffffff;
+    --clean:#2f7a45; --clean-soft:#eaf4ec;
+    --managed:#9a6b12; --managed-soft:#fbf1dd;
+    --contested:#a5342b; --contested-soft:#f8ecea;
+    --early:#5f6b6a; --early-soft:#eef1f0;
+    --flag-bg:#fdf8ec; --flag-line:#e0c474; --flag-ink:#7a5b00;
+    --chip:#1A4444;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.5;-webkit-font-smoothing:antialiased;}
+  .serif{font-family:Georgia,"Iowan Old Style","Times New Roman",serif;}
+  a{color:var(--teal-deep);}
+
+  /* ── Masthead ─────────────────────────────────── */
+  header.masthead{background:var(--teal-dark);color:#fff;padding:30px 24px 22px;}
+  .mast-inner{max-width:1240px;margin:0 auto;}
+  .kicker{font-size:12px;letter-spacing:3px;text-transform:uppercase;
+    color:var(--teal);margin:0 0 8px;font-weight:600;}
+  .hub-crumb{display:inline-block;font-size:12px;color:#8fb8b7;text-decoration:none;
+    margin-bottom:12px;}
+  .hub-crumb:hover{color:#fff;text-decoration:underline;}
+  header.masthead h1{margin:0 0 10px;font-size:29px;font-weight:600;line-height:1.2;
+    font-family:Georgia,"Iowan Old Style","Times New Roman",serif;}
+  .mast-meta{font-size:13px;color:#bcd4d3;display:flex;flex-wrap:wrap;gap:6px 18px;}
+  .mast-meta b{color:#fff;font-weight:600;}
+
+  /* ── Toolbar ──────────────────────────────────── */
+  .toolbar{background:var(--card);border-bottom:1px solid var(--line);
+    position:sticky;top:0;z-index:30;}
+  .tools-inner{max-width:1240px;margin:0 auto;padding:14px 24px;
+    display:flex;flex-wrap:wrap;gap:12px;align-items:center;}
+  .views{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line-strong);border-radius:8px;overflow:hidden;}
+  .views button{border:0;background:#fff;padding:9px 14px;font-size:12.5px;font-weight:600;
+    color:var(--muted);cursor:pointer;border-right:1px solid var(--line);white-space:nowrap;}
+  .views button:last-child{border-right:0;}
+  .views button.active{background:var(--teal-dark);color:#fff;}
+  .views button:focus-visible{outline:2px solid var(--teal);outline-offset:-2px;}
+  input[type=text],select{font-size:14px;padding:9px 12px;border:1px solid var(--line-strong);
+    border-radius:8px;font-family:inherit;background:#fff;color:var(--ink);}
+  input#search{min-width:190px;flex:1 1 190px;max-width:280px;}
+  select{cursor:pointer;min-width:0;max-width:100%;flex:0 1 auto;
+    text-overflow:ellipsis;white-space:nowrap;}
+  .tool-spacer{flex:1 1 auto;}
+  .hint{font-size:12px;color:var(--faint);}
+
+  main{max-width:1240px;margin:0 auto;padding:8px 24px 70px;}
+
+  /* ── Section titles ───────────────────────────── */
+  .section-title{display:flex;align-items:baseline;gap:10px;margin:26px 0 12px;
+    padding-bottom:7px;border-bottom:2px solid var(--line-strong);
+    font-size:13px;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;
+    color:var(--teal-deep);}
+  .section-title .count{font-size:12px;letter-spacing:.5px;color:var(--faint);font-weight:600;
+    text-transform:none;}
+  .section-title.working{color:var(--clean);border-color:var(--clean);}
+  .section-title.notworking{color:var(--contested);border-color:var(--contested);}
+  .section-sub{font-size:13.5px;color:var(--muted);margin:-6px 0 16px;max-width:760px;}
+
+  /* ── Deal / generic cards ──────────────────────── */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;
+    border-top:4px solid var(--faint);padding:16px 16px 13px;cursor:pointer;
+    transition:box-shadow .15s ease,transform .15s ease;
+    display:flex;flex-direction:column;gap:0;}
+  .card:hover{box-shadow:0 6px 22px rgba(20,40,40,.10);transform:translateY(-2px);}
+  .card:focus-visible{outline:2px solid var(--teal);outline-offset:2px;}
+  .card.clean{border-top-color:var(--clean);}
+  .card.managed{border-top-color:var(--managed);}
+  .card.contested{border-top-color:var(--contested);}
+  .card.early{border-top-color:var(--early);}
+  .card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+  .card h3{margin:0;font-size:17px;font-weight:600;line-height:1.3;}
+  .card .company-line{display:flex;align-items:center;gap:7px;margin:5px 0 0;}
+  .chip{font-size:10px;font-weight:700;letter-spacing:.4px;background:var(--chip);color:#fff;
+    padding:2px 7px;border-radius:4px;flex-shrink:0;white-space:nowrap;}
+  .card .role{margin:0;font-size:12.5px;color:var(--muted);}
+  .pill{font-size:9.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;
+    padding:3px 8px;border-radius:20px;flex-shrink:0;white-space:nowrap;margin-top:1px;}
+  .pill.clean{background:var(--clean-soft);color:var(--clean);}
+  .pill.managed{background:var(--managed-soft);color:var(--managed);}
+  .pill.contested{background:var(--contested-soft);color:var(--contested);}
+  .pill.early{background:var(--early-soft);color:var(--early);}
+  .card-synth{margin:10px 0 0;font-size:13px;color:var(--muted);line-height:1.45;
+    display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+  .card-divider{border:0;border-top:1px solid var(--line);margin:12px 0 10px;}
+  .card-previews{display:flex;flex-direction:column;gap:8px;margin-bottom:auto;}
+  .card-pos-preview{display:flex;flex-direction:column;gap:3px;}
+  .tag{font-size:10.5px;font-weight:600;letter-spacing:.3px;text-transform:uppercase;
+    background:#eef2f1;color:#48605f;padding:3px 8px;border-radius:5px;
+    display:inline-block;width:fit-content;align-self:flex-start;}
+  .card-pos-text{margin:0;font-size:12.5px;color:var(--ink);line-height:1.4;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .card-foot{display:flex;align-items:center;gap:10px;margin-top:12px;padding-top:10px;
+    border-top:1px solid var(--line);font-size:12px;color:var(--teal-deep);font-weight:600;}
+  .status-flag{font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;
+    color:var(--flag-ink);background:var(--flag-bg);border:1px solid var(--flag-line);
+    padding:2px 6px;border-radius:5px;margin-left:auto;}
+
+  /* ── Modal ────────────────────────────────────── */
+  .backdrop{position:fixed;inset:0;background:rgba(15,28,28,.55);z-index:50;
+    display:none;align-items:flex-start;justify-content:center;
+    padding:40px 16px;overflow-y:auto;}
+  .backdrop.open{display:flex;}
+  .modal{background:#fff;max-width:820px;width:100%;border-radius:12px;overflow:hidden;
+    box-shadow:0 24px 70px rgba(0,0,0,.3);display:flex;flex-direction:column;
+    max-height:calc(100vh - 80px);}
+  .modal-head{flex-shrink:0;padding:22px 26px 18px;
+    border-bottom:1px solid var(--line);position:relative;}
+  .modal-head.clean{border-top:5px solid var(--clean);}
+  .modal-head.managed{border-top:5px solid var(--managed);}
+  .modal-head.contested{border-top:5px solid var(--contested);}
+  .modal-head.early{border-top:5px solid var(--early);}
+  .modal-head h2{margin:0 0 3px;font-size:22px;font-weight:600;padding-right:36px;}
+  .modal-head .role{margin:2px 0 0;font-size:13.5px;color:var(--muted);}
+  .modal-synth{margin:12px 0 0;font-size:14px;color:#2b3a39;line-height:1.55;}
+  .modal-status{margin:12px 0 0;font-size:13px;font-weight:600;color:var(--flag-ink);
+    background:var(--flag-bg);border-left:3px solid var(--flag-line);
+    padding:8px 12px;border-radius:0 6px 6px 0;}
+  .close-x{position:absolute;top:16px;right:18px;border:0;background:#f1f4f4;
+    width:32px;height:32px;border-radius:8px;font-size:18px;cursor:pointer;
+    color:var(--muted);line-height:1;}
+  .close-x:hover{background:#e6eae9;}
+  .modal-detail{flex:1;overflow-y:auto;min-height:0;padding:6px 26px 26px;}
+  .detail-section{padding:16px 0;border-top:1px solid var(--line);}
+  .detail-section:first-child{border-top:0;}
+  .detail-section-title{margin:0 0 10px;font-size:11.5px;font-weight:700;letter-spacing:1.2px;
+    text-transform:uppercase;color:var(--teal-deep);}
+  .detail-label{display:flex;align-items:center;gap:7px;margin:0 0 5px;
+    font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);}
+  .detail-text{margin:0;font-size:14px;line-height:1.6;color:var(--ink);}
+  .subfield{margin:0 0 13px;}
+  .subfield:last-child{margin-bottom:0;}
+  .nuance{margin:14px 0 0;padding:10px 13px;background:#f4f9f8;border:1px dashed var(--line-strong);
+    border-radius:8px;font-size:12.5px;color:var(--muted);line-height:1.55;}
+  .nuance b{color:var(--teal-deep);font-size:10.5px;letter-spacing:.6px;text-transform:uppercase;
+    display:block;margin-bottom:4px;font-weight:700;}
+  .sources-toggle,.history-toggle{width:100%;display:flex;align-items:center;justify-content:center;gap:7px;
+    margin-top:16px;padding:10px;font-size:12.5px;font-weight:600;color:var(--muted);
+    background:none;border:1px dashed var(--line-strong);border-radius:8px;cursor:pointer;
+    font-family:inherit;transition:color .15s,border-color .15s;}
+  .sources-toggle:hover,.history-toggle:hover{color:var(--ink);border-color:var(--faint);}
+  .sources-toggle-icon,.history-toggle-icon{display:inline-block;font-size:10px;transition:transform .15s;}
+  .sources-toggle.open .sources-toggle-icon,.history-toggle.open .history-toggle-icon{transform:rotate(180deg);}
+  .srcs{margin:14px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:9px;}
+  .srcs li{font-size:13px;color:var(--muted);}
+  .srcs .src-date{color:var(--faint);margin-left:6px;}
+
+  .empty{padding:40px;text-align:center;color:var(--faint);font-size:14px;}
+
+  footer{max-width:1240px;margin:0 auto;padding:26px 24px;font-size:12px;color:var(--muted);
+    border-top:1px solid var(--line);}
+  footer p{margin:0 0 6px;max-width:760px;}
+
+  /* ── Models / legend view ───────────────────────── */
+  .model-card{background:var(--card);border:1px solid var(--line);border-radius:10px;
+    padding:16px 18px;position:relative;}
+  .model-num{position:absolute;top:14px;right:16px;font-family:Georgia,serif;font-size:26px;
+    font-weight:600;color:var(--line-strong);}
+  .model-card h3{margin:0 6px 8px 0;font-size:16px;padding-right:30px;}
+  .model-meta{display:flex;flex-wrap:wrap;gap:8px 20px;margin:10px 0 12px;font-size:12px;}
+  .model-meta span{display:flex;flex-direction:column;gap:1px;max-width:220px;}
+  .model-meta span b{font-size:9.5px;letter-spacing:.5px;text-transform:uppercase;
+    color:var(--faint);font-weight:700;}
+  .model-card p{margin:0 0 8px;font-size:13.5px;line-height:1.55;color:var(--ink);}
+  .model-examples{margin:10px 0 0;padding-top:10px;border-top:1px solid var(--line);
+    font-size:12.5px;color:var(--muted);}
+  .model-examples b{color:var(--teal-deep);font-weight:700;font-size:10.5px;letter-spacing:.5px;
+    text-transform:uppercase;display:block;margin-bottom:4px;}
+
+  .synthesis{background:linear-gradient(180deg,#f0f9f8,#ffffff);
+    border:1px solid #cdeae8;border-left:4px solid var(--teal);border-radius:0 10px 10px 0;
+    padding:18px 22px;margin:22px 0 4px;}
+  .synthesis .lead{font-size:11px;font-weight:700;letter-spacing:1.5px;
+    text-transform:uppercase;color:var(--teal-deep);margin:0 0 8px;}
+  .synthesis p{margin:0;font-size:14.5px;line-height:1.65;color:#243433;}
+
+  /* ── Playbook: decision map accordion ──────────── */
+  .accordion{display:flex;flex-direction:column;gap:10px;}
+  .acc-item{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+  .acc-head{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:14px 18px;background:none;border:0;cursor:pointer;font-family:inherit;text-align:left;}
+  .acc-head:hover{background:#fafcfc;}
+  .acc-head h4{margin:0;font-size:15px;font-weight:600;}
+  .acc-icon{font-size:11px;color:var(--faint);transition:transform .15s;flex-shrink:0;}
+  .acc-item.open .acc-icon{transform:rotate(180deg);}
+  .acc-body{display:none;padding:4px 18px 18px;}
+  .acc-item.open .acc-body{display:block;}
+  .acc-field{padding:10px 0;border-top:1px solid var(--line);}
+  .acc-field:first-child{border-top:0;}
+
+  /* ── Regulatory tracker ─────────────────────────── */
+  .note-banner{background:var(--flag-bg);border:1px solid var(--flag-line);border-radius:10px;
+    padding:14px 18px;margin:18px 0;font-size:13px;color:var(--flag-ink);line-height:1.55;}
+  .urgency{font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;
+    padding:3px 8px;border-radius:20px;display:inline-block;white-space:nowrap;}
+  .urgency.critical{background:var(--contested-soft);color:var(--contested);}
+  .urgency.high{background:var(--managed-soft);color:var(--managed);}
+  .urgency.medium{background:#eef1f0;color:var(--muted);}
+  .urgency.active{background:var(--clean-soft);color:var(--clean);}
+  .reg-card{background:var(--card);border:1px solid var(--line);border-radius:10px;
+    padding:15px 17px;cursor:pointer;transition:box-shadow .15s ease,transform .15s ease;}
+  .reg-card:hover{box-shadow:0 6px 22px rgba(20,40,40,.10);transform:translateY(-2px);}
+  .reg-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px;}
+  .reg-card h3{margin:0;font-size:15px;font-weight:600;line-height:1.35;}
+  .reg-card p{margin:0;font-size:13px;color:var(--muted);line-height:1.5;}
+
+  .feed{background:var(--card);border:1px solid var(--line);border-radius:10px;
+    padding:6px 18px;margin:18px 0 0;}
+  .feed-item{padding:14px 0;border-top:1px solid var(--line);}
+  .feed-item:first-child{border-top:0;}
+  .feed-item-top{display:flex;justify-content:space-between;gap:10px;align-items:baseline;margin-bottom:5px;}
+  .feed-item .when{font-size:11.5px;color:var(--faint);white-space:nowrap;flex-shrink:0;}
+  .feed-item h4{margin:0;font-size:14.5px;font-weight:600;line-height:1.4;}
+  .feed-item p{margin:5px 0 0;font-size:13px;color:var(--muted);line-height:1.55;}
+  .feed-item .who{font-size:11.5px;color:var(--faint);margin-top:5px;display:block;}
+
+  .leg-card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:15px 17px;
+    cursor:pointer;transition:box-shadow .15s ease,transform .15s ease;}
+  .leg-card:hover{box-shadow:0 6px 22px rgba(20,40,40,.10);transform:translateY(-2px);}
+  .leg-card-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;}
+  .leg-card h3{margin:0;font-size:15px;}
+  .leg-card p{margin:0;font-size:13px;color:var(--muted);line-height:1.5;}
+  .direction-tag{font-size:10px;font-weight:700;padding:3px 8px;border-radius:5px;white-space:nowrap;}
+
+  /* ── Sources view ───────────────────────────────── */
+  .source-group{margin:0 0 22px;}
+  .source-group h3{font-size:12.5px;letter-spacing:.8px;text-transform:uppercase;color:var(--teal-deep);
+    margin:0 0 10px;padding-bottom:6px;border-bottom:1px solid var(--line);}
+  .source-row{display:flex;flex-wrap:wrap;gap:4px 14px;padding:9px 0;border-top:1px solid var(--line);
+    font-size:13px;align-items:baseline;}
+  .source-row:first-of-type{border-top:0;}
+  .source-row .s-topic{font-weight:600;color:var(--ink);flex:1 1 240px;min-width:200px;}
+  .source-row .s-outlets{color:var(--muted);flex:2 1 320px;}
+  .source-row .s-date{color:var(--faint);font-size:12px;white-space:nowrap;margin-left:auto;}
+
+  @media(max-width:600px){
+    input#search{max-width:none;}
+    .tools-inner select{max-width:none;flex:1 1 100%;}
+    .model-meta{gap:6px 12px;}
+  }
+  @media(prefers-reduced-motion:reduce){*{transition:none !important;}}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="mast-inner">
+    <a class="hub-crumb" href="./index.html">&larr; Boundary Stone Partners Hub</a>
+    <p class="kicker">Boundary Stone Partners &middot; BSP Research</p>
+    <h1>Hyperscaler PPA &amp; Community Impact Database</h1>
+    <div class="mast-meta">
+      <span><b>Updated</b> June 23, 2026</span>
+      <span><b id="m-deals">19</b> deals tracked</span>
+      <span><b id="m-companies">6</b> companies</span>
+      <span><b id="m-sources">47</b> sources cited</span>
+      <span><b>Use</b> client &amp; utility advisory conversations</span>
+    </div>
+  </div>
+</header>
+
+<div class="toolbar">
+  <div class="tools-inner">
+    <div class="views" role="tablist">
+      <button id="v-deals" class="active" onclick="setView('deals')">Deals</button>
+      <button id="v-models" onclick="setView('models')">Approval Models</button>
+      <button id="v-playbook" onclick="setView('playbook')">Advisory Playbook</button>
+      <button id="v-reg" onclick="setView('regulatory')">Regulatory Tracker</button>
+      <button id="v-src" onclick="setView('sources')">Sources</button>
+    </div>
+    <input id="search" type="text" placeholder="Search deals…" oninput="render()">
+    <select id="f-company" onchange="render()">
+      <option value="">All companies</option>
+    </select>
+    <select id="f-model" onchange="render()">
+      <option value="">All approval models</option>
+    </select>
+    <select id="f-status" onchange="render()">
+      <option value="">All statuses</option>
+      <option value="clean">Clean approval</option>
+      <option value="managed">Managed / mixed</option>
+      <option value="contested">Contested</option>
+      <option value="early">Too early to call</option>
+    </select>
+    <span class="tool-spacer"></span>
+    <span class="hint" id="toolhint">Tap any card for the full profile</span>
+  </div>
+</div>
+
+<main id="main"></main>
+
+<footer>
+  <p><strong>About this database.</strong> Compiled by BSP Research from public news reporting, regulatory
+  filings, company disclosures, and litigation records, current as of the dates noted throughout (primary
+  scan window: April&ndash;June 2026). Positions and outcomes are presented descriptively, drawn from the
+  cited reporting &mdash; not BSP's own legal or engineering analysis.</p>
+  <p>For internal use preparing for client, utility, and community conversations. Not a substitute for legal,
+  regulatory, or PR review before external distribution.</p>
+</footer>
+
+<div class="backdrop" id="backdrop" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modal" role="dialog" aria-modal="true"></div>
+</div>
+
+<script>
+const DATA = {"deals":[{"id":"google_alabama","rich":true,"company":"Google","name":"Alabama (Jackson County)","location":"Jackson County, AL","model_num":1,"status_tier":"clean","status_label":"Operational since 2019 · zero opposition","notable_detail":"Only deal in entire dataset with\nzero state regulatory review","nuance":"TVA federal utility; actual DC load confidential;\ndemand response = curtailment obligation, not a MW credit","sections":[{"key":"overview","label":"Overview","fields":[{"label":"Utility Partner","value":"Tennessee Valley Authority (TVA)\n[FEDERAL – no state PUC]"},{"label":"Deal Structure Name","value":"TVA Direct Project Agreement\n(+ Kairos Power SMR PPA)"},{"label":"Announced / Filed","value":"TVA Board approval: Aug 2024\nExpansion announcement: Jun 15, 2026"},{"label":"Current Status","value":"✅ OPERATIONAL (since 2019)\nExpansion in construction 2026–27"}]},{"key":"mw_capacity","label":"MW & Capacity","fields":[{"label":"Data Center Max Load (MW)","value":"CONFIDENTIAL\n(TVA contract terms not public)"},{"label":"Total New Generation Funded (MW)","value":"300+ MW contracted (TVA region)\n50 MW nuclear SMR (Kairos/TVA, ~2030)\n[Up to 500 MW nuclear by 2035 under broader Kairos PPA]"},{"label":"Demand Response / Flexibility","value":"✅ Yes – contractual curtailment with TVA\nduring peak demand & extreme weather"},{"label":"Nuclear Component","value":"✅ 50 MW SMR (Kairos Power Hermes 2, Oak Ridge TN)\nFirst TVA Gen IV reactor PPA\nFirst delivery phase of 500 MW Kairos commitment (~2035)"},{"label":"Storage Component","value":"Not specified for expansion"},{"label":"Gas / Non-Renewable Backup","value":"❌ None disclosed"}]},{"key":"asset_mix","label":"Asset Mix (% of Generation)","fields":[{"label":"Utility-Scale Generation","value":"~85%+ (TVA bulk transmission\nand contracted new generation)"},{"label":"Distribution / Storage","value":"Not disaggregated"},{"label":"Demand Response / Flexibility","value":"Participation-based, not MW-quantified"}]},{"key":"financials","label":"Financials","fields":[{"label":"Data Center Capital Investment","value":"$2B+ total since 2018\n$1.5B expansion (2026–27)"},{"label":"Ratepayer Impact Commitment","value":"Google covers 100% of power +\ninfrastructure costs directly tied to DC"},{"label":"Affordability / Grid Benefit Mechanism","value":"Demand response during peaks\nWeatherization fund for low-income HHs"}]},{"key":"community","label":"Community Benefits","fields":[{"label":"Total Community $ Committed","value":"$2.55M announced (expansion):\n• $2M Energy Impact Fund\n• $550K STEM kits\n+ $28M philanthropy since 2009"},{"label":"Community Fund Structure","value":"Energy Impact Fund:\nRun with TVA + Community Action Agency\nof Northeast Alabama (CAANEAL)\nFocus: weatherization, efficiency,\nlow-income households + schools"},{"label":"Education / STEM","value":"✅ $550K / 5 years\nSTEM kits grades 4–8\nJackson County School District\nPlus existing robotics, career programs"},{"label":"Local Jobs Created","value":"1,000+ contract workers (construction)\nHundreds of full-time jobs (operational)"},{"label":"Water Commitment","value":"Water replenishment pledge\n(100%+ of water used)"}]},{"key":"approval","label":"Approval Process","fields":[{"label":"Regulatory Body","value":"TVA Board of Directors\n(FEDERAL utility – no state PUC)\n⚠️ KEY DISTINCTION: bypasses state-level PUC entirely"},{"label":"Local Government Vote","value":"N/A (federal site on TVA land)"},{"label":"Deal Structure in Approval","value":"Project Agreement with TVA\n(not a PUC rate case)\nTVA Board approved Aug 2024"},{"label":"Approval Timeline (expected/actual)","value":"TVA Board: ~months (Aug 2024)\nNo state PUC delay"},{"label":"Who Is the Decision Maker","value":"Primary: TVA Board of Directors\nSupporting: AL House Speaker (Ledbetter),\nAL Senate Majority Leader (Livingston)"}]},{"key":"opposition","label":"Opposition","fields":[{"label":"Opposition Actors","value":"None documented\n(clean replacement narrative;\n8-year existing relationship)"},{"label":"Primary Opposition Argument","value":"N/A"},{"label":"How They Fought / Neutralized Opposition","value":"N/A – no significant opposition\nKey factors: coal plant replacement narrative;\nstate legislative buy-in; TVA relationship;\nalignment with AL state law on cost coverage"},{"label":"Opposition Outcome","value":"✅ No opposition encountered"}]},{"key":"acceptance","label":"Community Acceptance","fields":[{"label":"Why the Community Said Yes","value":"• Site replaces closed coal plant (2015)\n  → existing infrastructure, no new footprint\n• 8-year established Google presence since 2018\n• TVA recruited Google; community already accepted it\n• Google = largest employer/investor in Jackson County\n• State leadership present at announcement (signal of top cover)\n• Rate protection + demand response = grid citizen framing\n• Low-income weatherization = direct residential benefit\n• $28M philanthropic history = trust built over time"},{"label":"Remaining Community Risk","value":"Low – TVA is considering rate changes that could\nraise data center costs; AL communities opposing\nnew data centers; but Jackson County itself is stable"}]},{"key":"bsp_lens","label":"BSP Lens","fields":[{"label":"Key Takeaway for BSP Clients","value":"Federal utility = completely different advisory playbook.\nNo PUC = no contested case = no intervenor rights.\nSpeed advantage is real but only applies to TVA territory.\nNuclear + demand response = strongest long-term model."},{"label":"Transferable Tactic","value":"Coal-plant-replacement siting;\nnuclear partnership structuring;\ndemand response as grid citizenship"}]}],"source_idx":[0,1,2]},{"id":"google_minnesota","rich":true,"company":"Google","name":"Minnesota (Pine Island – Project Skyway)","location":"Pine Island, MN","model_num":2,"status_tier":"contested","status_label":"Construction halted by court order (May 2026)","notable_detail":"Largest battery project by GWh\never announced globally","nuance":"Largest battery project by GWh ever announced globally;\nactual DC load still unknown to regulators;\nconstruction halted May 2026","sections":[{"key":"overview","label":"Overview","fields":[{"label":"Utility Partner","value":"Xcel Energy (Northern States Power)"},{"label":"Deal Structure Name","value":"Clean Energy Accelerator Charge (CEAC)\n[CTT variant]"},{"label":"Announced / Filed","value":"Announced: Feb 24, 2026\nFiled with MPUC: 'coming weeks' post-announcement"},{"label":"Current Status","value":"⚠️ IN REVIEW / HALTED\nCourt order halting construction (May 2026)\nMPUC review ongoing"}]},{"key":"mw_capacity","label":"MW & Capacity","fields":[{"label":"Data Center Max Load (MW)","value":"Not publicly disclosed\n(NDA; CEAC contract not yet filed with MPUC)"},{"label":"Total New Generation Funded (MW)","value":"1,900 MW total:\n• 1,400 MW wind\n• 200 MW solar\n• 300 MW long-duration storage (Form Energy iron-air)\n+ $50M to Xcel Capacity*Connect program"},{"label":"Demand Response / Flexibility","value":"✅ Yes – $50M to Capacity*Connect (flexibility program)"},{"label":"Nuclear Component","value":"❌ None"},{"label":"Storage Component","value":"✅ 300 MW / 30 GWh iron-air battery (Form Energy)\n[Largest single-site battery by GWh ever announced globally]"},{"label":"Gas / Non-Renewable Backup","value":"❌ None disclosed"}]},{"key":"asset_mix","label":"Asset Mix (% of Generation)","fields":[{"label":"Utility-Scale Generation","value":"~84% (1,600 MW wind+solar of 1,900 MW total)"},{"label":"Distribution / Storage","value":"~16% (300 MW LDES storage of 1,900 MW)"},{"label":"Demand Response / Flexibility","value":"$50M program (MW not quantified separately)"}]},{"key":"financials","label":"Financials","fields":[{"label":"Data Center Capital Investment","value":"Not disclosed publicly"},{"label":"Ratepayer Impact Commitment","value":"Google covers all costs for new service\n(per MN regulatory/legislative requirements\nfor large loads)"},{"label":"Affordability / Grid Benefit Mechanism","value":"$50M to Capacity*Connect (grid flexibility)\n$25M to schools over 20 years"}]},{"key":"community","label":"Community Benefits","fields":[{"label":"Total Community $ Committed","value":"$48M+:\n• $25M to Pine Island schools (20 years)\n• $20M+ city/school infrastructure\n• $3M city fund"},{"label":"Community Fund Structure","value":"Multiple streams:\n• School district endowment ($25M/20yr)\n• City infrastructure fund ($20M+)\n• Separate city discretionary fund ($3M)"},{"label":"Education / STEM","value":"✅ $25M / 20 years\nPine Island Public Schools\n(operational + capital support)"},{"label":"Local Jobs Created","value":"Not specified"},{"label":"Water Commitment","value":"Air cooling – zero water use\n(explicitly stated in project design)"}]},{"key":"approval","label":"Approval Process","fields":[{"label":"Regulatory Body","value":"Minnesota Public Utilities Commission (MPUC)\n+ Pine Island City Council / Planning Commission\n+ Goodhue County Court"},{"label":"Local Government Vote","value":"Pine Island City Council: approved subsidies + tax abatements\nPlanning Commission: approved site"},{"label":"Deal Structure in Approval","value":"CEAC = tariff filed with MPUC for approval\nContested case not yet scheduled"},{"label":"Approval Timeline (expected/actual)","value":"Nevada CTT precedent took ~1 year\nMN filing Feb 2026 → target: 2026–27"},{"label":"Who Is the Decision Maker","value":"Primary: MN PUC (5 commissioners)\nLocal: Pine Island City Council\nLegal wildcard: Goodhue County Court"}]},{"key":"opposition","label":"Opposition","fields":[{"label":"Opposition Actors","value":"MCEA (MN Center for Environmental Advocacy)\n– serial litigant w/ 6 parallel MN lawsuits\nLocal residents (water, noise, traffic concerns)"},{"label":"Primary Opposition Argument","value":"1) Inadequate environmental review\n   (generic 'light industrial' AUAR; real user undisclosed)\n2) NDA obscured Google identity until announcement\n3) CEAC contract still not filed publicly w/ MPUC\n4) Potential 2,700 MW total load undisclosed"},{"label":"How They Fought / Neutralized Opposition","value":"ONGOING – not yet resolved:\n• MCEA suit = court-ordered construction halt (May 2026)\n• Counter: generous community package\n• Counter: legislative buy-in + Chamber of Commerce\n• Weakness: NDA opacity still a litigation target\n• Google argued MN clean energy goals alignment"},{"label":"Opposition Outcome","value":"⚠️ ACTIVE litigation / construction halted\n(MCEA restraining order, May 2026)\nPUC review not yet complete"}]},{"key":"acceptance","label":"Community Acceptance","fields":[{"label":"Why the Community Said Yes","value":"• Partial yes: City Council & Planning Commission approved\n• School district support (25M over 20 years = decisive)\n• MN Chamber of Commerce endorsement\n• State clean energy goals alignment (100% by 2040)\n• BUT: community divided; litigation ongoing\n• Key failure: NDA opacity created 'secret deal' narrative"},{"label":"Remaining Community Risk","value":"HIGH – MCEA litigation active;\nconstruction halted; MPUC review incomplete;\nNDA opacity remains central allegation"}]},{"key":"bsp_lens","label":"BSP Lens","fields":[{"label":"Key Takeaway for BSP Clients","value":"MCEA serial litigation = repeat-litigant risk across MN.\nEnvironmental review quality is now a make-or-break variable.\nBest community package in the dataset didn't prevent halt.\nSequencing matters: get PUC framework set BEFORE individual deal."},{"label":"Transferable Tactic","value":"How NOT to use NDAs;\nhow to sequence PUC tariff vs. individual deal"}]}],"source_idx":[3,4,5,6,7]},{"id":"google_michigan","rich":true,"company":"Google","name":"Michigan (Project Cannoli)","location":"Van Buren Township, MI","model_num":2,"status_tier":"managed","status_label":"In contested-case review · MPSC decision due Sept 10, 2026","notable_detail":"","nuance":"2.7x data center load = meaningful grid benefit argument;\nload ramp timeline (Dec 2027–Dec 2028) is contractually defined;\nDTE claims $1.7B positive affordability benefit","sections":[{"key":"overview","label":"Overview","fields":[{"label":"Utility Partner","value":"DTE Energy"},{"label":"Deal Structure Name","value":"Clean Capacity Acceleration Agreement (CCAA)\n[CTT variant]"},{"label":"Announced / Filed","value":"Announced: Mar 17, 2026\nFiled with MPSC: Mar 17, 2026 (contested case)"},{"label":"Current Status","value":"⚠️ IN REVIEW\nMPSC decision requested by Sept 10, 2026\nTownship board approval pending"}]},{"key":"mw_capacity","label":"MW & Capacity","fields":[{"label":"Data Center Max Load (MW)","value":"1,000 MW\n(Load ramp begins Dec 2027;\nfull 1 GW by Dec 2028)"},{"label":"Total New Generation Funded (MW)","value":"2,700 MW total:\n• 1,600 MW solar\n• 450 MW energy storage (4-hr)\n• 350 MW demand flexibility\n[~2.7× data center load – excess goes to grid]"},{"label":"Demand Response / Flexibility","value":"✅ Yes – 350 MW demand flexibility component"},{"label":"Nuclear Component","value":"❌ None"},{"label":"Storage Component","value":"✅ 450 MW / 4-hour battery storage"},{"label":"Gas / Non-Renewable Backup","value":"❌ None disclosed"}]},{"key":"asset_mix","label":"Asset Mix (% of Generation)","fields":[{"label":"Utility-Scale Generation","value":"~59% (1,600 MW solar of 2,700 MW)"},{"label":"Distribution / Storage","value":"~17% (450 MW storage of 2,700 MW)"},{"label":"Demand Response / Flexibility","value":"~13% (350 MW of 2,700 MW)"}]},{"key":"financials","label":"Financials","fields":[{"label":"Data Center Capital Investment","value":"Not disclosed publicly"},{"label":"Ratepayer Impact Commitment","value":"Google covers full cost of serving its load +\nnew generation, storage, transmission, distribution\nDTE projects ~$1.7B positive affordability benefits\nfor existing customers"},{"label":"Affordability / Grid Benefit Mechanism","value":"$1.7B projected customer affordability benefit\n$10M Energy Impact Fund (statewide)"}]},{"key":"community","label":"Community Benefits","fields":[{"label":"Total Community $ Committed","value":"$10M Energy Impact Fund\n(statewide Michigan, not just Van Buren Twp)"},{"label":"Community Fund Structure","value":"Single statewide fund:\nPrograms TBD, grant applications\nto be announced\nFocus: energy affordability + workforce development"},{"label":"Education / STEM","value":"❌ Not specified separately\n(may be part of Energy Impact Fund)"},{"label":"Local Jobs Created","value":"Not specified"},{"label":"Water Commitment","value":"2–3.6M gallons/day\n(significant; flagged by opponents)"}]},{"key":"approval","label":"Approval Process","fields":[{"label":"Regulatory Body","value":"Michigan Public Service Commission (MPSC)\n+ Van Buren Township Board\n+ Van Buren Township Planning Commission"},{"label":"Local Government Vote","value":"Planning Commission: 5–2 preliminary approval (Feb 11, 2026)\nSubstation: preliminary approval (May 14, 2026)\nTownship Board: PENDING"},{"label":"Deal Structure in Approval","value":"CCAA = filed as CONTESTED CASE with MPSC\n(Google pre-committed to contested process –\nlearned from Oracle/OpenAI Saline Twp precedent)\nMPSC decision requested by Sept 10, 2026"},{"label":"Approval Timeline (expected/actual)","value":"~6 months per DTE estimate\n(Filed Mar 2026, target Sept 2026)"},{"label":"Who Is the Decision Maker","value":"Primary: Michigan PSC\nLocal: Van Buren Twp Board of Trustees\n(Supervisor Kevin McNamara – supportive)"}]},{"key":"opposition","label":"Opposition","fields":[{"label":"Opposition Actors","value":"AG Dana Nessel (scrutiny)\n1,500+ petition signers\n3 bipartisan moratorium bills in MI legislature\nLocal residents (noise, water, grid strain)"},{"label":"Primary Opposition Argument","value":"1) Scale unprecedented for Van Buren Twp zoning\n2) Water: 2–3.6M gal/day\n3) Rate impact uncertainty\n4) AG: potential cost-shifting to ratepayers\n5) 3 bills proposing statewide moratorium through Apr 2027"},{"label":"How They Fought / Neutralized Opposition","value":"Pre-empted AG by committing to contested case\n(Google directly told AG Nessel before announcement)\n• DTE filed $1.7B affordability benefit projection\n• Google framed as 'learned from Oracle/OpenAI'\n• Already-zoned M-1 Light Industrial = no rezoning needed\n• DTE published 'Data Center Facts' ratepayer FAQs"},{"label":"Opposition Outcome","value":"⚠️ MANAGED – AG scrutiny ongoing\nMPSC review in progress\nBills not yet passed"}]},{"key":"acceptance","label":"Community Acceptance","fields":[{"label":"Why the Community Said Yes","value":"• Planning commission approved 5–2\n• Largest taxpayer in Van Buren Twp = tax base argument\n• Top-5 taxpayer in Wayne County\n• Already-zoned M-1 (no rezoning = lower opposition threshold)\n• Supervisor McNamara publicly enthusiastic\n• 'Immediate boost to tax base, schools, public safety'\n• Google pre-committed to contested case = procedural trust signal\n• BUT: 1,500+ petition signatures = split community"},{"label":"Remaining Community Risk","value":"MODERATE – AG scrutiny ongoing;\nmoratorium bills in legislature;\nbut procedural/transparency approach is stronger\nthan Oracle/OpenAI precedent"}]},{"key":"bsp_lens","label":"BSP Lens","fields":[{"label":"Key Takeaway for BSP Clients","value":"Pre-committing to contested case = trust-building tactic\nthat actually neutralized the AG before she could intervene.\nCTT-variant structure + already-zoned site = faster local approval.\nMost transferable playbook of the four deals."},{"label":"Transferable Tactic","value":"Pre-commitment to contested case as AG neutralization;\nalready-zoned industrial site selection;\nCCCA structure design"}]}],"source_idx":[8,9,10,11,12,13]},{"id":"google_voltus","rich":true,"company":"Google","name":"Google – Voltus (PJM BYOC)","location":"PJM territory (multi-state)","model_num":5,"status_tier":"clean","status_label":"Active · zero opposition","notable_detail":"Only deal where the \"community\"\nis a paid participant, not a neighbor","nuance":"First hyperscaler-funded VPP in US wholesale market;\naddresses PJM capacity gap w/o new generation;\ncapacity prices jumped $29→$329/MW-day;\nVPP online 2027","sections":[{"key":"overview","label":"Overview","fields":[{"label":"Utility Partner","value":"Voltus (aggregator) / PJM Interconnection"},{"label":"Deal Structure Name","value":"Bring Your Own Capacity (BYOC)\n[VPP / wholesale capacity]"},{"label":"Announced / Filed","value":"Announced: Jun 2, 2026\nThree-year term"},{"label":"Current Status","value":"✅ ACTIVE\nVPP resources expected online 2027"}]},{"key":"mw_capacity","label":"MW & Capacity","fields":[{"label":"Data Center Max Load (MW)","value":"N/A – capacity deal, not dedicated load"},{"label":"Total New Generation Funded (MW)","value":"100 MW/yr of distributed capacity\n(batteries, smart thermostats, flexible loads)\nAggregated from homes & businesses across PJM"},{"label":"Demand Response / Flexibility","value":"✅ Core mechanism – VPP dispatched during grid stress peaks"},{"label":"Nuclear Component","value":"❌ None"},{"label":"Storage Component","value":"✅ Batteries are primary DER aggregated"},{"label":"Gas / Non-Renewable Backup","value":"❌ Not applicable"}]},{"key":"asset_mix","label":"Asset Mix (% of Generation)","fields":[{"label":"Utility-Scale Generation","value":"0% – no utility-scale generation"},{"label":"Distribution / Storage","value":"~100% – all distributed assets"},{"label":"Demand Response / Flexibility","value":"100% of deal structure"}]},{"key":"financials","label":"Financials","fields":[{"label":"Data Center Capital Investment","value":"Not applicable (capacity procurement deal)"},{"label":"Ratepayer Impact Commitment","value":"Payments go TO participating homes/businesses\n(rate-reducing by design)"},{"label":"Affordability / Grid Benefit Mechanism","value":"100 MW freed-up capacity reduces\nsupply scarcity and capacity prices in PJM"}]},{"key":"community","label":"Community Benefits","fields":[{"label":"Total Community $ Committed","value":"Payments to ALL PJM homes/businesses\nparticipating in VPP (~$100B consumer savings\nclaimed over 10 years, industry estimate)"},{"label":"Community Fund Structure","value":"No dedicated fund –\ndirect payments through Voltus\nto DER participants"},{"label":"Education / STEM","value":"❌ Not applicable"},{"label":"Local Jobs Created","value":"0 direct jobs – distributed model"},{"label":"Water Commitment","value":"N/A"}]},{"key":"approval","label":"Approval Process","fields":[{"label":"Regulatory Body","value":"PJM Interconnection\n(wholesale capacity market – no PUC approval needed)"},{"label":"Local Government Vote","value":"N/A"},{"label":"Deal Structure in Approval","value":"BYOC = capacity product sold into PJM\ncapacity market – no separate regulatory filing"},{"label":"Approval Timeline (expected/actual)","value":"No approval process required"},{"label":"Who Is the Decision Maker","value":"Primary: PJM Board / markets committee\nNo local approval needed"}]},{"key":"opposition","label":"Opposition","fields":[{"label":"Opposition Actors","value":"None documented"},{"label":"Primary Opposition Argument","value":"N/A"},{"label":"How They Fought / Neutralized Opposition","value":"No opposition; deal structured entirely outside\nnormal utility regulatory channels"},{"label":"Opposition Outcome","value":"✅ None"}]},{"key":"acceptance","label":"Community Acceptance","fields":[{"label":"Why the Community Said Yes","value":"• No specific community to win over\n• Participating homes/businesses receive DIRECT PAYMENTS\n• Model inverts the community dynamic entirely:\n  residents are paid participants, not impacted neighbors"},{"label":"Remaining Community Risk","value":"None – inverted model"}]},{"key":"bsp_lens","label":"BSP Lens","fields":[{"label":"Key Takeaway for BSP Clients","value":"First-of-kind mechanism that reframes community benefit:\nresidents get PAID rather than COMPENSATED.\nAddresses PJM capacity crunch 3–5 years faster\nthan new generation.\nBSP angle: scaling this model = new advisory product."},{"label":"Transferable Tactic","value":"BYOC as bridge capacity while new generation is built;\nVPP = community benefit by design, not by side payment"}]}],"source_idx":[14,15]},{"id":"google_texas","rich":true,"company":"Google","name":"Texas (Meitner Energy Center / Intersect)","location":"Gray & Roberts Counties, TX","model_num":4,"status_tier":"managed","status_label":"Under construction · tax abatement vote delayed once","notable_detail":"Google bought the developer\noutright for $4.75B","nuance":"Only deal in dataset with on-site gas firming;\nGoogle owns the generation developer outright (vertical\nintegration); fastest interconnection approval (ERCOT,\nno FERC jurisdiction) but lowest jobs-per-MW ratio","sections":[{"key":"overview","label":"Overview","fields":[{"label":"Utility Partner","value":"Self-supplied via Intersect Power\n(Google-owned since Mar 2026)\nGrid tie via Cross Texas Transmission / ERCOT"},{"label":"Deal Structure Name","value":"Full vertical integration / \"power-first\" co-location\n(Google bought the developer outright — $4.75B\nacquisition of Intersect Power, closed Mar 2026)"},{"label":"Announced / Filed","value":"Intersect partnership: Dec 2024\nFirst site (Haskell/Quantum): Nov 2025\nIntersect acquisition: Dec 2025, closed Mar 2026\nMeitner groundbreaking: Jun 4, 2026"},{"label":"Current Status","value":"⚠️ UNDER CONSTRUCTION\nHaskell/Quantum begins ops Jun 2026\nMeitner Phase 1 target: late 2028\nGray Co. tax abatement vote delayed once already"}]},{"key":"mw_capacity","label":"MW & Capacity","fields":[{"label":"Data Center Max Load (MW)","value":"840 MW behind-the-meter load at Meitner\n(per PUCT interconnection filings)\nTotal compute load/PUE not disclosed by Google"},{"label":"Total New Generation Funded (MW)","value":"1,000+ MW (Meitner): wind, solar, battery storage\n+ on-site gas firming (minority share)\nHaskell/Quantum (sister site): 640 MW solar +\n1.3 GWh storage, separately"},{"label":"Demand Response / Flexibility","value":"❌ Not applicable – co-located generation +\non-site gas firming substitutes for grid flexibility"},{"label":"Nuclear Component","value":"❌ None"},{"label":"Storage Component","value":"✅ Part of >1 GW package at Meitner (size undisclosed)\nHaskell/Quantum: 1.3 GWh battery storage"},{"label":"Gas / Non-Renewable Backup","value":"✅ On-site natural gas firming\n(\"minority share\" of demand per Google;\nmajority renewable from Day One)"}]},{"key":"asset_mix","label":"Asset Mix (% of Generation)","fields":[{"label":"Utility-Scale Generation","value":"Majority wind/solar (exact % undisclosed);\nstructurally different — this IS the utility,\nno separate utility-scale purchase"},{"label":"Distribution / Storage","value":"Undisclosed exact %; battery storage is a\nnamed component of the >1 GW package"},{"label":"Demand Response / Flexibility","value":"0% – substituted by on-site gas firming instead"}]},{"key":"financials","label":"Financials","fields":[{"label":"Data Center Capital Investment","value":"Part of Google's $40B TX investment through 2027;\nsite-specific figure not disclosed\n(original Intersect concept was ~$1–3B per phase)\n+ $4.75B acquisition of Intersect itself"},{"label":"Ratepayer Impact Commitment","value":"N/A in traditional sense – behind-the-meter,\nself-supplied power means minimal draw on\nshared grid by design (\"reduces need for new\npower supply on the local grid\" – Google)"},{"label":"Affordability / Grid Benefit Mechanism","value":"Co-location model itself is the affordability pitch:\nbypasses need for new shared grid infrastructure;\n$10M Texas Water Impact Fund (statewide)"}]},{"key":"community","label":"Community Benefits","fields":[{"label":"Total Community $ Committed","value":"$10M Texas Water Impact Fund (statewide);\n>$30M promised local tax revenue (Gray Co.,\npost-abatement); ongoing Intersect community\ninvestment since 2022 (Pampa ISD CTE, STEAM\ncenter, Texas 4-H) – amounts not broken out"},{"label":"Community Fund Structure","value":"Statewide water fund (not site-specific) +\nlocal tax abatement structure (Ch. 312) +\nlong-running Intersect community partnerships\n(schools, youth programs) since 2022"},{"label":"Education / STEM","value":"✅ Pampa ISD Career & Technical Education program;\nThe Well STEAM and Literacy Center;\nTexas 4-H Foundation (ongoing since 2022,\namounts not disclosed)"},{"label":"Local Jobs Created","value":"~40 full-time jobs across all 3 phases (per original\ntax abatement filing) – LOWEST jobs-per-dollar-\ninvested ratio in the dataset for a $1B+ project;\nup to 3,500 construction workers housed at\nCaprock Workforce Hub (temporary)"},{"label":"Water Commitment","value":"Air cooling design; water limited to domestic use\nonly (restrooms); \"closed-loop, filled once\" per local\nexec quote; $10M statewide Water Impact Fund;\nstill drew Ogallala Aquifer concerns from ag producers\nworried about groundwater precedent"}]},{"key":"approval","label":"Approval Process","fields":[{"label":"Regulatory Body","value":"Public Utility Commission of Texas (PUCT) –\ninterconnection agreements only (ERCOT is not\nFERC-jurisdictional, exempt from federal oversight);\nGray & Roberts County Commissioners Courts –\ntax abatement (Ch. 312); also Lone Star Infrastructure\nProtection Act (foreign-ownership certification)"},{"label":"Local Government Vote","value":"Gray County Commissioners Court: vote DELAYED\n30 days after contentious public hearing (transparency\n& land use concerns); Roberts County Court: scheduling\nvote, one judge recused due to conflict"},{"label":"Deal Structure in Approval","value":"Behind-the-meter interconnection agreement with\nCross Texas Transmission, filed with PUCT;\nERCOT's lighter regulatory touch (no FERC\njurisdiction) = fastest approval path in dataset;\ntax abatement separately negotiated at county level"},{"label":"Approval Timeline (expected/actual)","value":"Interconnection agreements: filed/amended within\nweeks (Jul 2025); tax abatement: delayed past\noriginal timeline due to opposition, ~8+ months\nfrom first hearing (Jan 2024) to expected vote"},{"label":"Who Is the Decision Maker","value":"Primary: Gray & Roberts County Commissioners\nCourts (tax abatement); PUCT (interconnection)\nLocal champion: Gray Co. Judge Chris Porter"}]},{"key":"opposition","label":"Opposition","fields":[{"label":"Opposition Actors","value":"Local agricultural producers (Ogallala Aquifer\ngroundwater concerns); residents citing transparency\nand land use (loss of farmland, grasslands, playa\nlakes); \"notable majority\" opposed at Jan 2024\npublic hearing per local reporting"},{"label":"Primary Opposition Argument","value":"1) Project's groundwater draw comes from same\nOgallala Aquifer ag producers are tightly regulated on\n(12 inch/acre-foot cap) – \"why aren't they?\"\n2) General transparency complaints about deal terms\n3) Loss of productive farmland/grassland/playa lakes"},{"label":"How They Fought / Neutralized Opposition","value":"Air-cooling design announced proactively to address\nwater concerns; $10M statewide Water Impact Fund;\n>$30M promised tax revenue post-abatement; long-\nstanding (since 2022) local community investment\nby Intersect predates controversy; Chamber of\nCommerce support; county judge as public champion"},{"label":"Opposition Outcome","value":"⚠️ MANAGED – tax abatement vote delayed once but\nproject proceeded; interconnection agreements\nalready filed/approved at PUCT; groundwater\nconcern remains unresolved/unaddressed directly"}]},{"key":"acceptance","label":"Community Acceptance","fields":[{"label":"Why the Community Said Yes","value":"• $30M+ tax revenue argument resonated w/ county\n  leadership (\"investment that doesn't happen often\")\n• Pampa Chamber of Commerce publicly supportive\n• Intersect's 2-year track record as local community\n  partner pre-dates the data-center pivot\n• Air-cooling redesign was a direct, proactive response\n  to water concerns raised early\n• BUT: vote delayed once; opposition not fully resolved,\n  particularly on aquifer/groundwater equity question"},{"label":"Remaining Community Risk","value":"MODERATE – groundwater equity argument (why is a\n$1B+ tech project not held to the same water-use\nstandard as local agriculture?) is unresolved and\ncould resurface in Roberts County vote or future phases"}]},{"key":"bsp_lens","label":"BSP Lens","fields":[{"label":"Key Takeaway for BSP Clients","value":"Vertical integration (buy the developer) is a new playbook\nentirely – eliminates negotiation/misalignment risk between\nhyperscaler and power developer, but doesn't eliminate local\nopposition (still needs county-level tax abatement votes).\nERCOT's lighter regulatory touch (no FERC jurisdiction) makes\nTexas structurally the fastest-approval state in this dataset –\nbut also the one with the lowest jobs-per-dollar narrative."},{"label":"Transferable Tactic","value":"Buying the developer to fully control siting, generation\nmix, and timeline; ERCOT/ Texas regulatory speed as a\nsite-selection criterion; matching cooling design choice\ndirectly to the community's most salient local resource\nconcern (water) before backlash forms"}]}],"source_idx":[16,17,18]},{"id":"ms_crane","rich":false,"company":"Microsoft","name":"Crane Clean Energy Center (Three Mile Island Unit 1, PA)","location":"Londonderry Township, PA","model_num":null,"status_tier":"clean","status_label":"On track for 2028 · near-zero opposition","profile":{"structure_type":"Front-of-meter PPA\n(existing-asset restart)","approval_body":"Federal: $1B DOE loan;\nState: PA governor backing\n(no contested PUC case found)","energy_allocation":"835 MW — 100% of plant output\nfor 20 years","ratepayer_protection":"Not ratepayer-funded; $16B DOE\nloan-backed restart investment","status_opposition":"✅ On track for 2028;\nnear-zero opposition","notable_detail":"Restarting the UNAFFECTED unit\nnext to the 1979 meltdown site"},"source_idx":[19,31]},{"id":"ms_wisconsin","rich":false,"company":"Microsoft","name":"Wisconsin (Mount Pleasant / Very Large Customer tariff)","location":"Mount Pleasant, WI","model_num":2,"status_tier":"clean","status_label":"Approved April 2026 with strong consumer-advocate wins","profile":{"structure_type":"Model 2 — State Tariff\n(consumer-advocate negotiated)","approval_body":"Wisconsin PSC — 13-month public\nprocess w/ Citizens Utility Board,\nClean Wisconsin as active intervenors","energy_allocation":"~2 GW total Microsoft demand;\n$19.3B in new We Energies generation\nover 5 years tied to the tariff","ratepayer_protection":"PSC REJECTED utility's original\n75%-cost-only option; mandated\nFULL cost recovery + 15-yr min. term","status_opposition":"✅ Approved Apr 2026, with\nstrong consumer-advocate wins","notable_detail":"Threshold lowered from 500 MW\nto 100 MW after public pressure"},"source_idx":[32]},{"id":"ms_westvirginia","rich":false,"company":"Microsoft","name":"West Virginia (Mason County / Nscale microgrid)","location":"Mason County, WV","model_num":4,"status_tier":"managed","status_label":"New in 2026 · first GW-scale off-grid commitment by Microsoft","profile":{"structure_type":"Model 4 — Off-grid\nBehind-the-Meter (gas)","approval_body":"State siting law only — bypasses\nPJM's 6+ year interconnection queue\nentirely under new WV statute","energy_allocation":"~1.4 GW off-grid, gas-fired\n(hundreds of gas generators)","ratepayer_protection":"N/A — no grid draw, no state\nPUC ratepayer case applies","status_opposition":"⚠️ New (2026); first GW-scale\noff-grid commitment by Microsoft","notable_detail":"Same WV law category as the\nReuters \"off-grid gas\" investigation"},"source_idx":[33]},{"id":"ms_indiana","rich":false,"company":"Microsoft","name":"Indiana (LaPorte) — part of AEP/I&M joint settlement","location":"LaPorte, IN","model_num":3,"status_tier":"clean","status_label":"Approved February 2025","profile":{"structure_type":"Model 3 — Multi-Party\nNegotiated Settlement","approval_body":"Indiana Utility Regulatory Commission\n(IURC) — pre-negotiated w/ OUCC +\nCitizens Action Coalition as parties","energy_allocation":"Peak load in I&M territory projected\nto jump from 2,800 MW to 7,000+ MW\nby 2030 (Microsoft + Amazon + Google combined)","ratepayer_protection":"Large loads must make long-term\nfinancial commitments; >20% capacity\nreduction requires IURC re-approval","status_opposition":"✅ Approved Feb 2025","notable_detail":"Microsoft, Amazon & Google EACH\ngive $500K/yr × 5yrs to low-income fund"},"source_idx":[36]},{"id":"amzn_talen","rich":false,"company":"Amazon","name":"Talen / Susquehanna nuclear (Susquehanna, PA)","location":"Susquehanna, PA","model_num":4,"status_tier":"contested","status_label":"FERC rejected co-location expansion 2-1 — converted to front-of-meter PPA","profile":{"structure_type":"Model 4 → converted\nto front-of-meter","approval_body":"FERC — REJECTED the co-location\nexpansion 2-1 (Nov 2024, upheld\non rehearing Mar 2026)","energy_allocation":"300 MW (existing, approved 2015)\n→ proposed 480 MW (REJECTED)\n→ converted to 1,920 MW front-of-meter","ratepayer_protection":"AEP/Exelon alleged up to $140M/yr\ncost-shift onto PJM ratepayers —\nthis argument is what FERC sided with","status_opposition":"⚠️ Resolved via conversion to\nstandard front-of-meter PPA","notable_detail":"The clearest cautionary tale on\nco-location in the entire dataset"},"source_idx":[20,34]},{"id":"amzn_indiana","rich":false,"company":"Amazon","name":"Indiana (New Carlisle) — part of AEP/I&M joint settlement","location":"New Carlisle, IN","model_num":3,"status_tier":"clean","status_label":"Approved February 2025 · broke ground October 2024","profile":{"structure_type":"Model 3 — Multi-Party\nNegotiated Settlement","approval_body":"IURC (same settlement as Microsoft\n& Google, filed jointly)","energy_allocation":"$11B data center campus;\npart of combined 7,000+ MW\nI&M territory peak load by 2030","ratepayer_protection":"Same settlement terms as Microsoft\n& Google (proportional commitments)","status_opposition":"✅ Approved Feb 2025;\nbroke ground Oct 2024","notable_detail":"Same $500K/yr × 5yr low-income\nfund commitment as Microsoft/Google"},"source_idx":[36]},{"id":"amzn_virginia","rich":false,"company":"Amazon","name":"Virginia (Dominion / North Anna) — SMR exploration","location":"North Anna, VA","model_num":null,"status_tier":"early","status_label":"Early-stage exploration only — pre-construction MOU","profile":{"structure_type":"Nuclear PPA\n(pre-construction MOU)","approval_body":"Not yet at formal PUC review stage —\nMOU/exploratory phase only","energy_allocation":"300+ MW potential (X-energy Xe-100\nSMR, modular 80 MW units)","ratepayer_protection":"Not yet defined (too early-stage)","status_opposition":"⚠️ Early-stage exploration only","notable_detail":"One of several X-energy SMR bets;\nAmazon also a direct investor in X-energy"},"source_idx":[35]},{"id":"meta_ohiopa","rich":false,"company":"Meta","name":"Ohio/Pennsylvania (Vistra — Perry, Davis-Besse, Beaver Valley)","location":"Perry, Davis-Besse & Beaver Valley plants, OH/PA","model_num":null,"status_tier":"clean","status_label":"Purchases begin late 2026 · no opposition found","profile":{"structure_type":"Front-of-meter PPA\n(existing-asset uprate)","approval_body":"Not a contested PUC case found —\nstructured as a 20-year bilateral PPA\nwith plant owner Vistra","energy_allocation":"2,176 MW existing + 433 MW from\nuprates = 2.6+ GW; largest nuclear\nuprate ever backed by a corporate buyer","ratepayer_protection":"Not explicitly ratepayer-walled —\nresearch found no public Meta\nfull-cost-recovery pledge for this deal","status_opposition":"✅ Purchases begin late 2026;\nno opposition found","notable_detail":"Largest single nuclear PPA among\nall deals researched (by MW)"},"source_idx":[21,37]},{"id":"meta_illinois","rich":false,"company":"Meta","name":"Illinois (Clinton — Constellation)","location":"Clinton, IL","model_num":null,"status_tier":"clean","status_label":"Active · floated as a possible template for other IL nuclear plants","profile":{"structure_type":"Subsidy substitution\n(unique structure)","approval_body":"Replaces a RATEPAYER-FUNDED state\nsubsidy program (Zero Emission Credits)\nexpiring 2027 — not a typical PPA filing","energy_allocation":"Full output of Clinton nuclear plant\n(exact MW not itemized in research)","ratepayer_protection":"Meta takes over costs Illinois\nratepayers used to fund — net\nratepayer benefit, unusually direct","status_opposition":"✅ Active; described as a possible\ntemplate for other IL nuclear plants","notable_detail":"The only deal in this comparison\nwhere a company explicitly REPLACES\nan existing ratepayer subsidy"},"source_idx":[21]},{"id":"meta_louisiana","rich":false,"company":"Meta","name":"Louisiana (Entergy — 7 GW gas)","location":"Louisiana","model_num":4,"status_tier":"managed","status_label":"Built · flagged in the Reuters off-grid gas investigation","profile":{"structure_type":"Model 4-adjacent —\nfast-tracked utility build","approval_body":"Louisiana PSC — approved in ~8 months\nunder a NEW fast-track rule that\nSUSPENDED competitive bidding","energy_allocation":"2,200 MW (3-turbine plant) as first\nphase of a 7 GW total commitment","ratepayer_protection":"Competitive bidding (normally a\nratepayer protection) was waived\nfor this specific fast-track process","status_opposition":"⚠️ Built; same project flagged in\nthe Reuters off-grid investigation","notable_detail":"The LA PSC has since formalized\nthis 8-month timeline into a\npermanent fast-track regulatory rule"},"source_idx":[22,27,38]},{"id":"openai_texas","rich":false,"company":"OpenAI / Stargate","name":"Texas (Abilene — flagship, Oracle/Crusoe)","location":"Abilene, TX","model_num":null,"status_tier":"managed","status_label":"Partially operational · local reporting flags air-quality & tax-revenue concerns","profile":{"structure_type":"Mixed — nuclear-adjacent\n+ on-site gas","approval_body":"Local TX permitting; no major\nstate PUC case found, but local\ntax-revenue criticism documented","energy_allocation":"1.2 GW campus; arrangement with\na local nuclear plant + natural gas\n(Crusoe-supplied turbines)","ratepayer_protection":"OpenAI's public \"pay its own way\"\npledge applies company-wide, not\nverified site-by-site in research found","status_opposition":"✅ Partially operational;\nlocal reporting flags air-quality\nand traded-away tax revenue concerns","notable_detail":"Texas Observer: local reporting says\nofficials \"traded away tax revenue\nand community health\""},"source_idx":[23,24]},{"id":"openai_miwi","rich":false,"company":"OpenAI / Stargate","name":"Michigan & Wisconsin (Oracle/Related Digital/DTE; Oracle/Vantage/WEC Energy)","location":"Michigan & Wisconsin","model_num":2,"status_tier":"clean","status_label":"Active development","profile":{"structure_type":"Model 2-style —\nexisting gen + new storage","approval_body":"Coordinated directly with DTE (MI)\nand WEC Energy (WI) utilities;\nno contested case identified","energy_allocation":"MI: existing generation + new\nbattery storage (size undisclosed);\nWI: new solar + battery buildout","ratepayer_protection":"OpenAI states deals are \"designed\nto ensure no impact on DTE's\nexisting customer base\"","status_opposition":"✅ Active development","notable_detail":"Explicitly cited by OpenAI as proof\nof its \"pay its own way\" pledge"},"source_idx":[39]},{"id":"openai_newmexico","rich":false,"company":"OpenAI / Stargate","name":"New Mexico (Doña Ana County — Project Jupiter)","location":"Doña Ana County, NM","model_num":3,"status_tier":"contested","status_label":"Two lawsuits allege the county violated state law in its expedited approval","profile":{"structure_type":"Model 3-attempted —\nbut contested","approval_body":"County commissioners approved\n$165B in bonds across TWO meetings\nin under a month","energy_allocation":"Not itemized in research found","ratepayer_protection":"Not itemized in research found","status_opposition":"🛑 TWO LAWSUITS filed alleging\ncounty violated state law in its\nexpedited approval process","notable_detail":"The only deal in this entire\ncomparison facing litigation over\nthe APPROVAL PROCESS itself"},"source_idx":[24,40]},{"id":"xai_memphis","rich":false,"company":"xAI","name":"Colossus (xAI, Memphis)","location":"Memphis, TN","model_num":4,"status_tier":"contested","status_label":"NAACP & SELC allege Clean Air Act violations · DOJ has intervened for xAI","profile":{"structure_type":"Model 4 — Off-grid,\nself-built gas plant","approval_body":"Minimal — no utility, no PUC;\nbuilt largely outside standard review","energy_allocation":"Not fully disclosed; part of\nbroader Mississippi/Memphis\nregion investment","ratepayer_protection":"None identified","status_opposition":"🛑 NAACP & Southern Environmental\nLaw Center allege Clean Air Act\nviolations; 900+ signature petition","notable_detail":"Sited near predominantly Black\ncommunities — the dataset's clearest\nenvironmental-justice flashpoint"},"source_idx":[25,27]}],"models":[{"num":"1","name":"Federal Utility\nDirect Deal","how":"Company contracts directly with a federally-chartered\nutility instead of a state-regulated one. No state PUC\nrate case, no AG intervention rights.","body":"Federal utility's own Board\n(e.g. TVA Board of Directors)\n— bypasses state regulation entirely","speed":"FASTEST","risk":"LOW\n(but only because no\nstate oversight exists)","examples":"Google – Alabama (TVA)"},{"num":"2","name":"State PUC\nRing-Fenced Tariff","how":"A new, dedicated rate class/tariff is created so the large\ncustomer pays the full cost of its own generation +\ninfrastructure; other ratepayers are walled off by design.","body":"State Public Utility/Service\nCommission — formal rate case\nor contested case, often with\nintervenors and public hearings","speed":"MODERATE\n(6 months–1+ years)","risk":"LOW–MODERATE\n(depends on tariff\ndesign rigor)","examples":"Google – MN (CEAC), MI (CCAA);\nMicrosoft – WI (VLC tariff);\nNevada CTT (origin template)"},{"num":"3","name":"Multi-Party\nNegotiated Settlement","how":"Multiple hyperscalers, the utility, and consumer advocates\nnegotiate a joint settlement BEFORE filing — front-loading\nconsensus instead of fighting it out in a contested case.","body":"State PUC approves a\npre-negotiated settlement\n(faster than a fully litigated case)","speed":"MODERATE-FAST\n(consensus pre-built)","risk":"LOW\n(consumer advocates are\nparty to the deal itself)","examples":"Indiana – AEP/I&M settlement\n(Google + Amazon + Microsoft +\nconsumer advocate, jointly)"},{"num":"4","name":"Behind-the-Meter /\nCo-location","how":"Data center draws power directly from an adjacent or\nself-built plant, bypassing the shared transmission grid\nand its standard review process entirely.","body":"FERC (if it requires a new/amended\ninterconnection agreement) OR\nstate siting law (if fully off-grid)","speed":"FASTEST\n(when it works)","risk":"HIGH\n(cost-shift and\nprecedent concerns)","examples":"Amazon – Talen/Susquehanna (PA,\nexpansion REJECTED by FERC);\nGoogle – TX/Meitner (Intersect);\nMicrosoft – WV/Nscale (off-grid gas);\nxAI – Memphis"},{"num":"5","name":"Wholesale Capacity\nMarket / VPP","how":"Company funds a virtual power plant (aggregated home/\nbusiness batteries & flexible loads) and sells the resulting\ncapacity into the regional wholesale market — no dedicated\nphysical load, no community to approve.","body":"Regional grid operator's wholesale\ncapacity market (e.g. PJM) — NOT\na state PUC matter at all","speed":"FAST","risk":"NONE\n(architecturally avoids\nthe ratepayer question)","examples":"Google – Voltus BYOC (PJM)"},{"num":"6","name":"Vertical Integration\n(Buy the Developer)","how":"Company acquires the power-development firm outright\nrather than negotiating a PPA with an independent\ndeveloper — full control over siting, mix, and timeline.","body":"Still requires local approvals (zoning,\ntax abatement) and state interconnection\nfilings — acquisition itself isn't a\nregulatory shortcut, just a control one","speed":"MODERATE\n(local votes still required)","risk":"LOW–MODERATE\n(self-supplied, but local\nfights still happen)","examples":"Google – TX (Intersect Power\nacquisition, $4.75B)"}],"synthesis":"Three patterns hold across all 19 deals and six companies surveyed here: (1) the multi-party negotiated settlement model (Indiana) is the most consumer-advocate-friendly path found anywhere in this research — three competing hyperscalers, a utility, and a ratepayer watchdog reached agreement BEFORE filing, producing the lowest-conflict outcome of any approval mechanism reviewed, which may be the single most exportable tactic in this whole comparison; (2) every behind-the-meter or off-grid structure in the dataset — Amazon's original Talen proposal, Google's Texas/Intersect deal, Microsoft's West Virginia plant, xAI's Memphis plant — draws meaningfully sharper scrutiny than front-of-meter or tariff-based deals, regardless of which company pursues it; (3) restarting or buying output from an EXISTING, already-trusted plant (Microsoft/Crane, Meta/Vistra, Meta/Clinton) is consistently the smoothest-approved deal type of any structure in this research — site history appears to matter more than generation technology. For BSP: a client's choice of approval MODEL (the six listed above) is a stronger predictor of opposition risk than the size of its community benefit package, and the Indiana multi-party settlement model is worth a closer look as a template BSP could proactively pitch to a utility client facing multiple incoming hyperscaler customers at once.","playbook":{"working":[{"num":"1","strategy":"Multi-Party Negotiated Settlement\n(Indiana Model)","why":"Consumer advocates and ratepayer watchdogs co-sign the deal BEFORE it's filed. No intervenors because they're already parties. Zero opposition, zero litigation.","example":"Indiana AEP/I&M deal: Google + Amazon + Microsoft + utility + OUCC + Citizens Action Coalition all signed together. Approved Feb 2025, zero opposition.","replicability":"HIGH — any market with multiple incoming hyperscalers hitting one utility simultaneously is a candidate. Requires a neutral convener.","angle":"BSP convenes the table. One of the only actors that can bring competing hyperscalers AND consumer advocates into the same room pre-filing."},{"num":"2","strategy":"Federal Utility Direct Deal\n(TVA Model — Alabama only)","why":"Federal utilities (TVA) have no state PUC, no contested case process, no AG intervention rights. Board approves it and that's it.","example":"Google Jackson County: TVA Board approved Aug 2024. Zero state regulatory review, zero opposition. Operational since 2019.","replicability":"LOW geographic scope (TVA territory only, 7-state SE footprint) but HIGH value when applicable.","angle":"For any client siting in TVA territory: BSP helps navigate TVA's internal process, which is relationship-driven rather than procedural."},{"num":"3","strategy":"Pre-Calling the AG Before Announcement\n(Michigan Model)","why":"Google called AG Dana Nessel directly before announcing Project Cannoli and pre-committed to a contested case. This neutralized the most dangerous regulatory opposition vector before it could organize.","example":"Project Cannoli: AG scrutiny reduced, planning commission approved 5-2, MPSC review on track for Sept 2026. The pre-call is the reason.","replicability":"HIGH — works in any state where an AG has consumer protection jurisdiction over utility rate cases. Requires knowing who to call and what to offer.","angle":"BSP knows the AGs, commissioners, and consumer advocates in each state. This is exactly the kind of pre-filing political engagement BSP does."},{"num":"4","strategy":"Ring-Fenced Tariff Design\n(CTT / CEAC / CCAA variants)","why":"Makes 'we pay our own way' legally enforceable rather than just a press release promise. Walls the hyperscaler's costs off from other ratepayers by design.","example":"Nevada CTT (origin template, 2024). Replicated in MN (CEAC), MI (CCAA), WI (VLC tariff). Now the de facto standard structure.","replicability":"HIGH — spreading state by state. Every state without one yet is a target market for BSP advisory work on tariff design.","angle":"BSP helps design the tariff structure, anticipate intervenor objections, and defend cost-allocation methodology in PUC proceedings."},{"num":"5","strategy":"Already-Zoned Industrial Site Selection","why":"Choosing a site already zoned for industrial use removes the rezoning fight entirely — one of the most common local opposition triggers. No variance, no public hearing required for zoning.","example":"Project Cannoli (M-1 Light Industrial zoning) and Alabama (existing data center site). Both avoided the rezoning opposition layer entirely.","replicability":"HIGH — site selection criteria should always include existing zoning as a primary filter. Obvious in retrospect, routinely ignored.","angle":"BSP adds zoning screening to any site-selection advisory engagement as a standard first filter before clients invest in site design."},{"num":"6","strategy":"Coal Plant Replacement Narrative","why":"Siting on or adjacent to a retiring coal plant gives the community an existing frame: 'we already live with industrial use, this replaces something we wanted gone.' Eliminates the greenfield opposition dynamic.","example":"Alabama: Google built on a retired TVA coal plant site. Zero opposition. Community already wanted the coal gone and Google filled the jobs/tax gap.","replicability":"HIGH in coal-retirement states (WV, OH, IN, PA, WY) — and there are hundreds of retiring coal plants in the next decade.","angle":"Connecting hyperscaler clients to coal-plant-adjacent sites in retiring-utility service territories is a specific deal-origination product BSP could develop."},{"num":"7","strategy":"Air / Closed-Loop Cooling Design","why":"Proactively addresses the #1 community flashpoint (water use) before opposition forms. Zero-water cooling is a categorical answer to the aquifer and groundwater concerns that have stalled multiple projects.","example":"Minnesota Pine Island: zero water use, explicitly designed in. Despite everything else going wrong, water was never an opposition issue. Microsoft Pecos: closed-loop cooling announced same day as the project.","replicability":"HIGH — especially in agriculture-adjacent and drought-prone areas. Should be the default design choice in any water-stressed site.","angle":"BSP includes cooling design as part of community opposition risk assessment. Recommending air cooling in water-sensitive markets is a specific, defensible advisory tactic."},{"num":"8","strategy":"Existing-Site Nuclear Restarts / Uprates","why":"Restarting or buying output from an already-operating, community-familiar nuclear plant consistently produces the smoothest approval path in this research. The plant already has community trust, a workforce, and a regulatory history.","example":"Microsoft/Crane (TMI Unit 1 restart): near-zero opposition. Meta/Vistra (Perry, Davis-Besse, Beaver Valley uprates): approved, no opposition found. Meta/Clinton: approved.","replicability":"HIGH for clients willing to pay the premium for existing nuclear. BSP's nuclear practice area is directly relevant here.","angle":"BSP helps structure the 20-year PPA, navigate the DOE loan process, and frame the restart as a jobs/energy-security story rather than a nuclear risk story."},{"num":"9","strategy":"VPP / BYOC — Invert the Community Dynamic","why":"Rather than asking a community to accept a power plant, pay the community to participate in a virtual power plant. Residents become paid stakeholders, not impacted neighbors. Architecturally eliminates all traditional opposition vectors.","example":"Google Voltus BYOC (PJM): 100 MW/yr, zero opposition, no PUC case, no zoning fight, no NDA. Participants get paid. Only deal in the dataset with no opposition of any kind.","replicability":"MODERATE-HIGH — limited to markets with PJM-style wholesale capacity structures and sufficient DER penetration. But growing fast.","angle":"BSP could develop a BYOC advisory product for clients in PJM territory who want to add capacity without a construction fight. First mover advantage exists here."}],"not_working":[{"num":"1","pattern":"NDA Opacity on End-User Identity","why":"Hiding the company's name in permits and environmental reviews consistently becomes the story. It fuels 'secret deal' narratives that are harder to undo than if the identity had been disclosed upfront.","example":"Pine Island (NDA hid Google until Feb 2026 announcement — MCEA sued on this). Indianapolis (NDA-shrouded school board reversal — Google withdrew). Marana, AZ ('Project Blue' NDA-triggered backlash).","warning":"Any project using an NDA to conceal the end-user identity from local planners, environmental reviewers, or the public before approval.","risk_flag":"Recommend upfront disclosure as default. If client insists on NDA, audit the environmental review to ensure it discloses actual use, not a generic category."},{"num":"2","pattern":"Buying Off One Stakeholder Through Side Deals","why":"Neutralizing the most vocal institutional opponent (school board, a single council member) through a private side arrangement doesn't address what the broader community actually objects to — it just adds 'secret backroom deal' to their talking points.","example":"Indianapolis: Google negotiated a school board reversal (reportedly with NDA), then withdrew minutes before the council vote as grassroots opposition cheered.","warning":"A single stakeholder reversal that happens after months of public opposition, especially if it follows private meetings or is paired with an NDA.","risk_flag":"Genuine broad-based community engagement before filing beats targeted stakeholder buyout every time. BSP designs engagement strategy, not just checkbook commitments."},{"num":"3","pattern":"Generic Environmental Review (AUAR/EIS for Wrong Use Class)","why":"Using a light-weight environmental review designed for 'light industrial' use when the actual project is a hyperscale data center creates a fatal legal vulnerability. Courts will treat it as a defect, not a technicality.","example":"Pine Island: City conducted an 'Alternative Urban Areawide Review' for light industrial rather than disclosing the actual Google/data center use. MCEA sued, court issued construction halt May 2026.","warning":"Any environmental review conducted before the actual end-user is publicly identified, or that uses a lower-tier review process than the project's actual scale requires.","risk_flag":"BSP audits the planned environmental review type and end-user disclosure before filing. If it doesn't match the real project, fix it before it becomes a lawsuit."},{"num":"4","pattern":"Announcing Community Benefits AFTER Backlash Forms","why":"A generous community package announced reactively reads as 'we're buying your silence' rather than 'we designed this for you.' The same dollar amount has opposite political effects depending on when it's announced.","example":"Pine Island: $48M+ package was generous but came as opposition was already organized. Michigan's $10M statewide fund was announced same-day as the project but still seen as thin.","warning":"Community benefit details that emerge only after public opposition meetings or media coverage rather than leading the announcement.","risk_flag":"Community benefit design should happen before the press release, not in response to it. BSP structures the package as part of pre-announcement strategy."},{"num":"5","pattern":"Global Water Pledges for Site-Specific Problems","why":"A company-wide 'net water positive by 2030' pledge doesn't satisfy a township whose wells are next to a site drawing 2-3.6M gallons/day. Global aggregates don't answer local questions.","example":"Michigan/Cannoli: 2-3.6M gal/day, no local mitigation commitment. Google's global replenishment pledge is meaningless to Van Buren Township residents who can't verify it.","warning":"Any deal in an agriculture-adjacent or water-stressed area that relies on corporate-level sustainability pledges rather than site-specific, legally-binding water commitments.","risk_flag":"Local water commitment (air cooling, closed-loop, aquifer recharge fund) must be site-specific and ideally legally enforceable, not just a CSR reference."},{"num":"6","pattern":"Behind-the-Meter Co-Location Without Federal Cover","why":"Co-location structures that require amending interconnection agreements face FERC rejection risk (demonstrated) and ongoing cost-shift allegations. PJM's new co-location rules (post-FERC December 2025 order) are a work in progress — full mechanism not active until 2027.","example":"Amazon/Talen: FERC rejected the 300→480 MW co-location expansion 2-1 (Nov 2024, upheld Mar 2026). Talen converted to 1,920 MW front-of-meter PPA instead.","warning":"Any co-location arrangement requiring a new or amended interconnection agreement rather than operating within an already-approved existing connection.","risk_flag":"FERC's June 2026 ruling (RM26-4-000) may change this landscape immediately. Monitor the ruling and advise clients on timing relative to the new framework."},{"num":"7","pattern":"Filing the Specific Deal Before the General Regulatory Framework Exists","why":"When a company files a one-off deal before the state has established a general large-load tariff, the specific deal can become a contested precedent-setting fight rather than a routine application of existing rules.","example":"Minnesota: Google's CEAC (specific deal) is being filed while ratepayer advocates are simultaneously pushing to establish the general large-load tariff framework first — whichever finishes first sets the template for everything else.","warning":"Any state where the specific hyperscaler deal is the first major large-load tariff filing, before the PUC has established a general framework.","risk_flag":"BSP tracks the sequencing of general vs. specific filings in each state and advises clients on whether to wait for the framework or lead with the one-off deal."},{"num":"8","pattern":"Phantom / Speculative Interconnection Filings","why":"Filing interconnection requests with multiple utilities simultaneously, then cancelling all but one, has undermined utility load forecasts and driven up regional capacity prices for everyone. Regulators are now actively auditing these numbers.","example":"AEP cut its OH data center pipeline from 30 GW to 13 GW after screening; Exelon says only 22% of its 65 GW pipeline will materialize; PPL projected 200%+ demand growth vs. 11% for the next-closest PA utility.","warning":"Any client with a large, multi-utility interconnection pipeline that hasn't been screened for realistic development probability.","risk_flag":"BSP helps clients build credible, scrutable interconnection filings that survive regulatory audit — not inflated numbers that create a liability when the pipeline gets scrutinized."}],"decision_map":[{"level":"Municipal /\nLocal","who":"Township/city planning commission;\nTownship/city council;\nCounty commissioners court (TX, rural)\nSchool board (tax revenue beneficiary)\nZoning board of appeals","controls":"Site plan approval;\nRezoning / variance;\nTax abatement approval;\nBuilding permits;\nSpecial use permits","engage":"Early, transparent, in-person engagement\nBEFORE filing. Community meetings with\nactual project details, not placeholders.\nProactive disclosure of water/cooling design.","relationships":"Local chamber of commerce;\nCounty judge (TX);\nSchool superintendent;\nFire/emergency services chief","risk":"Project halt via referendum petition;\nZoning denial forcing complete redesign;\nTax abatement rejection = economics collapse;\nGrassroots campaign that draws state-level attention"},{"level":"State — Regulatory","who":"PUC / PSC commissioners (5-7 per state);\nAG / consumer advocate office;\nState environmental review agency;\nDept. of Natural Resources (water permits)","controls":"Tariff approval / contested case outcome;\nCost-allocation methodology;\nAG intervention in rate cases;\nEnvironmental review adequacy (air, water)","engage":"File strong, transparent tariff applications.\nPre-call AG before announcement (Michigan model).\nEngage intervenors early as potential co-designers\n(Indiana model) not adversaries.","relationships":"PUC chair and swing commissioners;\nAG's energy/environment division;\nConsumer advocate office;\nPUC staff economists (who write the recommendations)","risk":"Contested case intervenor that adds 12-18 months;\nAG cost-shift challenge that kills the tariff;\nEnvironmental review inadequacy lawsuit (Pine Island);\nPSC rejection = deal dead"},{"level":"State — Political","who":"Governor;\nState senate/house energy committee chairs;\nState legislative majority leadership;\nGovernor's energy/economic dev. office","controls":"Political cover for PUC commissioners;\nLegislative bills (moratorium, tariff mandate, zoning preemption);\nFast-track siting law (Louisiana model);\nState economic development incentives","engage":"Top-level governmental endorsement at\nannouncement (Alabama model).\nBriefing legislators on job/tax numbers\nbefore opposition forms a counter-narrative.","relationships":"Governor's chief of staff;\nChair of Senate/House energy committees;\nState economic development secretary;\nBipartisan relationships across both parties","risk":"Moratorium bill that freezes approvals (MI, 3 bills pending);\nLegislative investigation into specific deal;\nGovernor's public opposition changes political calculus for PUC"},{"level":"Federal — FERC","who":"FERC Chair + 4 commissioners;\nFERC Office of Energy Market Regulation;\nFERC ALJs (in contested proceedings)","controls":"Interstate transmission interconnection;\nWholesale market rules (PJM, SPP, MISO);\nCo-location / behind-the-meter approval;\nCost allocation for transmission upgrades","engage":"File comments in active dockets (RM26-4-000).\nStructure deals to align with FERC's evolving\nco-location framework post-Dec 2025 PJM order.\nAvoid arrangements requiring new interconnection\nagreements until the new rules are finalized.","relationships":"FERC Chair Laura Swett + 4 commissioners;\nPJM/MISO/SPP interconnection staff;\nFERC's Energy Market Regulation office;\nDOE liaison (Section 403 authority)","risk":"FERC rejection of interconnection agreement\n(Amazon/Talen model) forces restructuring;\nFERC cost-shift finding = entire deal economics reopen;\nFERC's June 2026 ruling changes the rules for all pending deals"},{"level":"Federal — Other","who":"DOE Secretary (loan guarantees, Section 403);\nEPA (Clean Air Act for off-grid plants);\nNRC (nuclear restarts and new SMRs);\nDOD (for projects on/near federal land)","controls":"DOE loan guarantees (Crane/TMI model);\nEPA permitting for gas turbines (xAI Memphis issue);\nNRC reactor licensing (nuclear deals);\nFERC ANOPR direction (DOE Section 403)","engage":"DOE loan guarantee engagement for nuclear deals;\nEPA pre-consultation for off-grid gas siting;\nNRC early engagement for SMR timeline planning;\nDOD coordination for any national security framing","relationships":"DOE Office of Loan Programs;\nEPA Region offices (for air permits);\nNRC regional offices;\nWhite House NEDC (National Energy Dominance Council)","risk":"EPA Clean Air Act enforcement (xAI Memphis);\nNRC licensing delay = 3-5 year nuclear timeline slip;\nDOE loan rejection = project financing gap;\nFERC ANOPR changes rules mid-deal for pending filings"},{"level":"Regional Grid\nOperator","who":"PJM (13-state eastern grid);\nERCOT (Texas);\nMISO (Midwest);\nSPP (Great Plains);\nNERC (reliability standards, all regions)","controls":"Interconnection queue management;\nCapacity market rules and pricing;\nTransmission upgrade requirements;\nReliability standards for large loads;\nStudy timelines (6+ years in PJM queue)","engage":"ERCOT's lighter regulatory touch (no FERC jurisdiction)\nis a site-selection advantage BSP should quantify.\nPJM's new large-load study process means new deposits\nand requirements — advise clients on the new process.","relationships":"PJM Large Load Interconnection team;\nERCOT interconnection queue managers;\nSPP HILL (High Impact Large Load) process lead;\nNERC Large Loads Working Group","risk":"6+ year PJM interconnection queue delays project by years;\nERCOT Batch Zero (new, just approved June 16, 2026) adds study requirements;\nNERC Level 3 Alert (issued May 4, 2026) signals grid reliability concern = political pressure for moratoriums"}],"services":[{"service":"Multi-Party Settlement\nDesign & Convening","what":"BSP convenes competing hyperscalers, the utility, and the state consumer advocate to negotiate a pre-agreed settlement before any PUC filing — eliminating intervenor opposition by making the potential opponents co-authors.","evidence":"Indiana AEP/I&M: Google + Amazon + Microsoft + OUCC + Citizens Action Coalition = zero opposition. No other model in the dataset achieved this. It requires a neutral convener.","client":"Utilities facing 3+ simultaneous hyperscaler interconnection requests; hyperscalers in states with active AG/consumer advocate opposition history","when":"When a state's PUC has multiple pending large-load tariff applications from different companies — pitch to the utility or to the hyperscalers collectively.","urgency":"HIGH\n(Indiana outcome is not yet widely understood as a template)"},{"service":"State PUC Tariff Design\n& Defense (CTT variants)","what":"Design the ring-fenced tariff structure (CTT/CEAC/CCAA variant) for a specific state, anticipate and preempt intervenor objections on cost-allocation methodology, and defend it through the rate case.","evidence":"Nevada CTT (approved 2024), MN CEAC, MI CCAA, WI VLC tariff — each required bespoke design for state regulatory context. The MN tariff is currently stalled partly due to design/sequencing issues.","client":"Any hyperscaler or utility in a state without an existing large-load tariff framework; any client whose existing tariff is under AG challenge","when":"When a state's AG or consumer advocate has filed objections to a utility's cost-allocation methodology — BSP defends the methodology and proposes an improved design.","urgency":"HIGH\n(30+ states still lack a mature large-load tariff framework)"},{"service":"AG Pre-Engagement\nStrategy","what":"Before a project is announced, BSP maps the AG's likely objections, prepares a response package (cost-allocation data, contested case commitment, community benefit structure), and facilitates the pre-announcement call.","evidence":"Michigan: Google pre-called AG Nessel before Cannoli announcement. She had objected to the Oracle/OpenAI Saline Township deal without this engagement. The pre-call changed the outcome.","client":"Any hyperscaler announcing a project in a state with an active, consumer-protection-minded AG (MI, MN, NY, CA, CO, MA are high-risk states)","when":"Engagement 60-90 days before planned public announcement. Requires knowing the AG's office and what they're likely to object to.","urgency":"HIGH\n(Most clients don't do this; most deals that go badly in this research didn't do it)"},{"service":"Environmental Review\nAdequacy Audit","what":"Before any environmental review is filed, BSP audits the planned review type, end-user disclosure, and scope against the likely litigation attacks from repeat-litigant opponents.","evidence":"Pine Island: MCEA (serial litigant, 6 parallel MN lawsuits) successfully sued on environmental review inadequacy. The same vulnerability exists in every state where MCEA or equivalent groups operate.","client":"Any project in MN, WI, IL, or other states with active environmental litigation groups; any project using a light-touch review category for a large-scale use","when":"Pre-filing, as part of the permitting strategy engagement. Should be a standard first check in any state where repeat-litigant environmental groups are active.","urgency":"MEDIUM-HIGH\n(Prevents the Pine Island outcome; requires knowing which legal groups operate in each state)"},{"service":"Off-Grid Siting &\nAir Permit Navigation","what":"As behind-the-meter and off-grid gas plants proliferate (73,000 MW identified in Reuters investigation), BSP helps clients navigate the state power-plant siting board process, air permit requirements, and local notification strategy — before the backlash that's forming.","evidence":"Reuters (June 16, 2026): 57 off-grid plants, many approved in under a year, minimal public notice. xAI Memphis: NAACP and SELC now challenging under Clean Air Act. Backlash wave is forming.","client":"Any hyperscaler considering behind-the-meter or co-located gas generation; utilities navigating the new FERC co-location framework post-June 2026 ruling","when":"Now — before state legislatures close the fast-track loopholes. The window for advisory work before the regulatory crackdown is 12-24 months.","urgency":"HIGH & TIME-SENSITIVE\n(Reuters story broke June 16; legislative reactions will follow within months)"},{"service":"Regional Capacity Market\nRisk Assessment","what":"The PJM capacity auction price has gone from $29/MW-day (2024) to $329/MW-day (2027) — driven by aggregate data center load. Individual deal 'ratepayer protection' pledges don't touch this regional-level cost increase. BSP maps the exposure and advises on mitigation.","evidence":"PJM capacity price jump = $14.2B in added regional costs (2024→2027). Average family in PJM: +$70/month by 2028. Individual CTT/CCAA deals protect against local utility costs but not the regional capacity market. This gap is unsurfaced in current public discourse.","client":"Utilities or state regulators worried about PJM capacity costs; hyperscalers wanting to demonstrate genuine ratepayer protection beyond bilateral deals; state AGs building a regional cost-shift case","when":"When a state AG or ratepayer advocate starts connecting regional capacity prices to data center growth — which is beginning to happen.","urgency":"MEDIUM\n(This is the next front after individual deal fights; positioning now gives BSP a head start)"},{"service":"Live Regulatory\nIntelligence (Retainer)","what":"Ongoing monitoring of state PUC dockets, AG office filings, legislative tracker (moratorium bills), FERC dockets, and NERC alerts across all active markets — with weekly briefings and immediate alerts on material developments.","evidence":"FERC RM26-4-000 ruling could drop any day this week. Michigan moratorium bills could pass before Project Cannoli clears. ERCOT Batch Zero just changed TX interconnection rules June 16. The landscape is moving faster than quarterly research cycles can track.","client":"Any BSP client with an active or planned data center project in more than one state; utilities managing multiple large-load relationships simultaneously","when":"Retainer structure, pitch to any client with ongoing regulatory exposure — the 'platform' element that makes BSP a continuous partner rather than a one-off engagement.","urgency":"HIGH\n(The regulatory environment is moving fast enough that clients who aren't tracking it weekly are behind)"}]},"regulatory":{"active":[{"proceeding":"FERC Large Load\nInterconnection Rulemaking\n(RM26-4-000)","docket":"FERC Docket RM26-4-000\n(DOE Section 403 ANOPR,\ninitiated Oct 2025)","status":"🔴 RULING IMMINENT\nOn June 18, 2026 FERC open\nmeeting agenda as item E-1.\nMay have already been issued\nas of this week.","deadline":"END OF JUNE 2026\n(FERC committed April 16, 2026\nto act by end of June — this\nweek or next)","decision_makers":"FERC Chair Laura Swett\n+ Commissioners Rosner,\nSee, Chang, LaCerte\n(5 commissioners total)","stakes":"Could make 'pay 100% of your own costs' mandatory for ALL large loads (not just voluntary pledges);\ncould formally legitimize co-location/behind-the-meter nationally;\ncould establish 60-day study timeline for curtailable large loads;\ncould set new cost-allocation rules that affect every pending deal.\nEach company filed different positions: Meta wants guidance only (no binding rules); Google wants co-location prioritized; Microsoft/OpenAI want fast-track for nationally important projects >250 MW.","urgency":"🔴 CRITICAL\nMonitor daily;\nruling may be\nalready issued"},{"proceeding":"Michigan MPSC —\nProject Cannoli\n(Google / DTE CCAA)","docket":"MPSC Contested Case\n(Filed Mar 17, 2026)\nDTE Energy / Google","status":"⚠️ IN REVIEW\nContested case proceeding;\nvan Buren Twp planning\ncommission approved 5-2;\nsubstation approved May 2026;\ntownship board still pending.","deadline":"SEPT 10, 2026\n(DTE requested MPSC\ndecision by this date)\nTownship board vote:\nno firm date set","decision_makers":"Michigan PSC commissioners;\nVan Buren Twp Board of Trustees\n(Supervisor Kevin McNamara,\nleaning supportive);\nAG Dana Nessel (monitoring)","stakes":"Model outcome for CCAA tariff structure nationwide — if it clears cleanly, it validates the pre-AG-engagement approach as the playbook for future deals;\nif MI moratorium bill passes before MPSC vote, deal could be frozen mid-review;\nwater (2-3.6M gal/day) remains only major unaddressed community concern.","urgency":"🟡 HIGH\nSept 10 deadline;\n3 moratorium bills\nin MI legislature"},{"proceeding":"Minnesota MPUC —\nProject Skyway\n(Google / Xcel CEAC)","docket":"MPUC docket (filed ~Feb/Mar 2026)\nMCEA litigation:\nGoodhue County District Court","status":"🔴 HALTED\nCourt-ordered construction\nhalt (Goodhue County,\nMay 2026)\nMPUC review ongoing;\nCEAC contract still not\npublicly filed with MPUC","deadline":"No firm deadline;\ndependent on court\nlifting restraining order +\nMPUC completing review\nof CEAC tariff\n(Nevada CTT took ~1 year)","decision_makers":"MN PUC (5 commissioners);\nGoodhue County District Court;\nMCEA (litigant in 6 parallel\nMN data center lawsuits)","stakes":"If court lifts the halt AND MPUC approves CEAC, validates the 1,900 MW / Form Energy storage deal as a national model;\nif MCEA wins on AUAR adequacy, sets precedent that hyperscaler identity must be disclosed in all environmental reviews;\nCEAC contract terms (still undisclosed) are the remaining transparency gap MCEA will continue to exploit.","urgency":"🔴 HIGH RISK\nConstruction halted;\nno clear resolution\ntimeline"},{"proceeding":"ERCOT Batch Zero —\nTX Large Load\nInterconnection","docket":"PUCT Docket (ERCOT\nBatch Zero process);\nApproved June 16, 2026","status":"✅ JUST APPROVED\nERCOT's new framework for\nstudying 75+ MW large-load\ninterconnection requests\ntogether rather than\none-at-a-time.\n438 GW of large-load\nrequests pending in ERCOT\n(89% data centers)","deadline":"New process in effect now;\nfirst batch studies expected\nto begin Q3 2026;\nfull timeline implications\nfor Meitner Phase 2 and\nMicrosoft Pecos are\nbeing assessed","decision_makers":"PUCT commissioners;\nERCOT interconnection\nqueue management team","stakes":"Changes the interconnection timeline for all future TX large-load projects including Microsoft Pecos (announced June 22) and Google Meitner later phases;\nthe 438 GW backlog (mostly speculative/phantom demand) will be studied together — may accelerate genuine projects and screen out phantom ones;\nTX is no longer the regulatory-free-for-all it was 18 months ago.","urgency":"🟡 ACTIVE\nNow in effect;\nmonitor batch study\ntimelines for TX clients"},{"proceeding":"OpenAI / Stargate —\nProject Jupiter\n(New Mexico,\nDoña Ana County)","docket":"Doña Ana County\ncommissioners court;\nTwo active lawsuits","status":"🔴 UNDER LITIGATION\nTwo lawsuits filed alleging\ncounty commissioners\nviolated NM state law in\nexpedited approval process\n($165B in bonds across\ntwo meetings in <1 month)","deadline":"Unknown — dependent\non NM state court\ndocket and case schedules","decision_makers":"NM District Court;\nDoña Ana County\ncommissioners;\nOpenAI / Oracle\nlegal team","stakes":"This is the only deal in this entire research where the APPROVAL PROCESS ITSELF is under litigation (not just the deal terms);\nif plaintiffs win, it potentially voids the county approval and forces a restart;\nsets a precedent for how fast local governments can move on large data center commitments without triggering legal vulnerability.","urgency":"🟡 MEDIUM\nWatch for court\nschedule developments"},{"proceeding":"Michigan Legislature —\nData Center\nMoratorium Bills\n(3 bills, bipartisan)","docket":"Michigan House/Senate;\n3 separate bipartisan bills;\nwould freeze new data center\npermits through April 2027","status":"⚠️ ACTIVE IN LEGISLATURE\nNot yet passed;\nbipartisan sponsorship\nmakes passage more likely\nthan typical opposition bills","deadline":"Timing uncertain;\nKey risk: if any bill passes\nBEFORE MPSC approves\nProject Cannoli (Sept 10)\nit could freeze the deal\nmid-process","decision_makers":"Michigan House and\nSenate energy committees;\nGovernor Whitmer\n(sign or veto)","stakes":"Directly threatens Project Cannoli if passed before the Sept 10 MPSC decision;\nbroad template risk: if Michigan passes a moratorium, other states (MN, WI, OH) will likely consider similar legislation;\nboth Google and DTE are actively lobbying against.","urgency":"🔴 HIGH RISK\nRace against Cannoli\nSept 10 deadline"}],"recent":[{"date":"June 22, 2026","event":"Microsoft announces 2 GW Pecos TX\ndata center + Chevron Project Kilby\n(2.67 GW behind-the-meter gas PPA,\n20 years, first power 2028)","who":"Microsoft + Chevron\n(Engine No.1 / GE Vernova\n/ Solar Turbines)","changed":"Largest single-site announcement in\nthis research. Introduces Chevron as\na major gas-plant-to-hyperscaler\npower partner — a new actor type.","implication":"Sets a scale benchmark (2 GW = new floor for major announcements); validates behind-the-meter gas as a mainstream hyperscaler strategy despite regulatory risk; Chevron's brand adds political credibility the Nscale/WV deal lacked.","source":"Microsoft Official Blog;\nReuters (BOE Report);\nData Center Dynamics"},{"date":"June 18, 2026","event":"FERC open meeting — RM26-4-000\n(Large Load Interconnection)\nwas Agenda Item E-1","who":"FERC Chair Swett\n+ 4 commissioners","changed":"Ruling may have been issued at\nthis meeting or is expected\nbefore June 30, 2026.","implication":"Could be the single biggest regulatory development affecting all deals in this database simultaneously. Monitor immediately.","source":"White & Case June 2026\nFERC Meeting Summary;\nFERC.gov"},{"date":"June 16, 2026","event":"PUCT approves ERCOT Batch Zero —\nnew large-load interconnection\nframework for 75+ MW requests\n(438 GW of large-load\npending in ERCOT queue)","who":"Public Utility Commission\nof Texas (PUCT)","changed":"Texas is no longer the fast,\nregulation-free interconnection\nmarket it was 18 months ago.\nAll future TX large-load projects\ngo through new study process.","implication":"Affects Microsoft Pecos, Google Meitner Phase 2, and any other future TX project. Texas advantage vs. PJM is narrower than it was.","source":"Energy Magazine (Pecos\nreporting); PUCT proceedings"},{"date":"June 15, 2026","event":"Google announces $1.5B expansion\nof Jackson County, AL data center\n(TVA / Kairos Power nuclear PPA)","who":"Google / TVA /\nKairos Power","changed":"Expands the TVA / federal utility\nmodel. Confirms Kairos Power SMR\ntimeline (~2030 for first 50 MW).","implication":"Validates Alabama as the cleanest-approval model in the dataset. TVA Board process = fastest path where applicable.","source":"Chattanooga Times\nFree Press; AL Daily News"},{"date":"June 2, 2026","event":"Google-Voltus BYOC announced —\nfirst hyperscaler-funded VPP\nin a US wholesale capacity market\n(PJM, 100 MW/yr, 3-year term)","who":"Google / Voltus /\nPJM Interconnection","changed":"Establishes the BYOC/VPP model\nas a commercially available\nalternative to traditional PPAs\nfor capacity procurement.","implication":"First deal that architecturally eliminates all community opposition. Sets a template for hyperscalers trying to add capacity without a construction fight.","source":"Google Blog; Voltus GlobeNewswire;\nLatitude Media"},{"date":"May 2026","event":"MCEA wins court order halting\nconstruction at Pine Island, MN\n(Goodhue County District Court)","who":"Goodhue County\nDistrict Court;\nMCEA (plaintiff)","changed":"First successful construction\nhalt of a major hyperscaler project\nvia environmental review litigation.","implication":"Establishes environmental review adequacy as a viable litigation strategy for MCEA and similar groups in any state. Pine Island is now the cautionary template.","source":"Post Bulletin; MPR News;\nMinnesota Reformer"},{"date":"April 2026","event":"Wisconsin PSC approves Microsoft\nVLC (Very Large Customer) tariff\nwith FULL cost recovery mandate —\nrejecting utility's 75%-only option","who":"Wisconsin Public\nService Commission","changed":"Regulator pushed back on the\nutility's original cost-protection\ndesign and mandated stronger\nconsumer protections than proposed.","implication":"State regulators are willing to improve tariff terms beyond what the utility proposes. The 'negotiated settlement' framing doesn't guarantee the regulator will rubber-stamp utility preferences.","source":"PowerMag; WisBusiness;\nData Center Knowledge"},{"date":"May 4, 2026","event":"NERC issues Level 3 Alert —\nurges essential actions on\nlarge load grid reliability\n(data centers cited as\nkey reliability concern)","who":"North American Electric\nReliability Corporation\n(NERC)","changed":"First NERC Level 3 Alert\nexplicitly tied to data center\nload growth. Grid reliability is\nnow a named federal concern.","implication":"Gives regulators and AGs a federal reliability-standards hook to challenge fast-moving large-load approvals. Strengthens argument for moratoriums and slower interconnection review.","source":"NERC accelerated large load\naction plan filing;\nFERC RM26-4-000 docket"}],"legislative":[{"state":"Michigan","bill":"3 bipartisan moratorium bills —\nwould freeze new data center\npermits through April 2027","direction":"🔴 PRO-RESTRICTION","status":"Active in legislature;\nnot yet passed;\nbipartisan sponsors\n= elevated passage risk","if_passes":"Project Cannoli mid-process freeze;\nbroad chilling effect on new MI projects;\ntemplate for MN, WI, OH copycats","if_fails":"Cannoli clears Sept 10;\nMI remains open for business;\nbut issue resurfaces next session","watch_level":"🔴 CRITICAL\nRace against\nCannoli deadline"},{"state":"Georgia","bill":"HB 1012 (moratorium) + HB 1063\n(ratepayer protection act) —\nboth failed in 2026 session;\nbut PSC commissioners were\nvoted out over data center rates","direction":"🟡 MIXED\n(bills failed but\nelectoral backlash succeeded)","status":"2026 bills dead;\nPSC electoral outcome\nalready delivered the political\nconsequence anyway;\nexpect 2027 session bills","if_passes":"Mandatory cost-allocation rules;\ndata center rate class requirement","if_fails":"Fight moves entirely to PSC level\nand individual utility rate cases;\nGeorgia Power faces ongoing scrutiny","watch_level":"🟡 HIGH\nTemplate for\nother states;\nelection outcome\nis the warning"},{"state":"Minnesota","bill":"Multiple bills related to\nlarge-load utility obligations;\nalso CEAC framework timing\ndiscussion at MPUC","direction":"🟡 REGULATORY PRESSURE\n(not yet legislative mandate)","status":"Legislature pushing MPUC to\nfinalize general large-load\ntariff framework BEFORE\nany specific deal (like CEAC)\nis approved","if_passes":"General framework constrains\nGoogle's specific deal terms;\nsequencing win for consumer advocates","if_fails":"Google's CEAC gets approved\nbefore general rule exists;\nCEAC becomes de facto template","watch_level":"🟡 HIGH\nSequencing fight\nis the real battle"},{"state":"West Virginia","bill":"New law exempting data center\nmicrogrids from local zoning\n(already passed, in effect)","direction":"🟢 PRO-DEVELOPMENT\n(already law)","status":"In effect — enables projects\nlike Microsoft/Nscale Mason\nCounty off-grid gas plant","if_passes":"WV becomes fastest-approval\nmarket for off-grid gas generation;\nmore projects expected","if_fails":"N/A — already passed","watch_level":"🟡 MEDIUM\nMonitor for\nopposition in\n2027 session"},{"state":"Ohio","bill":"State siting law allows\npower plant approvals in\nas little as 45 days with\nno hearing required\n(already in effect)","direction":"🟢 PRO-DEVELOPMENT\n(already law)","status":"In effect — used by multiple\noff-grid gas plant projects;\nColumbus-area school/elementary\nproximity concerns flagged\nin Reuters investigation","if_passes":"Ohio remains fastest off-grid\ngas approval market in the US;\nbut EJ backlash building","if_fails":"Harder to build — would need\nnew siting legislation","watch_level":"🟡 MEDIUM\nEJ opposition\nbuilding; watch\nfor 2027 bills"},{"state":"Arizona","bill":"Bill to ban NDAs in data center\ndevelopment (introduced 2026)\nafter 'Project Blue' (Marana)\nNDA-triggered backlash;\ncounterbalanced by pro-developer\nbill allowing referendum withdrawal","direction":"🟡 MIXED","status":"Both bills advanced;\nnot yet signed or resolved;\nAZ is a swing state on this issue","if_passes":"NDA ban: major change to\nhow all AZ projects are structured\nfrom announcement","if_fails":"Pro-developer bill: enables\ndevelopers to defuse referendum\nthreats by withdrawing petitions","watch_level":"🟡 MEDIUM\nAZ is a\ntemplate market\nfor NDA policy"},{"state":"Pennsylvania","bill":"PA Load Forecast Accountability\nAct (passed 2026) — lets\nregulators audit utility demand\nforecasts before baking them\ninto capacity prices","direction":"🟢 CONSUMER PROTECTION\n(already law)","status":"In effect — directly responds\nto PPL projecting 200%+ demand\ngrowth while next-closest utility\nprojects 11%","if_passes":"Makes phantom/speculative\ndemand forecasts legally\nand financially riskier for utilities;\ncleans up the interconnection\npipeline over time","if_fails":"Utilities absorb more\nforecast risk, may be\nmore conservative in\nfuture load projections","watch_level":"🟡 MEDIUM\nTemplate for\nother states;\nalready in effect"}],"note":"⚠️  NOTE: This tracker reflects the regulatory environment as of June 23, 2026. The FERC RM26-4-000 ruling may have already been issued at the June 18 open meeting — check FERC.gov/rm26-4 for the latest order. This tab should be updated weekly during the internship as proceedings advance."},"sources":[{"topic":"Alabama – Expansion","source":"Chattanooga Times Free Press; AL Daily News; WAFF; AL Reporter; squaredtech.co","date":"June 15–16, 2026"},{"topic":"Alabama – Nuclear (Kairos/TVA)","source":"Data Center Dynamics; Fox Business","date":"May 7 & Aug 2025"},{"topic":"Alabama – TVA Board Approval","source":"Chattanooga Times Free Press","date":"June 15, 2026 (Aug 2024 approval referenced)"},{"topic":"Minnesota – CEAC Announcement","source":"Xcel Energy Newsroom (primary); Renewable Energy World; Daily Energy Insider; Star Tribune; FOX 9; KTTC; Form Energy","date":"Feb 24–26, 2026"},{"topic":"Minnesota – CEAC Analysis","source":"Latitude Media ('With Form Energy deal...')","date":"Feb 26, 2026"},{"topic":"Minnesota – Becker (2019 deal)","source":"MN PUC press release; Daily Energy Insider","date":"May 14–16, 2019"},{"topic":"Minnesota – Regulation / MN Reformer","source":"Minnesota Reformer","date":"March 27, 2026"},{"topic":"Minnesota – Litigation / Construction Halt","source":"Post Bulletin; MPR News; Minnesota Reformer; MCEA","date":"Oct 2025 – May 2026"},{"topic":"Michigan – Project Cannoli reveal","source":"Michigan Public / WKAR; Planet Detroit; WXYZ; CBS Detroit; Data Center Dynamics","date":"March 17–19, 2026"},{"topic":"Michigan – Van Buren Twp votes","source":"Planet Detroit; ClickOnDetroit; Hoodline","date":"Feb–May 2026"},{"topic":"Michigan – Township FAQ (primary source)","source":"Van Buren Township official website (vbtmi.gov)","date":"Updated through Apr 2026"},{"topic":"Michigan – DTE MPSC filing (primary)","source":"Van Buren Township site link to MPSC filing PDF (page 10: load ramp testimony)","date":"March 2026"},{"topic":"Michigan – Substation approval","source":"Planet Detroit","date":"May 14, 2026"},{"topic":"Michigan – AG Nessel response","source":"Michigan Public","date":"March 17–18, 2026"},{"topic":"Google – Voltus BYOC announcement","source":"Google Blog; Voltus press release (GlobeNewswire); Latitude Media; Data Center Knowledge; Blockspace; MLQ.ai; APPA; CryptoBriefing","date":"June 2, 2026"},{"topic":"PJM capacity market context","source":"MLQ.ai analysis; PJM data; Blockspace","date":"June 2026"},{"topic":"Texas – Meitner Energy Center / Intersect","source":"Data Center Dynamics; PowerMag; PPC Land; ConstructionReviewOnline; ABC7 Amarillo (KVII)","date":"June 2026 (various)"},{"topic":"Texas – Intersect acquisition by Alphabet","source":"PowerMag; CNBC; ESG Dive; Energy-Storage.News; IntuitionLabs","date":"Dec 2025 – Mar 2026"},{"topic":"Texas – Gray/Roberts County tax abatement & opposition","source":"ABC7 Amarillo (KVII); New Project Media (NPM); Gray County official PDF","date":"Jan 2024 – Aug 2025"},{"topic":"Microsoft / Constellation (TMI)","source":"Constellation press releases; CNBC; Sustainability Magazine; Utility Dive; NucNet","date":"2024–2026"},{"topic":"Amazon / Talen (FERC rejection)","source":"Utility Dive; Power Engineering; Pillsbury Law; ANS Newswire; PowerMag; Nuclear Engineering International; Data Center Dynamics; Talen Energy investor release","date":"2024–2026"},{"topic":"Meta – Vistra/Clinton/Oklo/TerraPower nuclear deals","source":"ANS Newswire; American Public Power Association; CarbonCredits.com; ESG Today; EnkiAI; Tom's Hardware","date":"Jan 2026"},{"topic":"Meta – Louisiana gas (Entergy)","source":"Tom's Hardware; Reuters (off-grid investigation, referenced)","date":"2025–2026"},{"topic":"OpenAI / Stargate (Oracle, SoftBank)","source":"OpenAI official blog (x2); IntuitionLabs; TechCrunch; Data Center Dynamics; Oracle internal fact sheet (via House Energy Committee)","date":"Sept 2025 – May 2026"},{"topic":"OpenAI / Stargate – New Mexico litigation, Abilene concerns","source":"Stargate Project SW Fact Sheet (advocacy document); Texas Observer (referenced)","date":"Dec 2025"},{"topic":"xAI Memphis – environmental justice opposition","source":"Broadband Breakfast; AP (referenced)","date":"Jan 2026"},{"topic":"Phantom demand / speculative load","source":"OilPrice.com; Latitude Media; Utility Dive; Thomson Reuters Institute; WRI; VaaSBlock; PowerMag; Kleinman Center (UPenn); Pennsylvania Load Forecast Accountability Act analysis","date":"2025–2026"},{"topic":"Off-grid gas plants (Reuters investigation)","source":"Reuters (via Investing.com, MarketScreener); Japan Times; Let's Data Science; IBTimes Singapore; tovima.com","date":"June 16, 2026 (BREAKING)"},{"topic":"Tax incentives / state budgets","source":"Good Jobs First ('Cloudy w/ a Loss of Spending Control'; 'Cloudy Data, Costly Deals'); Texas Tribune; Stateline; MultiState; CSG South","date":"2025–2026"},{"topic":"FERC large-load interconnection ANOPR (RM26-4-000)","source":"FERC.gov (primary); Holland & Knight; CSIS; White & Case; Gibson Dunn; Troutman Energy Report; CryptoBriefing; hData blog","date":"Oct 2025 – Apr 2026"},{"topic":"BSP background","source":"boundarystone.com; LinkedIn; LegiStorm; OpenSecrets","date":"June 2026"},{"topic":"Microsoft – Crane/TMI restart","source":"Yahoo Finance/Simply Wall St; Introl Blog; smrintel.com nuclear tracker","date":"Apr–May 2026"},{"topic":"Microsoft – Wisconsin VLC tariff","source":"PowerMag; WisBusiness; WisPolitics; Wausau Pilot & Review; Data Center Knowledge; WPR; Racine County Eye","date":"Feb–Jun 2026"},{"topic":"Microsoft – West Virginia off-grid gas (Nscale)","source":"Latitude Media; BlackRidge Research","date":"Apr 2026"},{"topic":"Amazon – Talen/Susquehanna (full reasoning)","source":"Utility Dive; Power Engineering; Pillsbury Law; ANS Newswire; PowerMag; Nuclear Engineering Intl; Data Center Dynamics","date":"Nov 2024 – Mar 2026"},{"topic":"Amazon – X-energy/SMR/Dominion/Energy Northwest","source":"Data Center Dynamics; EnergyTech; EnkiAI; ETF Trends; Data Center Frontier; Introl Blog","date":"2024–2026"},{"topic":"Indiana – AEP/I&M multi-party settlement (Google+Amazon+Microsoft)","source":"Utility Dive; AEP.com (primary press releases x2); PR Newswire; EnergyTech; Renewable Energy World; IURC Cause No. 46097 (primary filing)","date":"Nov 2024 – Aug 2025"},{"topic":"Meta – Vistra nuclear PPA detail","source":"ANS Newswire; American Public Power Association; CarbonCredits.com; ESG Today; EnkiAI; Tom's Hardware; smrintel.com","date":"Jan 2026"},{"topic":"Meta – Louisiana Entergy gas / LA PSC fast-track","source":"Tom's Hardware; Reuters off-grid investigation (cross-referenced)","date":"2025–2026"},{"topic":"OpenAI/Stargate – Wisconsin & Michigan utility partnerships","source":"Data Center Dynamics ('pay its own way')","date":"May 2026"},{"topic":"OpenAI/Stargate – New Mexico litigation (Project Jupiter)","source":"Stargate Project SW Fact Sheet (advocacy document, MediaJustice)","date":"Dec 2025"},{"topic":"PJM capacity price / ratepayer impact (hard numbers)","source":"IEEFA; Introl Blog; The AI Consulting Network; ElectricityRates.com","date":"Feb–May 2026"},{"topic":"Nuclear deal cross-reference / full tracker","source":"smrintel.com 'Every Nuclear-Powered Data Center Deal' tracker","date":"May 2026"},{"topic":"Nevada CTT (structural template)","source":"Latitude Media; C2ES; Google Blog; Energy Magazine; ESG Today; MEXC News","date":"2024–2026"},{"topic":"Ratepayer Protection Pledge (White House)","source":"whitehouse.gov; Kleinman Center; Data Center Dynamics","date":"March 2026"},{"topic":"Georgia PSC / electoral backlash","source":"Georgia PSC press releases; Inside Climate News; Capitol Beat News; Reuters","date":"2025–2026"},{"topic":"Franklin Township Indianapolis (Google withdrawal)","source":"FOX59; WFYI / Chalkbeat / Mirror Indy; WRTV; Data Center Watch","date":"Sept–Oct 2025"}]};
+
+/* ── HELPERS ────────────────────────────────────────────── */
+const $ = (s, el=document) => el.querySelector(s);
+const esc = s => String(s||'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const nl2br = s => esc(s).replace(/\n/g, '<br>');
+const flatten = s => String(s||'').replace(/\s*\n+\s*/g, ' ').replace(/\s+/g, ' ').trim();
+const byId = id => DATA.deals.find(d => d.id === id);
+const fieldVal = (section, label) => {
+  if(!section) return '';
+  const f = section.fields.find(x => x.label === label);
+  return f ? f.value : '';
+};
+
+const COMPANY_ORDER = ['Google','Microsoft','Amazon','Meta','OpenAI / Stargate','xAI'];
+const COMPANY_SHORT = {'Google':'GOOGLE','Microsoft':'MSFT','Amazon':'AMZN','Meta':'META','OpenAI / Stargate':'OPENAI','xAI':'XAI'};
+const STATUS_PILL   = {clean:'Clean', managed:'Managed', contested:'Contested', early:'Too early'};
+const LEVEL_VOCAB = ['HIGH & TIME-SENSITIVE','MODERATE-HIGH','MEDIUM-HIGH','MODERATE-FAST','LOW-MODERATE',
+  'LOW\u2013MODERATE','HIGH','MODERATE','MEDIUM','LOW','NONE','CRITICAL','FASTEST','FAST'];
+
+function leadingLevel(s){
+  s = String(s||'').trim().toUpperCase();
+  for(const v of LEVEL_VOCAB){ if(s.startsWith(v)) return v; }
+  return '';
+}
+function urgencyParts(s){
+  s = String(s||'').trim();
+  const m = s.match(/^(\u{1F534}|\u{1F7E1}|\u{1F7E2})\s*([A-Z][A-Z0-9\- &]*)/u);
+  if(m) return {emoji:m[1], label:m[2].trim()};
+  return {emoji:'', label:s.split('\n')[0].trim()};
+}
+function urgencyClass(emoji){
+  if(emoji==='\u{1F534}') return 'critical';
+  if(emoji==='\u{1F7E1}') return 'high';
+  if(emoji==='\u{1F7E2}') return 'active';
+  return 'medium';
+}
+const MODEL_NAME = {};
+DATA.models.forEach(m => { MODEL_NAME[m.num] = flatten(m.name); });
+
+const SOURCE_GROUPS = [
+  ['Alabama','Alabama (Google)'],
+  ['Minnesota','Minnesota (Google)'],
+  ['Michigan','Michigan (Google)'],
+  ['Google \u2013 Voltus','Google \u2013 Voltus BYOC'],
+  ['PJM capacity market context','Google \u2013 Voltus BYOC'],
+  ['Texas','Texas (Google)'],
+  ['Indiana \u2013 AEP','Indiana Multi-Party Settlement'],
+  ['Microsoft','Microsoft'],
+  ['Amazon','Amazon'],
+  ['Meta','Meta'],
+  ['OpenAI','OpenAI / Stargate'],
+  ['xAI','xAI'],
+];
+function sourceGroupKey(topic){
+  for(const [pfx,label] of SOURCE_GROUPS){ if(topic.startsWith(pfx)) return label; }
+  return 'Cross-Cutting & Regulatory';
+}
+const SOURCE_GROUP_ORDER = ['Alabama (Google)','Minnesota (Google)','Michigan (Google)','Texas (Google)',
+  'Google \u2013 Voltus BYOC','Indiana Multi-Party Settlement','Microsoft','Amazon','Meta',
+  'OpenAI / Stargate','xAI','Cross-Cutting & Regulatory'];
+
+/* ── STATE ──────────────────────────────────────────────── */
+let view = 'deals';
+
+/* ── VIEW SWITCHER ──────────────────────────────────────── */
+function setView(v){
+  view = v;
+  ['deals','models','playbook','reg','src'].forEach(k => $('#v-'+k).classList.remove('active'));
+  const btnId = {deals:'v-deals', models:'v-models', playbook:'v-playbook', regulatory:'v-reg', sources:'v-src'}[v];
+  $('#'+btnId).classList.add('active');
+
+  const showDealFilters = v === 'deals';
+  const showSearch = v === 'deals' || v === 'sources';
+  $('#search').style.display = showSearch ? '' : 'none';
+  $('#search').placeholder = v === 'sources' ? 'Search sources…' : 'Search deals, companies, locations…';
+  if(v !== 'deals' && v !== 'sources') $('#search').value = '';
+  $('#f-company').style.display = showDealFilters ? '' : 'none';
+  $('#f-model').style.display = showDealFilters ? '' : 'none';
+  $('#f-status').style.display = showDealFilters ? '' : 'none';
+
+  const hints = {
+    deals: 'Tap any card for the full deal profile',
+    models: 'The six structural models used across every deal in this database',
+    playbook: 'What consistently works, what backfires, who decides, and what BSP can sell',
+    regulatory: 'Active proceedings, the last 60 days, and state legislation to watch',
+    sources: 'Every outlet and filing this research draws on'
+  };
+  $('#toolhint').textContent = hints[v];
+  render();
+}
+
+function render(){
+  if(view==='deals') renderDeals();
+  else if(view==='models') renderModels();
+  else if(view==='playbook') renderPlaybook();
+  else if(view==='regulatory') renderRegulatory();
+  else if(view==='sources') renderSources();
+}
+
+/* ── DEALS VIEW ─────────────────────────────────────────── */
+function filteredDeals(){
+  const q  = $('#search').value.trim().toLowerCase();
+  const fc = $('#f-company').value;
+  const fm = $('#f-model').value;
+  const fs = $('#f-status').value;
+  return DATA.deals.filter(d =>
+    (!q  || (d.name+' '+d.company+' '+d.location).toLowerCase().includes(q)) &&
+    (!fc || d.company === fc) &&
+    (!fm || String(d.model_num) === fm) &&
+    (!fs || d.status_tier === fs)
+  );
+}
+
+function cardHTML(d){
+  const previewStructure = d.rich ? fieldVal(d.sections[0], 'Deal Structure Name') : d.profile.structure_type;
+  const previewStatus    = d.rich ? fieldVal(d.sections[0], 'Current Status')      : d.profile.status_opposition;
+  const synth = d.rich
+    ? fieldVal(d.sections.find(s=>s.key==='bsp_lens'), 'Key Takeaway for BSP Clients')
+    : d.profile.notable_detail;
+  return `<article class="card ${d.status_tier}" tabindex="0" role="button"
+    onclick="openItem('deal','${d.id}')"
+    onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openItem('deal','${d.id}')}">
+    <div class="card-top">
+      <h3 class="serif">${esc(d.name)}</h3>
+      <span class="pill ${d.status_tier}">${esc(STATUS_PILL[d.status_tier])}</span>
+    </div>
+    <div class="company-line"><span class="chip">${esc(COMPANY_SHORT[d.company]||d.company)}</span><p class="role">${esc(d.location)}</p></div>
+    ${synth ? `<p class="card-synth">${esc(flatten(synth))}</p>` : ''}
+    <hr class="card-divider">
+    <div class="card-previews">
+      ${previewStructure ? `<div class="card-pos-preview"><span class="tag">Structure</span><p class="card-pos-text">${esc(flatten(previewStructure))}</p></div>` : ''}
+      ${previewStatus ? `<div class="card-pos-preview"><span class="tag">Status</span><p class="card-pos-text">${esc(flatten(previewStatus))}</p></div>` : ''}
+    </div>
+    <div class="card-foot">
+      View full profile
+      ${d.model_num ? `<span class="status-flag">Model ${esc(d.model_num)}</span>` : ''}
+    </div>
+  </article>`;
+}
+
+function renderDeals(){
+  const list = filteredDeals();
+  let html = '';
+  COMPANY_ORDER.forEach(co => {
+    const items = list.filter(d => d.company === co);
+    if(!items.length) return;
+    html += `<div class="section-title">${esc(co)} <span class="count">${items.length} deal${items.length===1?'':'s'}</span></div>
+      <div class="grid">${items.map(cardHTML).join('')}</div>`;
+  });
+  if(!list.length) html = `<div class="empty">No deals match these filters.</div>`;
+  $('#main').innerHTML = html;
+}
+
+function openModalDeal(id){
+  const d = byId(id);
+  if(!d) return;
+  const cls = d.status_tier;
+  let sectionsHtml;
+
+  if(d.rich){
+    sectionsHtml = d.sections.filter(sec => sec.fields.length).map(sec => {
+      const fieldsHtml = sec.fields.map(f => `
+        <div class="subfield">
+          <p class="detail-label">${esc(f.label)}</p>
+          <p class="detail-text">${nl2br(f.value)}</p>
+        </div>`).join('');
+      const nuanceHtml = (sec.key === 'mw_capacity' && d.nuance)
+        ? `<div class="nuance"><b>Key nuance</b>${nl2br(d.nuance)}</div>` : '';
+      return `<div class="detail-section">
+        <p class="detail-section-title">${esc(sec.label)}</p>
+        ${fieldsHtml}${nuanceHtml}
+      </div>`;
+    }).join('');
+    if(d.notable_detail){
+      sectionsHtml += `<div class="detail-section">
+        <p class="detail-label">Notable detail (cross-company comparison)</p>
+        <p class="detail-text">${nl2br(d.notable_detail)}</p>
+      </div>`;
+    }
+  } else {
+    const p = d.profile;
+    const rows = [
+      ['Structure Type', p.structure_type],
+      ['Approval Body / Path', p.approval_body],
+      ['Energy Allocation / MW Mix', p.energy_allocation],
+      ['Ratepayer Protection', p.ratepayer_protection],
+      ['Status / Opposition', p.status_opposition],
+      ['Notable Detail', p.notable_detail],
+    ];
+    sectionsHtml = rows.map(([label,value]) => `
+      <div class="detail-section">
+        <p class="detail-label">${esc(label)}</p>
+        <p class="detail-text">${nl2br(value)}</p>
+      </div>`).join('');
+  }
+
+  const srcs = (d.source_idx||[]).map(i => DATA.sources[i]);
+  const srcsHtml = srcs.length ? `
+    <button class="sources-toggle" onclick="toggleCollapse(this)"
+      data-closed-label="Show sources (${srcs.length})" data-open-label="Hide sources">
+      <span class="sources-toggle-icon">&#9662;</span><span>Show sources (${srcs.length})</span>
+    </button>
+    <div class="collapse-panel" style="display:none;">
+      <ul class="srcs">${srcs.map(s=>`<li><strong>${esc(s.topic)}</strong> \u2014 ${esc(s.source)}<span class="src-date">${esc(s.date)}</span></li>`).join('')}</ul>
+    </div>` : '';
+
+  $('#modal').innerHTML = `
+    <div class="modal-head ${cls}">
+      <button class="close-x" onclick="closeModal()" aria-label="Close">\u00d7</button>
+      <h2 class="serif">${esc(d.name)}</h2>
+      <p class="role">${esc(d.company)} \u00b7 ${esc(d.location)}${d.model_num?` \u00b7 Model ${esc(d.model_num)} \u2014 ${esc(MODEL_NAME[d.model_num]||'')}`:''}</p>
+      <p class="modal-status">${esc(d.status_label)}</p>
+    </div>
+    <div class="modal-detail">${sectionsHtml}${srcsHtml}</div>`;
+  openBackdrop();
+}
+
+/* ── MODELS VIEW ────────────────────────────────────────── */
+function renderModels(){
+  const cards = DATA.models.map(m => `
+    <div class="model-card">
+      <div class="model-num">${esc(m.num)}</div>
+      <h3 class="serif">${esc(flatten(m.name))}</h3>
+      <p>${nl2br(m.how)}</p>
+      <div class="model-meta">
+        <span><b>Approval path</b>${esc(flatten(m.body))}</span>
+        <span><b>Speed</b>${esc(flatten(m.speed))}</span>
+        <span><b>Ratepayer risk</b>${esc(flatten(m.risk))}</span>
+      </div>
+      <div class="model-examples"><b>Real examples in this database</b>${nl2br(m.examples)}</div>
+    </div>`).join('');
+  $('#main').innerHTML = `
+    <div class="section-sub">Every hyperscaler power deal in this database uses one, or a combination, of
+      six structural approval models. Switch to the Deals view and filter by model to see how each one plays
+      out across companies.</div>
+    <div class="grid">${cards}</div>
+    <div class="synthesis">
+      <p class="lead">Cross-Company Synthesis</p>
+      <p>${nl2br(DATA.synthesis)}</p>
+    </div>`;
+}
+
+/* ── PLAYBOOK VIEW ──────────────────────────────────────── */
+function renderPlaybook(){
+  const pb = DATA.playbook;
+
+  const workingCards = pb.working.map((w,i) => `
+    <article class="card clean" tabindex="0" role="button" onclick="openItem('working',${i})"
+      onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openItem('working',${i})}">
+      <div class="card-top"><h3 class="serif">${esc(flatten(w.strategy))}</h3><span class="pill clean">Working</span></div>
+      <p class="card-synth">${esc(flatten(w.why))}</p>
+      <hr class="card-divider">
+      <div class="card-previews"><div class="card-pos-preview"><span class="tag">Best example</span>
+        <p class="card-pos-text">${esc(flatten(w.example))}</p></div></div>
+      <div class="card-foot">View full detail
+        ${leadingLevel(w.replicability) ? `<span class="status-flag">${esc(leadingLevel(w.replicability))}</span>` : ''}</div>
+    </article>`).join('');
+
+  const notWorkingCards = pb.not_working.map((w,i) => `
+    <article class="card contested" tabindex="0" role="button" onclick="openItem('notworking',${i})"
+      onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openItem('notworking',${i})}">
+      <div class="card-top"><h3 class="serif">${esc(flatten(w.pattern))}</h3><span class="pill contested">Not working</span></div>
+      <p class="card-synth">${esc(flatten(w.why))}</p>
+      <hr class="card-divider">
+      <div class="card-previews"><div class="card-pos-preview"><span class="tag">Clearest example</span>
+        <p class="card-pos-text">${esc(flatten(w.example))}</p></div></div>
+      <div class="card-foot">View full detail</div>
+    </article>`).join('');
+
+  const serviceCards = pb.services.map((s,i) => `
+    <article class="card" tabindex="0" role="button" onclick="openItem('service',${i})"
+      onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openItem('service',${i})}">
+      <div class="card-top"><h3 class="serif">${esc(flatten(s.service))}</h3></div>
+      <p class="card-synth">${esc(flatten(s.what))}</p>
+      <hr class="card-divider">
+      <div class="card-previews"><div class="card-pos-preview"><span class="tag">Target client</span>
+        <p class="card-pos-text">${esc(flatten(s.client))}</p></div></div>
+      <div class="card-foot">View full detail
+        ${leadingLevel(s.urgency) ? `<span class="status-flag">${esc(leadingLevel(s.urgency))}</span>` : ''}</div>
+    </article>`).join('');
+
+  const accordion = pb.decision_map.map((lvl,i) => `
+    <div class="acc-item" id="acc-${i}">
+      <button class="acc-head" onclick="toggleAccordion(${i})">
+        <h4 class="serif">${esc(flatten(lvl.level))}</h4>
+        <span class="acc-icon">&#9662;</span>
+      </button>
+      <div class="acc-body">
+        <div class="acc-field"><p class="detail-label">Who decides</p><p class="detail-text">${nl2br(lvl.who)}</p></div>
+        <div class="acc-field"><p class="detail-label">What they control</p><p class="detail-text">${nl2br(lvl.controls)}</p></div>
+        <div class="acc-field"><p class="detail-label">How to engage</p><p class="detail-text">${nl2br(lvl.engage)}</p></div>
+        <div class="acc-field"><p class="detail-label">Key relationships</p><p class="detail-text">${nl2br(lvl.relationships)}</p></div>
+        <div class="acc-field"><p class="detail-label">Risk if ignored</p><p class="detail-text">${nl2br(lvl.risk)}</p></div>
+      </div>
+    </div>`).join('');
+
+  $('#main').innerHTML = `
+    <div class="section-title working">What's Working <span class="count">${pb.working.length} strategies</span></div>
+    <div class="section-sub">Approaches that consistently drive approval across the deals in this database.</div>
+    <div class="grid">${workingCards}</div>
+
+    <div class="section-title notworking">What's Not Working <span class="count">${pb.not_working.length} patterns</span></div>
+    <div class="section-sub">Patterns that consistently derail deals or draw opposition.</div>
+    <div class="grid">${notWorkingCards}</div>
+
+    <div class="section-title">Decision-Maker Map <span class="count">who votes yes or no, by level</span></div>
+    <div class="section-sub">Tap a level to see who decides, what they control, and the risk of skipping them.</div>
+    <div class="accordion">${accordion}</div>
+
+    <div class="section-title">BSP Service Products <span class="count">${pb.services.length} offerings</span></div>
+    <div class="section-sub">What this research suggests BSP can package and sell.</div>
+    <div class="grid">${serviceCards}</div>`;
+}
+
+function toggleAccordion(i){ $('#acc-'+i).classList.toggle('open'); }
+
+function openModalWorking(i){
+  const w = DATA.playbook.working[i];
+  $('#modal').innerHTML = `
+    <div class="modal-head clean">
+      <button class="close-x" onclick="closeModal()" aria-label="Close">\u00d7</button>
+      <h2 class="serif">${esc(flatten(w.strategy))}</h2>
+      <p class="role">Strategy #${esc(w.num)} \u00b7 What's Working</p>
+    </div>
+    <div class="modal-detail">
+      <div class="detail-section"><p class="detail-label">Why it works</p><p class="detail-text">${nl2br(w.why)}</p></div>
+      <div class="detail-section"><p class="detail-label">Best example</p><p class="detail-text">${nl2br(w.example)}</p></div>
+      <div class="detail-section"><p class="detail-label">Replicability</p><p class="detail-text">${nl2br(w.replicability)}</p></div>
+      <div class="detail-section"><p class="detail-label">BSP service angle</p><p class="detail-text">${nl2br(w.angle)}</p></div>
+    </div>`;
+  openBackdrop();
+}
+function openModalNotWorking(i){
+  const w = DATA.playbook.not_working[i];
+  $('#modal').innerHTML = `
+    <div class="modal-head contested">
+      <button class="close-x" onclick="closeModal()" aria-label="Close">\u00d7</button>
+      <h2 class="serif">${esc(flatten(w.pattern))}</h2>
+      <p class="role">Failure pattern #${esc(w.num)} \u00b7 What's Not Working</p>
+    </div>
+    <div class="modal-detail">
+      <div class="detail-section"><p class="detail-label">Why it backfires</p><p class="detail-text">${nl2br(w.why)}</p></div>
+      <div class="detail-section"><p class="detail-label">Clearest example</p><p class="detail-text">${nl2br(w.example)}</p></div>
+      <div class="detail-section"><p class="detail-label">Warning signal</p><p class="detail-text">${nl2br(w.warning)}</p></div>
+      <div class="detail-section"><p class="detail-label">BSP risk flag</p><p class="detail-text">${nl2br(w.risk_flag)}</p></div>
+    </div>`;
+  openBackdrop();
+}
+function openModalService(i){
+  const s = DATA.playbook.services[i];
+  $('#modal').innerHTML = `
+    <div class="modal-head">
+      <button class="close-x" onclick="closeModal()" aria-label="Close">\u00d7</button>
+      <h2 class="serif">${esc(flatten(s.service))}</h2>
+      <p class="role">BSP Service Product</p>
+    </div>
+    <div class="modal-detail">
+      <div class="detail-section"><p class="detail-label">What it is</p><p class="detail-text">${nl2br(s.what)}</p></div>
+      <div class="detail-section"><p class="detail-label">Evidence base from research</p><p class="detail-text">${nl2br(s.evidence)}</p></div>
+      <div class="detail-section"><p class="detail-label">Target client</p><p class="detail-text">${nl2br(s.client)}</p></div>
+      <div class="detail-section"><p class="detail-label">When to pitch it</p><p class="detail-text">${nl2br(s.when)}</p></div>
+      <div class="detail-section"><p class="detail-label">Urgency</p><p class="detail-text">${nl2br(s.urgency)}</p></div>
+    </div>`;
+  openBackdrop();
+}
+
+/* ── REGULATORY TRACKER VIEW ────────────────────────────── */
+function renderRegulatory(){
+  const reg = DATA.regulatory;
+
+  const activeCards = reg.active.map((a,i) => {
+    const {emoji,label} = urgencyParts(a.urgency);
+    const stakesFlat = flatten(a.stakes);
+    return `<article class="reg-card" tabindex="0" role="button" onclick="openItem('active',${i})"
+      onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openItem('active',${i})}">
+      <div class="reg-card-top"><h3 class="serif">${esc(flatten(a.proceeding))}</h3>
+        <span class="urgency ${urgencyClass(emoji)}">${emoji} ${esc(label)}</span></div>
+      <p>${esc(stakesFlat.slice(0,150))}${stakesFlat.length>150?'\u2026':''}</p>
+    </article>`;
+  }).join('');
+
+  const recentItems = reg.recent.map(r => `
+    <div class="feed-item">
+      <div class="feed-item-top"><h4 class="serif">${esc(flatten(r.event))}</h4><span class="when">${esc(r.date)}</span></div>
+      <span class="who">${esc(flatten(r.who))}</span>
+      <p>${esc(flatten(r.implication))}</p>
+    </div>`).join('');
+
+  const legCards = reg.legislative.map((l,i) => {
+    const {emoji,label} = urgencyParts(l.direction);
+    return `<article class="leg-card" tabindex="0" role="button" onclick="openItem('legislative',${i})"
+      onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openItem('legislative',${i})}">
+      <div class="leg-card-top"><h3 class="serif">${esc(l.state)}</h3>
+        <span class="urgency ${urgencyClass(emoji)}">${emoji} ${esc(label)}</span></div>
+      <p>${esc(flatten(l.bill))}</p>
+    </article>`;
+  }).join('');
+
+  $('#main').innerHTML = `
+    <div class="note-banner">${nl2br(reg.note)}</div>
+
+    <div class="section-title">Active Proceedings <span class="count">${reg.active.length} decisions pending now</span></div>
+    <div class="grid">${activeCards}</div>
+
+    <div class="section-title">Recent Key Decisions <span class="count">last 60 days</span></div>
+    <div class="feed">${recentItems}</div>
+
+    <div class="section-title">State Legislative Trends <span class="count">${reg.legislative.length} states to watch</span></div>
+    <div class="grid">${legCards}</div>`;
+}
+
+function openModalActive(i){
+  const a = DATA.regulatory.active[i];
+  const {emoji,label} = urgencyParts(a.urgency);
+  const uc = urgencyClass(emoji);
+  const headCls = uc==='critical' ? 'contested' : uc==='high' ? 'managed' : uc==='active' ? 'clean' : '';
+  $('#modal').innerHTML = `
+    <div class="modal-head ${headCls}">
+      <button class="close-x" onclick="closeModal()" aria-label="Close">\u00d7</button>
+      <h2 class="serif">${esc(flatten(a.proceeding))}</h2>
+      <p class="role">${esc(flatten(a.docket))}</p>
+      <p class="modal-status">${nl2br(a.status)}</p>
+    </div>
+    <div class="modal-detail">
+      <div class="detail-section"><p class="detail-label">Next decision / deadline</p><p class="detail-text">${nl2br(a.deadline)}</p></div>
+      <div class="detail-section"><p class="detail-label">Decision-makers</p><p class="detail-text">${nl2br(a.decision_makers)}</p></div>
+      <div class="detail-section"><p class="detail-label">What's at stake for BSP clients</p><p class="detail-text">${nl2br(a.stakes)}</p></div>
+      <div class="detail-section"><p class="detail-label">Urgency</p><p class="detail-text">${emoji} ${nl2br(a.urgency)}</p></div>
+    </div>`;
+  openBackdrop();
+}
+function openModalLegislative(i){
+  const l = DATA.regulatory.legislative[i];
+  $('#modal').innerHTML = `
+    <div class="modal-head">
+      <button class="close-x" onclick="closeModal()" aria-label="Close">\u00d7</button>
+      <h2 class="serif">${esc(l.state)}</h2>
+      <p class="role">${esc(flatten(l.bill))}</p>
+      <p class="modal-status">${nl2br(l.status)}</p>
+    </div>
+    <div class="modal-detail">
+      <div class="detail-section"><p class="detail-label">Direction</p><p class="detail-text">${nl2br(l.direction)}</p></div>
+      <div class="detail-section"><p class="detail-label">If it passes</p><p class="detail-text">${nl2br(l.if_passes)}</p></div>
+      <div class="detail-section"><p class="detail-label">If it fails</p><p class="detail-text">${nl2br(l.if_fails)}</p></div>
+      <div class="detail-section"><p class="detail-label">BSP watch level</p><p class="detail-text">${nl2br(l.watch_level)}</p></div>
+    </div>`;
+  openBackdrop();
+}
+
+/* ── SOURCES VIEW ───────────────────────────────────────── */
+function filteredSources(){
+  const q = $('#search').value.trim().toLowerCase();
+  if(!q) return DATA.sources;
+  return DATA.sources.filter(s => (s.topic+' '+s.source+' '+s.date).toLowerCase().includes(q));
+}
+
+function renderSources(){
+  const list = filteredSources();
+  if(!list.length){ $('#main').innerHTML = `<div class="empty">No sources match that search.</div>`; return; }
+  const groups = {};
+  list.forEach(s => {
+    const g = sourceGroupKey(s.topic);
+    (groups[g] = groups[g] || []).push(s);
+  });
+  const order = SOURCE_GROUP_ORDER.filter(g => groups[g]);
+  const html = order.map(g => `
+    <div class="source-group">
+      <h3>${esc(g)} (${groups[g].length})</h3>
+      ${groups[g].map(s => `
+        <div class="source-row">
+          <span class="s-topic">${esc(s.topic)}</span>
+          <span class="s-outlets">${esc(s.source)}</span>
+          <span class="s-date">${esc(s.date)}</span>
+        </div>`).join('')}
+    </div>`).join('');
+  $('#main').innerHTML = `<div class="section-sub">${list.length} of ${DATA.sources.length} sources shown.
+    These are the outlets and filings BSP Research drew on for this database \u2014 no article text is
+    reproduced here.</div>${html}`;
+}
+
+/* ── SHARED: MODAL DISPATCH, TOGGLES, BOOT ──────────────── */
+function openItem(kind, key){
+  if(kind==='deal') openModalDeal(key);
+  else if(kind==='working') openModalWorking(key);
+  else if(kind==='notworking') openModalNotWorking(key);
+  else if(kind==='service') openModalService(key);
+  else if(kind==='active') openModalActive(key);
+  else if(kind==='legislative') openModalLegislative(key);
+}
+function openBackdrop(){
+  $('#backdrop').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal(){
+  $('#backdrop').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
+
+function toggleCollapse(btn){
+  const panel = btn.nextElementSibling;
+  const isOpen = panel.style.display !== 'none';
+  panel.style.display = isOpen ? 'none' : 'block';
+  btn.classList.toggle('open', !isOpen);
+  const label = btn.querySelector('span:last-child');
+  label.textContent = isOpen ? btn.dataset.closedLabel : btn.dataset.openLabel;
+}
+
+function populateFilterOptions(){
+  const companies = COMPANY_ORDER.filter(c => DATA.deals.some(d => d.company === c));
+  $('#f-company').innerHTML = '<option value="">All companies</option>' +
+    companies.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  $('#f-model').innerHTML = '<option value="">All approval models</option>' +
+    DATA.models.map(m => `<option value="${esc(m.num)}">Model ${esc(m.num)} \u2014 ${esc(flatten(m.name))}</option>`).join('');
+}
+
+/* ── BOOT ───────────────────────────────────────────────── */
+document.getElementById('m-deals').textContent = DATA.deals.length;
+document.getElementById('m-companies').textContent = new Set(DATA.deals.map(d=>d.company)).size;
+document.getElementById('m-sources').textContent = DATA.sources.length;
+populateFilterOptions();
+setView('deals');
+
+</script>
+</body>
+</html>

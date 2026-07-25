@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data Center Development: Practice Comparison</title>
+<style>
+  :root{
+    --teal-dark:#1A4444; --teal:#2ABFBF; --teal-deep:#14807f;
+    --ink:#16201f; --muted:#5f6b6a; --faint:#8a9594;
+    --line:#e3e8e7; --line-strong:#cfd6d5;
+    --bg:#f6f8f8; --card:#ffffff;
+    --model:#2f7a45; --caution:#a5342b;
+    --model-soft:#eaf4ec; --caution-soft:#f8ecea;
+    --flag-bg:#fdf8ec; --flag-line:#e0c474; --flag-ink:#7a5b00;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.5;-webkit-font-smoothing:antialiased;}
+  .serif{font-family:Georgia,"Iowan Old Style","Times New Roman",serif;}
+  a{color:var(--teal-deep);}
+
+  /* ── Masthead ─────────────────────────────────── */
+  header.masthead{background:var(--teal-dark);color:#fff;padding:30px 24px 22px;}
+  .mast-inner{max-width:1240px;margin:0 auto;}
+  .kicker{font-size:12px;letter-spacing:3px;text-transform:uppercase;
+    color:var(--teal);margin:0 0 8px;font-weight:600;}
+  .hub-crumb{display:inline-block;font-size:12px;color:#8fb8b7;text-decoration:none;
+    margin-bottom:12px;}
+  .hub-crumb:hover{color:#fff;text-decoration:underline;}
+  header.masthead h1{margin:0 0 10px;font-size:31px;font-weight:600;line-height:1.15;
+    font-family:Georgia,"Iowan Old Style","Times New Roman",serif;}
+  .mast-meta{font-size:13px;color:#bcd4d3;display:flex;flex-wrap:wrap;gap:6px 18px;}
+  .mast-meta b{color:#fff;font-weight:600;}
+
+  /* ── Toolbar ──────────────────────────────────── */
+  .toolbar{background:var(--card);border-bottom:1px solid var(--line);
+    position:sticky;top:0;z-index:30;}
+  .tools-inner{max-width:1240px;margin:0 auto;padding:14px 24px;
+    display:flex;flex-wrap:wrap;gap:12px;align-items:center;}
+  .views{display:inline-flex;border:1px solid var(--line-strong);border-radius:8px;overflow:hidden;}
+  .views button{border:0;background:#fff;padding:9px 16px;font-size:13px;font-weight:600;
+    color:var(--muted);cursor:pointer;border-right:1px solid var(--line);}
+  .views button:last-child{border-right:0;}
+  .views button.active{background:var(--teal-dark);color:#fff;}
+  .views button:focus-visible{outline:2px solid var(--teal);outline-offset:-2px;}
+  input[type=text]{font-size:14px;padding:9px 12px;border:1px solid var(--line-strong);
+    border-radius:8px;font-family:inherit;background:#fff;color:var(--ink);}
+  input#search{min-width:220px;flex:1 1 220px;max-width:320px;}
+  .tool-spacer{flex:1 1 auto;}
+  .hint{font-size:12px;color:var(--faint);}
+
+  main{max-width:1240px;margin:0 auto;padding:8px 24px 70px;}
+
+
+  /* ── Section titles ───────────────────────────── */
+  .section-title{display:flex;align-items:baseline;gap:10px;margin:26px 0 12px;
+    padding-bottom:7px;border-bottom:2px solid var(--line-strong);
+    font-size:13px;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;}
+  .section-title .count{font-size:12px;letter-spacing:.5px;color:var(--faint);font-weight:600;}
+  .section-title.model{color:var(--model);border-color:var(--model);}
+  .section-title.caution{color:var(--caution);border-color:var(--caution);}
+
+  /* ── Project cards ─────────────────────────────── */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;
+    border-top:4px solid var(--faint);padding:16px 16px 13px;cursor:pointer;
+    transition:box-shadow .15s ease,transform .15s ease;
+    display:flex;flex-direction:column;gap:0;}
+  .card:hover{box-shadow:0 6px 22px rgba(20,40,40,.10);transform:translateY(-2px);}
+  .card:focus-visible{outline:2px solid var(--teal);outline-offset:2px;}
+  .card.model{border-top-color:var(--model);}
+  .card.caution{border-top-color:var(--caution);}
+  .card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+  .card h3{margin:0;font-size:17px;font-weight:600;line-height:1.3;}
+  .pill{font-size:9.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;
+    padding:3px 8px;border-radius:20px;flex-shrink:0;white-space:nowrap;margin-top:1px;}
+  .pill.model{background:var(--model-soft);color:var(--model);}
+  .pill.caution{background:var(--caution-soft);color:var(--caution);}
+  .card .role{margin:4px 0 0;font-size:12.5px;color:var(--muted);}
+  .card-synth{margin:10px 0 0;font-size:13px;color:var(--muted);line-height:1.45;
+    display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+  .card-divider{border:0;border-top:1px solid var(--line);margin:12px 0 10px;}
+  .card-previews{display:flex;flex-direction:column;gap:8px;margin-bottom:auto;}
+  .card-pos-preview{display:flex;flex-direction:column;gap:3px;}
+  .tag{font-size:10.5px;font-weight:600;letter-spacing:.3px;text-transform:uppercase;
+    background:#eef2f1;color:#48605f;padding:3px 8px;border-radius:5px;
+    display:inline-block;width:fit-content;align-self:flex-start;}
+  .card-pos-text{margin:0;font-size:12.5px;color:var(--ink);line-height:1.4;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .card-foot{display:flex;align-items:center;gap:10px;margin-top:12px;padding-top:10px;
+    border-top:1px solid var(--line);font-size:12px;color:var(--teal-deep);font-weight:600;}
+  .status-flag{font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;
+    color:var(--flag-ink);background:var(--flag-bg);border:1px solid var(--flag-line);
+    padding:2px 6px;border-radius:5px;margin-left:auto;}
+
+  /* ── Modal ────────────────────────────────────── */
+  .backdrop{position:fixed;inset:0;background:rgba(15,28,28,.55);z-index:50;
+    display:none;align-items:flex-start;justify-content:center;
+    padding:40px 16px;overflow-y:auto;}
+  .backdrop.open{display:flex;}
+  .modal{background:#fff;max-width:820px;width:100%;border-radius:12px;overflow:hidden;
+    box-shadow:0 24px 70px rgba(0,0,0,.3);display:flex;flex-direction:column;
+    max-height:calc(100vh - 80px);}
+  .modal-head{flex-shrink:0;padding:22px 26px 18px;
+    border-bottom:1px solid var(--line);position:relative;}
+  .modal-head.model{border-top:5px solid var(--model);}
+  .modal-head.caution{border-top:5px solid var(--caution);}
+  .modal-head h2{margin:0 0 3px;font-size:23px;font-weight:600;padding-right:36px;}
+  .modal-head .role{margin:2px 0 0;font-size:13.5px;color:var(--muted);}
+  .modal-synth{margin:12px 0 0;font-size:14px;color:#2b3a39;line-height:1.55;font-style:italic;}
+  .modal-status{margin:12px 0 0;font-size:13px;font-weight:600;color:var(--flag-ink);
+    background:var(--flag-bg);border-left:3px solid var(--flag-line);
+    padding:8px 12px;border-radius:0 6px 6px 0;}
+  .close-x{position:absolute;top:16px;right:18px;border:0;background:#f1f4f4;
+    width:32px;height:32px;border-radius:8px;font-size:18px;cursor:pointer;
+    color:var(--muted);line-height:1;}
+  .close-x:hover{background:#e6eae9;}
+  .modal-detail{flex:1;overflow-y:auto;min-height:0;padding:6px 26px 26px;}
+  .detail-section{padding:16px 0;border-top:1px solid var(--line);}
+  .detail-section:first-child{border-top:0;}
+  .detail-label{display:flex;align-items:center;gap:7px;margin:0 0 6px;
+    font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
+  .detail-label .ok{color:var(--model);}
+  .detail-label .bad{color:var(--caution);}
+  .detail-text{margin:0;font-size:14.5px;line-height:1.6;color:var(--ink);}
+  .crossref{margin:14px 0 0;padding:12px 14px;background:#f4f9f8;border:1px dashed var(--line-strong);
+    border-radius:8px;font-size:13px;color:var(--muted);}
+  .crossref a{font-weight:600;cursor:pointer;}
+  .sources-toggle{width:100%;display:flex;align-items:center;justify-content:center;gap:7px;
+    margin-top:16px;padding:10px;font-size:12.5px;font-weight:600;color:var(--muted);
+    background:none;border:1px dashed var(--line-strong);border-radius:8px;cursor:pointer;
+    font-family:inherit;transition:color .15s,border-color .15s;}
+  .sources-toggle:hover{color:var(--ink);border-color:var(--faint);}
+  .sources-toggle-icon{display:inline-block;font-size:10px;transition:transform .15s;}
+  .sources-toggle.open .sources-toggle-icon{transform:rotate(180deg);}
+  .srcs{margin:14px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:9px;}
+  .srcs li{font-size:13.5px;}
+  .srcs a{text-decoration:none;}
+  .srcs a:hover{text-decoration:underline;}
+
+  .empty{padding:40px;text-align:center;color:var(--faint);font-size:14px;}
+
+  footer{max-width:1240px;margin:0 auto;padding:26px 24px;font-size:12px;color:var(--muted);
+    border-top:1px solid var(--line);}
+  footer p{margin:0 0 6px;max-width:760px;}
+
+  @media(max-width:600px){
+    input#search{max-width:none;}
+  }
+  @media(prefers-reduced-motion:reduce){*{transition:none !important;}}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="mast-inner">
+    <a class="hub-crumb" href="./index.html">&larr; Boundary Stone Partners Hub</a>
+    <p class="kicker">Boundary Stone Partners</p>
+    <h1>Data Center Development: Practice Comparison</h1>
+    <div class="mast-meta">
+      <span><b>Compiled</b> July 2026</span>
+      <span><b id="m-count">—</b> projects tracked</span>
+      <span><b id="m-src">—</b> sources cited</span>
+      <span><b>Use</b> client &amp; community conversations</span>
+    </div>
+  </div>
+</header>
+
+<div class="toolbar">
+  <div class="tools-inner">
+    <div class="views" role="tablist">
+      <button id="v-all" class="active" onclick="setFilter('all')">All Projects</button>
+      <button id="v-model" onclick="setFilter('model')">Model Practice</button>
+      <button id="v-caution" onclick="setFilter('caution')">Cautionary</button>
+    </div>
+    <input id="search" type="text" placeholder="Search by name, developer, location…" oninput="render()">
+    <span class="tool-spacer"></span>
+    <span class="hint">Tap any card for the full profile</span>
+  </div>
+</div>
+
+<main id="main"></main>
+
+<footer>
+  <p><strong>About this comparison.</strong> Compiled from public news reporting, government filings,
+  legal filings, and company disclosures as of July 2026 (full citations on each profile's Sources tab).
+  Projects are grouped by documented practice on six criteria — energy costs, power source, off-grid
+  fossil generation, water use, community benefits, and transparency — not by company reputation. The same
+  company can land on either side depending on the project: see the note above.</p>
+  <p>For internal use preparing for client and community conversations. Not a substitute for legal,
+  regulatory, or PR review before external distribution.</p>
+</footer>
+
+<div class="backdrop" id="backdrop" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modal" role="dialog" aria-modal="true"></div>
+</div>
+
+<script>
+/* ── DATA ───────────────────────────────────────────────── */
+const CRIT_ORDER = ['energy','power','offgrid','water','community','transparency'];
+const CRIT_LABEL = {
+  energy:'Energy Costs', power:'Power & Grid', offgrid:'Off-Grid Fossil Fuels', water:'Water & Environment',
+  community:'Community Benefits', transparency:'Transparency'
+};
+
+const PROJECTS = [
+{
+  id:'stanton-springs', category:'model',
+  name:'Stanton Springs Campus', developer:'Meta',
+  location:'Social Circle, Newton & Walton Counties, GA',
+  scale:'$1.5B+ invested since 2018 · 1,000-acre, 8-building campus · 1,120 MW of renewables added',
+  statusShort:'Operational · Expanding',
+  statusFull:'Operational; a second campus is under construction. County officials are now coordinating regional planning as more developers follow Meta\u2019s lead into the area.',
+  bottomLine:'The longest-running, most financially documented commitment on this list \u2014 and a reminder that even strong performers face real community concerns; what matters is how they respond.',
+  previews:['energy','community'],
+  criteria:{
+    energy:{tag:'\u2713 Pays full cost (Ratepayer Pledge)', full:'Signed the 2026 White House Ratepayer Protection Pledge; Meta states it has \u201cpaid its own way\u201d since 2018, covering its own power and infrastructure costs rather than shifting them to residential ratepayers.'},
+    power:{tag:'\u2713 1,120 MW new renewables added', full:'Procures power to match 100% renewable consumption; 1,120 MW of new renewable generation was added specifically to serve this campus rather than drawing down existing fossil capacity.'},
+    offgrid:{tag:'\u2713 No off-grid fossil generation', full:'Draws from the grid and matches consumption with newly added renewable generation; no on-site fossil combustion is used here to bypass grid interconnection.'},
+    water:{tag:'\u2713 Water-positive goal, 2030', full:'Company-wide goal to be water-positive (replenish more than it consumes) by 2030; LEED Gold-certified design. Note: Newton County has separately seen resident complaints about well disruption tied to area data-center growth; Meta commissioned a third-party well study that found no link to its own operations.'},
+    community:{tag:'\u2713 $4.5M+ given since 2019', full:'$4.5M+ donated directly to local schools/nonprofits since 2019 (part of a broader Meta grant program that has given $74M+ across its global data-center communities); ~1,300 skilled-trade jobs at peak construction; 200+ permanent operating jobs.'},
+    transparency:{tag:'\u2713 Published 3rd-party well study', full:'Published a third-party well study in response to community complaints rather than disputing them privately, and said it would keep funding the community \u201cregardless.\u201d'}
+  },
+  sources:[
+    {t:'Meta \u2014 Stanton Springs data center fact sheet', u:'https://datacenters.atmeta.com/asset/newton-data-center-info-sheet/'},
+    {t:'Fortune \u2014 \u201cAmerica\u2019s data centers are thirsty\u201d', u:'https://fortune.com/2026/05/13/data-center-georgia-arizona-water-wars/'},
+    {t:'Fox Business \u2014 small towns / data center boom', u:'https://www.foxbusiness.com/technology/data-centers-rapidly-transforming-small-town-america'},
+    {t:'Technology Magazine \u2014 Ratepayer Protection Pledge coverage', u:'https://technologymagazine.com/news/why-are-tech-giants-signing-a-ratepayer-protection-pledge'},
+    {t:'Meta Newsroom \u2014 Data Center Community Action Grants', u:'https://about.fb.com/news/2025/11/expanding-meta-data-center-community-action-grants-program/'}
+  ]
+},
+{
+  id:'lancaster-ai-hub', category:'model',
+  name:'Lancaster AI Hub', developer:'Chirisa Technology Parks, with CoreWeave (anchor/financing) & Machine Investment Group',
+  location:'City of Lancaster, PA',
+  scale:'~$10B combined build cost across two campuses (~2,000,000 sq ft) · ~150\u2013300 permanent jobs projected',
+  statusShort:'Under construction',
+  statusFull:'Approved by City Council 6-1 in November 2025; under construction.',
+  bottomLine:'One of the first legally binding, data-center-specific CBAs in the country, negotiated before construction \u2014 though legal reviewers note some clauses use flexible language rather than hard numeric standards, and the job count is modest relative to the investment.',
+  previews:['water','community'],
+  criteria:{
+    energy:{tag:'\u2713 Developer-funded, not ratepayers', full:'The city\u2019s Community Benefits Agreement (CBA) requires the developer \u2014 not the city or ratepayers \u2014 to fund all sustainability commitments, secured by letters of credit rather than promises.'},
+    power:{tag:'\u2713 100% clean energy, $10M bond', full:'CBA legally requires 100% of electricity to be \u201cderived from clean energy sources,\u201d backed by a $10M letter of credit; the developer forfeits \u201cRequired Clean Energy Payments\u201d from that fund if it falls short, reduced $2.5M per building that comes online in compliance.'},
+    offgrid:{tag:'\u2713 No off-grid fossil generation', full:'The CBA\u2019s 100% clean-energy requirement applies to grid-delivered power; no on-site fossil generation is part of the project as disclosed.'},
+    water:{tag:'\u2713 20,000 gal/day cap (enforced)', full:'Enforceable cap of 20,000 gallons/day of municipal water use PER campus via closed-loop cooling \u2014 set publicly in advance, not estimated after the fact.'},
+    community:{tag:'\u2713 $20.25M binding agreement', full:'$20.25M in direct payments (Lancaster County Community Foundation and the City\u2019s Sustainable Development & Clean Energy Fund), paid on construction/operating milestones; local-hiring plan; free first-responder training.'},
+    transparency:{tag:'\u2713 Public record by PA law', full:'The CBA itself is explicitly designated a public record under Pennsylvania\u2019s Right-to-Know Law; the developer must present clean-energy compliance to City Council annually.'}
+  },
+  sources:[
+    {t:'City of Lancaster, PA \u2014 Data Center Information', u:'https://www.cityoflancasterpa.gov/data-center/'},
+    {t:'LancasterOnline \u2014 City Council approves benefits agreement', u:'https://lancasteronline.com/news/local/lancaster-city-council-votes-to-approve-data-center-benefits-agreement/article_b05cb1fd-a585-4c4f-8945-c96ada3172ad.html'},
+    {t:'Columbia Climate Law Blog \u2014 CBA analysis', u:'https://blogs.law.columbia.edu/climatechange/2026/05/28/community-benefits-agreements-and-data-center-development/'},
+    {t:'Federation of American Scientists \u2014 CBA policy memo', u:'https://fas.org/publication/community-benefit-agreements-data-center-development/'},
+    {t:'Brookings \u2014 \u201cWhy community benefit agreements are necessary\u201d', u:'https://www.brookings.edu/articles/why-community-benefit-agreements-are-necessary-for-data-centers/'}
+  ]
+},
+{
+  id:'microsoft-crane', category:'model',
+  name:'Fleet-wide Water Stewardship & Crane Clean Energy Center Power Deal', developer:'Microsoft (power partner: Constellation Energy)',
+  location:'Multi-site: cooling pilots in Phoenix, AZ & Mount Pleasant, WI; power tied to Crane Clean Energy Center (formerly Three Mile Island Unit 1), PA',
+  scale:'New \u201czero-water\u201d cooling standard for all new designs from late 2027 · 20-year PPA to restart 800+ MW of retired nuclear capacity',
+  statusShort:'Piloting 2026',
+  statusFull:'Cooling pilots underway in 2026; standard rollout from 2027; Crane restart in progress.',
+  bottomLine:'Pairs a genuinely additive clean-power deal with an independently verifiable efficiency metric (WUE) instead of an unverifiable marketing claim \u2014 though critics fairly note fleet-wide progress doesn\u2019t erase water stress at every individual site.',
+  previews:['power','water'],
+  criteria:{
+    energy:{tag:'\u2713 Ratepayer Pledge signer', full:'Signed the 2026 Ratepayer Protection Pledge; the Crane deal adds a large block of always-on, carbon-free power to the regional grid rather than only drawing from it.'},
+    power:{tag:'\u2713 Restarting retired nuclear plant', full:'20-year PPA to bring a previously retired nuclear plant back online specifically to serve data-center demand \u2014 extending the life of existing clean baseload generation instead of requiring new fossil-fuel buildout.'},
+    offgrid:{tag:'\u2713 Clean generation, not off-grid fossil', full:'The Crane deal adds nuclear capacity to the regional grid rather than installing on-site fossil generation \u2014 the opposite of the off-grid-gas pattern seen in the cautionary examples in this comparison.'},
+    water:{tag:'\u2713 Water-positive in FY25', full:'Fleet-wide Water Usage Effectiveness of ~0.27\u20130.30 L/kWh, roughly 3x better than the reported industry average and a 90% cut from its early-2000s facilities; new closed-loop, chip-level cooling eliminates evaporative water use entirely (a reported 125M+ liters saved per facility/year); the company reports it was globally water-positive for the first time in fiscal 2025, ahead of its 2030 goal.'},
+    community:{tag:'Varies by site', full:'Site-specific community agreements vary (e.g., its West Des Moines, IA campus runs on 100% renewable power and is reported to generate $2B+ in local tax revenue).'},
+    transparency:{tag:'\u2713 Annual public sustainability report', full:'Publishes detailed annual water/energy sustainability reporting, including auditable Water Usage Effectiveness figures and a public list of 49+ water-replenishment projects worldwide.'}
+  },
+  sources:[
+    {t:'Data Center Dynamics \u2014 zero-water evaporation design', u:'https://www.datacenterdynamics.com/en/news/microsofts-upcoming-data-centers-to-use-closed-loop-zero-water-evaporation-design/'},
+    {t:'Tom\u2019s Hardware \u2014 Nadella water-use comments (Build 2026)', u:'https://www.tomshardware.com/tech-industry/big-tech/microsoft-ceo-says-new-ai-data-centers-use-as-little-water-annually-as-a-restaurant-closed-loop-cooling-system-aims-to-slash-consumption-from-millions-of-gallons-as-ai-infrastructure-faces-mounting-environmental-scrutiny'},
+    {t:'Microsoft Official Blog \u2014 two-decade water intensity push', u:'https://blogs.microsoft.com/blog/2026/06/24/inside-microsofts-two-decade-push-to-cut-water-intensity-while-scaling-for-growth/'},
+    {t:'GeekWire \u2014 90% water-use reduction claim', u:'https://www.geekwire.com/2026/microsoft-says-its-data-centers-use-90-less-water-than-its-earliest-facilities-as-public-concern-grows/'},
+    {t:'National Governors Association \u2014 nuclear/data center dispatch', u:'https://www.nga.org/publications/nga-nuclear-dispatch-powering-a-new-era-of-innovation/'},
+    {t:'FTI Consulting \u2014 nuclear + data centers', u:'https://www.fticonsulting.com/insights/articles/powerful-duo-nuclear-data-centers'}
+  ]
+},
+{
+  id:'new-carlisle', category:'model',
+  name:'New Carlisle Data Center Campus', developer:'Amazon Web Services (AWS)',
+  location:'New Carlisle, St. Joseph County, IN',
+  scale:'$11B (2024) + $15B (2025) \u2248 $26B combined · 16 planned \u201cshells\u201d · up to ~3 GW combined capacity',
+  statusShort:'Operational · Hiring',
+  statusFull:'Approved; first phase operational and hiring, later phases under construction.',
+  bottomLine:'Distinguished by explicit, numeric, pre-negotiated ratepayer-savings and water-cap commitments \u2014 though the tax abatement package wasn\u2019t unanimous locally (7-2), and some residents still argue it\u2019s too generous relative to their own tax bills.',
+  previews:['energy','community'],
+  crossRef:'project-blue',
+  crossRefLabel:'Project Blue (Cautionary) \u2014 same developer, very different outcome in Tucson, AZ',
+  criteria:{
+    energy:{tag:'\u2713 Saves ratepayers ~$1B/15 yrs', full:'Energy framework with utility NIPSCO is projected to save existing Indiana ratepayers ~$1B over 15 years, structured so current customers bear no project risk \u2014 a utility deal marketed and reviewed explicitly as a ratepayer benefit.'},
+    power:{tag:'\u2713 Capacity contracted upfront', full:'New generation/transmission capacity sized and contracted for the project through the NIPSCO framework rather than drawn ad hoc from existing supply.'},
+    offgrid:{tag:'\u2713 No off-grid fossil generation', full:'Power is delivered through new grid capacity contracted with NIPSCO; the project does not rely on on-site fossil generation to avoid grid interconnection.'},
+    water:{tag:'\u2713 County cap set pre-construction', full:'County set an explicit combined water-use ceiling (24M gallons/day) shared with a neighboring EV-battery plant, with both projects expected to use no more than 21M gallons combined \u2014 capacity planned before construction, not discovered afterward.'},
+    community:{tag:'\u2713 $143M community fund', full:'$143M \u201ccommunity enhancement agreement\u201d; $7M for road improvements; 1,100+ new high-skill jobs in the newest phase; ~80% of hired campus staff sourced locally; its \u201cFuture Ready 2030\u201d workforce program has already graduated its first local cohort into data-center and machine-learning roles.'},
+    transparency:{tag:'\u2713 Public votes; tax figures disclosed', full:'Debated and approved in public county council votes (7-2); officials disclosed that even with an 85% equipment-tax exemption over 35 years, Amazon is projected to pay $722M+ in local taxes over that period and become the county\u2019s largest taxpayer.'}
+  },
+  sources:[
+    {t:'About Amazon \u2014 $15B Northern Indiana investment', u:'https://www.aboutamazon.com/news/company-news/amazon-15-billion-indiana-data-centers'},
+    {t:'Indiana Economic Development Corp \u2014 $11B announcement', u:'https://iedc.in.gov/events/news/details/2024/04/25/gov.-holcomb-announces-amazon-web-services-plans-to-invest-11b-to-create-a-new-data-center-campus-in-northern-indiana'},
+    {t:'Inside INdiana Business \u2014 incentives approved', u:'https://www.insideindianabusiness.com/articles/incentives-approved-for-amazon-data-center-project'},
+    {t:'Data Center Dynamics \u2014 St. Joseph County approval', u:'https://www.datacenterdynamics.com/en/news/st-joseph-county-leaders-approve-11bn-amazon-data-center-in-indiana/'},
+    {t:'WSBT \u2014 workforce program / local hiring', u:'https://wsbt.com/news/local/first-look-at-amazons-new-carlisle-data-centers-administration-building-campus-11-billion-dollar-investment-recruit-workers-technical-careers-multiple-buildings'}
+  ]
+},
+{
+  id:'stratos', category:'caution',
+  name:'Stratos Project (\u201cWonder Valley\u201d)', developer:'O\u2019Leary Digital (Kevin O\u2019Leary) / West GenCo',
+  location:'Box Elder County (Hansel Valley), UT',
+  scale:'Originally 40,000 acres (~62 sq mi), up to 9 GW / ~$100B · agreed to a 75% footprint cut after state pushback',
+  statusShort:'Scaled back 75%',
+  statusFull:'Initial phase approved (May 2026); facing an active lawsuit challenging MIDA\u2019s authority as unconstitutional and a citizen referendum drive; developer has agreed to scale back after the state Senate President demanded a 75% reduction.',
+  bottomLine:'Shows that \u201cwe generate our own power\u201d doesn\u2019t automatically mean low-impact \u2014 self-generation via unabated gas combustion can still mean enormous regional emissions, layered on a rushed, low-transparency approval process.',
+  previews:['offgrid','transparency'],
+  criteria:{
+    energy:{tag:'\u2717 Tax break from unelected authority', full:'Utah\u2019s Military Installation Development Authority (MIDA) \u2014 a state-created body with limited elected accountability \u2014 approved a steep tax discount (0.5% vs. the 6% it\u2019s authorized to collect) specifically to attract the project.'},
+    power:{tag:'\u2717 Gas self-gen, ~+50% of state emissions', full:'Developer states 100% of power will be self-generated on-site via natural gas, avoiding new grid demand \u2014 but independent estimates put resulting emissions at ~30M tons of CO2/year, which a state physicist said would raise Utah\u2019s total greenhouse gas output by roughly 50%, more than the state\u2019s entire existing transportation sector.'},
+    offgrid:{tag:'\u2717 100% on-site gas, built to skip the grid', full:'The entire project is designed to run on on-site natural-gas turbines specifically so it never has to seek grid interconnection. That is the single largest driver of its emissions footprint, and the clearest example in this comparison of \u201coff-grid\u201d being marketed as a benefit while the fuel source itself \u2014 unabated natural gas, at a scale rivaling the state\u2019s transportation sector \u2014 goes largely unscrutinized.'},
+    water:{tag:'Claims unverified', full:'Developer states the project will use a closed-loop system with minimal draw from the local basin, returning water to an aquifer feeding the Great Salt Lake; independent verification is limited, and scientists have flagged that dissipating this much waste heat locally could measurably alter regional weather patterns.'},
+    community:{tag:'Jobs promised, no binding figures', full:'Developer cites ~2,000 permanent jobs and new tax revenue; after political pressure, added commitments on Great Salt Lake water and conservation/agricultural land set-asides.'},
+    transparency:{tag:'\u2717 Rushed; disputed \u201cpaid protester\u201d claim', full:'Approval was sought before environmental and traffic studies were complete; O\u2019Leary publicly claimed, without evidence, that most protesters at a public hearing were paid and bussed in \u2014 a claim Salt Lake Tribune reporting disputed.'}
+  },
+  sources:[
+    {t:'Rolling Stone \u2014 \u201cUtah Data Center From Kevin O\u2019Leary...Sparks Controversy\u201d', u:'https://www.rollingstone.com/culture/culture-features/utah-data-center-mr-wonderful-kevin-oleary-1235564105/'},
+    {t:'Fortune \u2014 \u201cResidents are revolting\u201d', u:'https://fortune.com/2026/05/11/shark-tank-kevin-oleary-millionaire-utah-data-center-american-politics-protests-ai-tech/'},
+    {t:'CBC News \u2014 Utah data centre opposition', u:'https://www.cbc.ca/news/world/kevin-oleary-data-centre-utah-9.7207716'},
+    {t:'NBC News \u2014 residents sue officials', u:'https://www.nbcnews.com/tech/tech-news/utah-residents-sue-officials-kevin-oleary-data-center-plan-rcna348720'},
+    {t:'Axios Salt Lake City \u2014 vote coverage', u:'https://www.axios.com/local/salt-lake-city/2026/05/04/utah-data-center-kevin-oleary'},
+    {t:'Fox Business \u2014 O\u2019Leary agrees to shrink project', u:'https://www.foxbusiness.com/technology/kevin-oleary-says-utah-ai-data-center-project-shrink-lawmakers-demand-cuts'}
+  ]
+},
+{
+  id:'colossus', category:'caution',
+  name:'Colossus 1 & 2', developer:'xAI / MZX Tech (Elon Musk)',
+  location:'Memphis, TN (Boxtown & Whitehaven) and Southaven, MS',
+  scale:'Colossus 1 (~150MW grid tie plus on-site turbines) · Colossus 2 seeking up to 41 gas turbines (~1.2 GW) · expanding toward 1M GPUs',
+  statusShort:'Federal litigation',
+  statusFull:'Federal Clean Air Act lawsuit (NAACP/Earthjustice/SELC v. xAI-MZX Tech) ongoing; the Department of Justice has intervened on xAI\u2019s side citing AI\u2019s national-security value; the local health department approved an air permit in July 2026 despite unanimous opposition at the public hearing.',
+  bottomLine:'Shows how \u201cwe don\u2019t burden the grid, we make our own power\u201d can still cause serious local harm if the generation itself is unpermitted and sited near homes, schools, and churches \u2014 particularly in a community already carrying a heavy pollution burden.',
+  previews:['offgrid','transparency'],
+  criteria:{
+    energy:{tag:'Not the primary issue here', full:'Signer of the 2026 Ratepayer Protection Pledge nationally; locally, the core issue has been unpermitted power generation rather than rate design.'},
+    power:{tag:'\u2717 Unpermitted gas turbines (Clean Air Act)', full:'Self-generates behind-the-meter via methane gas turbines, but for extended periods operated dozens of them (35 at Colossus 1; up to 41 sought at the Southaven site) without the Clean Air Act permits required for that scale of combustion \u2014 regulators and reporters found roughly double the turbine count the company had publicly disclosed.'},
+    offgrid:{tag:'\u2717 Unpermitted on-site gas turbines', full:'Built and ran dozens of methane gas turbines on-site specifically to avoid the standard grid-interconnection queue \u2014 the turbines operated for extended periods without the Clean Air Act permits that scale of combustion requires, at roughly double the count the company had disclosed. Same off-grid-fossil playbook as Utah\u2019s Stratos project, in a dense urban setting instead of a rural one.'},
+    water:{tag:'Not the primary issue here', full:'Not the primary documented concern at this site; the core issue is unpermitted air emissions \u2014 potentially over 1,700 tons/year of smog-forming NOx alongside particulates, carbon monoxide, and formaldehyde \u2014 in an area already failing federal ozone standards.'},
+    community:{tag:'Jobs overstated vs. postings', full:'Local chamber of commerce cited ~500 promised jobs, though only a small number of positions were actually posted; after sustained community advocacy, Memphis City Council passed an ordinance directing 25% of xAI-generated tax revenue to the closest communities.'},
+    transparency:{tag:'\u2717 Turbine count misstated publicly', full:'City officials initially stated only 15 of the turbines were running; independent aerial thermal-imaging by environmental groups showed 35 in operation. Residents learned of the turbines mainly through advocacy groups\u2019 public-records requests, not company disclosure.'}
+  },
+  sources:[
+    {t:'Earthjustice \u2014 lawsuit case page', u:'https://earthjustice.org/case/xai-illegal-gas-power-plant-data-center-colossus'},
+    {t:'Southern Environmental Law Center \u2014 \u201cxAI built an illegal power plant\u201d', u:'https://www.selc.org/news/xai-built-an-illegal-power-plant-to-power-its-data-center/'},
+    {t:'TIME \u2014 Memphis pollution investigation', u:'https://time.com/7308925/elon-musk-memphis-ai-data-center/'},
+    {t:'Inside Climate News \u2014 unpermitted turbines reporting', u:'https://insideclimatenews.org/news/17072025/elon-musk-xai-data-center-gas-turbines-memphis/'},
+    {t:'Tennessee Lookout \u2014 Mississippi-Tennessee battle', u:'https://tennesseelookout.com/2026/03/18/a-battle-over-data-centers-heats-up-along-the-mississippi-tennessee-state-line/'},
+    {t:'Utility Dive \u2014 DOJ intervenes in lawsuit', u:'https://www.utilitydive.com/news/doj-intervenes-xai-data-center-gas-turbine-lawsuit/823267/'}
+  ]
+},
+{
+  id:'fayetteville', category:'caution',
+  name:'Fayetteville Data Center Campus', developer:'QTS (Quality Technology Services)',
+  location:'Fayette County (Fayetteville), GA',
+  scale:'Not disclosed in the public reporting reviewed',
+  statusShort:'Under scrutiny',
+  statusFull:'Regulatory and community scrutiny ongoing as of mid-2026; contributed to Georgia regional water planners publicly pressing data-center operators for disclosed, capped water use.',
+  bottomLine:'A useful caution that a signed community agreement elsewhere (QTS also holds a 20-year tax agreement with Cedar Rapids, IA) doesn\u2019t guarantee on-the-ground compliance at every site \u2014 commitments matter less than verified, metered practice.',
+  previews:['water','transparency'],
+  criteria:{
+    energy:{tag:'Not the documented issue here', full:'Not the documented issue at this site \u2014 the core issue was water, not power costs.'},
+    power:{tag:'Not detailed in reporting', full:'Not detailed in available reporting.'},
+    offgrid:{tag:'Not documented', full:'Public reporting on this site centers on unauthorized water use, not power generation; no on-site fossil generation has been documented here one way or the other.'},
+    water:{tag:'\u2717 30M gallons drawn without authorization', full:'Drew an estimated 30 million gallons from the county\u2019s public water system through undisclosed industrial-scale hookups, without prior authorization or payment, during an active statewide drought and state of emergency.'},
+    community:{tag:'Not detailed in reporting', full:'Not detailed in available reporting for this specific site.'},
+    transparency:{tag:'\u2717 Found out by residents, not disclosed', full:'The county utility discovered the unauthorized hookups only after nearby residents (Annelise Park subdivision) reported falling water pressure \u2014 the company did not disclose the draw itself. Separately, QTS was found to have installed roughly 40 unpermitted wells at its Cedar Rapids, IA site, prompting the county to pursue a fine.'}
+  },
+  sources:[
+    {t:'Fortune \u2014 \u201cAmerica\u2019s data centers are thirsty\u201d', u:'https://fortune.com/2026/05/13/data-center-georgia-arizona-water-wars/'},
+    {t:'Cowboy State Daily \u2014 Cheyenne scrutiny after GA water grab', u:'https://cowboystatedaily.com/2026/05/14/georgia-30-million-gallon-water-grab-puts-cheyenne-data-centers-under-new-scrutiny/'},
+    {t:'Gizmodo \u2014 \u201c30 Million Gallons...Before Paying a Dime\u201d', u:'https://gizmodo.com/georgia-data-center-secretly-guzzled-30-million-gallons-of-water-before-paying-a-dime-2000757471'},
+    {t:'Bloomberg Law \u2014 Georgia asks data centers to cut water use', u:'https://news.bloomberglaw.com/environment-and-energy/drought-ravaged-georgia-asks-data-centers-to-cut-water-use'},
+    {t:'WALB \u2014 drought concerns / data center debate', u:'https://www.walb.com/2026/05/15/drought-concerns-fuel-new-debate-over-data-centers-georgia/'}
+  ]
+},
+{
+  id:'project-blue', category:'caution',
+  name:'Project Blue', developer:'Beale Infrastructure (Blue Owl); Amazon Web Services initially reported as anchor tenant, later publicly distanced itself',
+  location:'Pima County / Tucson, AZ',
+  scale:'290-acre initial site · potential expansion to ~2M sq ft / 600MW across up to 10 buildings',
+  statusShort:'Rejected 7\u20130',
+  statusFull:'Tucson City Council voted unanimously (7-0) in August 2025 to reject annexation; Amazon publicly stepped back; Beale is reportedly continuing the project outside city limits with a redesigned, air-cooled (higher-electricity, lower-water) approach; Tucson is drafting new ordinances on large water users.',
+  bottomLine:'The clearest example here of how secrecy itself \u2014 not just environmental impact \u2014 becomes the story: it was the non-disclosure agreements with local government, more than the water math alone, that triggered the unanimous rejection.',
+  previews:['water','transparency'],
+  crossRef:'new-carlisle',
+  crossRefLabel:'New Carlisle Campus (Model Practice) \u2014 same developer, very different outcome in Indiana',
+  criteria:{
+    energy:{tag:'Ratepayer cost cited in rejection', full:'Council members specifically cited potential ratepayer cost exposure, alongside water and energy demand, among their reasons for rejecting the project.'},
+    power:{tag:'Standard grid draw', full:'Would have drawn from the local electric utility (Tucson Electric Power); no self-generation commitments were highlighted in reporting.'},
+    offgrid:{tag:'Standard grid draw, not off-grid', full:'Unlike the Utah and Memphis examples above, this project would have drawn power from the existing grid rather than self-generating on-site \u2014 its documented problems were secrecy and disputed water claims, not fuel source.'},
+    water:{tag:'\u2717 \u201cWater positive\u201d claim disputed', full:'Marketed as \u201cnet water positive\u201d using mostly reclaimed water, but the developer\u2019s own disclosed plans showed reliance on fresh potable water for the first several years until reclamation infrastructure existed; separately used unauthorized city potable water for dust control during construction and was asked to provide restitution.'},
+    community:{tag:'Jobs claim disputed by council', full:'Developer touted construction jobs; a sitting council member publicly countered that data centers\u2019 permanent operating headcount is typically very small and that construction jobs are temporary.'},
+    transparency:{tag:'\u2717 NDAs hid developer from officials', full:'County and city economic-development staff signed multi-year non-disclosure agreements (2022\u20132023) that kept elected council members and the public unaware of Amazon\u2019s involvement until 2025; Amazon publicly stated it had no \u201ccommitments or agreements in place\u201d despite the NDA.'}
+  },
+  sources:[
+    {t:'Newsweek \u2014 Project Blue rejected amid water fears', u:'https://www.newsweek.com/amazons-project-blue-rejected-amid-water-fears-2110065'},
+    {t:'AZFamily \u2014 Tucson rejects Amazon-linked data center', u:'https://www.azfamily.com/2025/08/09/tucson-rejects-amazon-linked-data-center-amid-water-energy-concerns/'},
+    {t:'AZ Luminaria \u2014 council rejects amid community pressure', u:'https://azluminaria.org/2025/08/06/tucson-city-council-rejects-project-blue-amid-intense-community-pressure/'},
+    {t:'Tucson.com \u2014 city demands water restitution', u:'https://tucson.com/news/local/government-politics/article_bec73e4b-4533-4d5d-887a-ee177422046e.html'},
+    {t:'KJZZ \u2014 project moves forward outside city limits', u:'https://www.kjzz.org/the-show/2025-12-09/rejected-by-tucson-and-abandoned-by-amazon-project-blue-data-center-moves-forward'},
+    {t:'Pivot to AI \u2014 NDA / water claims analysis', u:'https://pivot-to-ai.com/2026/05/19/tucson-project-blue-data-centres-lie-about-water-again/'}
+  ]
+}
+];
+
+/* ── STATE + HELPERS ────────────────────────────────────── */
+let filter = 'all';
+let modalId = null;
+const $ = (s, el=document) => el.querySelector(s);
+const esc = s => String(s||'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const byId = id => PROJECTS.find(p => p.id === id);
+
+function setFilter(f){
+  filter = f;
+  ['all','model','caution'].forEach(k => $('#v-'+k).classList.remove('active'));
+  $('#v-'+f).classList.add('active');
+  render();
+}
+
+function filtered(){
+  const q = $('#search').value.trim().toLowerCase();
+  return PROJECTS.filter(p =>
+    (filter==='all' || p.category===filter) &&
+    (!q || (p.name+' '+p.developer+' '+p.location).toLowerCase().includes(q))
+  );
+}
+
+/* ── CARDS ──────────────────────────────────────────────── */
+function cardHTML(p){
+  const previews = p.previews.map(k =>
+    `<div class="card-pos-preview">
+      <span class="tag">${esc(CRIT_LABEL[k])}</span>
+      <p class="card-pos-text">${esc(p.criteria[k].tag)}</p>
+    </div>`
+  ).join('');
+  const pillLabel = p.category==='model' ? 'Model' : 'Caution';
+  return `<article class="card ${p.category}" tabindex="0" role="button"
+    onclick="openModal('${p.id}')"
+    onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openModal('${p.id}')}">
+    <div class="card-top">
+      <div class="card-title-col">
+        <h3 class="serif">${esc(p.name)}</h3>
+        <p class="role">${esc(p.developer)}</p>
+      </div>
+      <span class="pill ${p.category}">${pillLabel}</span>
+    </div>
+    <p class="card-synth">${esc(p.bottomLine)}</p>
+    <hr class="card-divider">
+    <div class="card-previews">${previews}</div>
+    <div class="card-foot">
+      View full profile
+      <span class="status-flag">${esc(p.statusShort)}</span>
+    </div>
+  </article>`;
+}
+
+function renderCandidates(){
+  const list = filtered();
+  const model = list.filter(p => p.category==='model');
+  const caution = list.filter(p => p.category==='caution');
+  let html = '';
+  if(model.length) html +=
+    `<div class="section-title model">Model Practice <span class="count">${model.length} shown</span></div>
+     <div class="grid">${model.map(cardHTML).join('')}</div>`;
+  if(caution.length) html +=
+    `<div class="section-title caution">Cautionary Examples <span class="count">${caution.length} shown</span></div>
+     <div class="grid">${caution.map(cardHTML).join('')}</div>`;
+  if(!list.length) html = `<div class="empty">No projects match this search.</div>`;
+  return html;
+}
+
+function render(){
+  $('#main').innerHTML = renderCandidates();
+  $('#m-count').textContent = PROJECTS.length;
+  $('#m-src').textContent = PROJECTS.reduce((n,p)=>n+p.sources.length,0);
+}
+
+/* ── MODAL ──────────────────────────────────────────────── */
+function critIcon(tag){
+  if(tag.indexOf('\u2713')===0) return '<span class="ok">\u2713</span> ';
+  if(tag.indexOf('\u2717')===0) return '<span class="bad">\u2717</span> ';
+  return '';
+}
+
+function openModal(id){
+  const p = byId(id);
+  if(!p) return;
+  modalId = id;
+
+  const sections = CRIT_ORDER.map(k => {
+    const c = p.criteria[k];
+    const cross = (k==='transparency' && p.crossRef)
+      ? `<div class="crossref">Also in this comparison: <a onclick="openModal('${p.crossRef}')">${esc(p.crossRefLabel)}</a></div>` : '';
+    return `<div class="detail-section">
+      <p class="detail-label">${critIcon(c.tag)}${esc(CRIT_LABEL[k])}</p>
+      <p class="detail-text">${esc(c.full)}</p>
+      ${cross}
+    </div>`;
+  }).join('');
+
+  const srcList = `<ul class="srcs">${p.sources.map(s =>
+    `<li><a href="${esc(s.u)}" target="_blank" rel="noopener noreferrer">${esc(s.t)}</a></li>`
+  ).join('')}</ul>`;
+
+  $('#modal').innerHTML =
+    `<div class="modal-head ${p.category}">
+       <button class="close-x" onclick="closeModal()" aria-label="Close">\u00d7</button>
+       <h2 class="serif">${esc(p.name)}</h2>
+       <p class="role">${esc(p.developer)} &middot; ${esc(p.location)}</p>
+       <p class="modal-synth">${esc(p.bottomLine)}</p>
+       <p class="modal-status">${esc(p.statusFull)}</p>
+     </div>
+     <div class="modal-detail">
+       ${sections}
+       <button class="sources-toggle" onclick="toggleSources(this)" data-closed-label="Show sources (${p.sources.length})">
+         <span class="sources-toggle-icon">&#9662;</span>
+         <span>Show sources (${p.sources.length})</span>
+       </button>
+       <div class="sources-panel" style="display:none;">${srcList}</div>
+     </div>`;
+
+  $('#backdrop').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function toggleSources(btn){
+  const panel = btn.nextElementSibling;
+  const isOpen = panel.style.display !== 'none';
+  panel.style.display = isOpen ? 'none' : 'block';
+  btn.classList.toggle('open', !isOpen);
+  btn.querySelector('span:last-child').textContent = isOpen ? btn.dataset.closedLabel : 'Hide sources';
+}
+
+function closeModal(){
+  $('#backdrop').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
+
+/* ── BOOT ───────────────────────────────────────────────── */
+render();
+</script>
+</body>
+</html>

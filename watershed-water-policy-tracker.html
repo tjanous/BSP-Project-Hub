@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Watershed — Data Center Cooling & Water Policy Tracker</title>
+<style>
+  :root{
+    --bg:#f6f8f8;
+    --card:#ffffff;
+    --card-tint:#eef2f1;
+    --ink:#16201f;
+    --muted:#5f6b6a;
+    --faint:#8a9594;
+    --line:#e3e8e7;
+    --line-strong:#cfd6d5;
+    --teal-dark:#1A4444;
+    --teal:#2ABFBF;
+    --teal-deep:#14807f;
+    --teal-soft:#dcf0ef;
+    --restrictive:#9b2226;
+    --restrictive-soft:#f7ecec;
+    --transparency:#a8730c;
+    --transparency-soft:#f8eeda;
+    --mixed:#1d4e89;
+    --mixed-soft:#eaf0f7;
+    --font-display:Georgia,'Iowan Old Style','Times New Roman',serif;
+    --font-body:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--font-body);
+    font-size:15px;
+    line-height:1.45;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--teal-deep);}
+  .wrap{max-width:1280px;margin:0 auto;padding:0 22px 80px;}
+
+
+  /* ---------- Masthead ---------- */
+  header.masthead{background:var(--teal-dark);color:#fff;padding:30px 22px 22px;margin:0 calc(-50vw + 50%) 28px;width:100vw;}
+  .mast-inner{max-width:1236px;margin:0 auto;}
+  .kicker{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--teal);margin:0 0 8px;font-weight:600;}
+  .hub-crumb{display:inline-block;font-size:12px;color:#8fb8b7;text-decoration:none;margin-bottom:12px;}
+  .hub-crumb:hover{color:#fff;text-decoration:underline;}
+  h1.title{font-family:var(--font-display);color:#fff;font-weight:600;font-size:32px;letter-spacing:-0.01em;margin:0 0 10px;line-height:1.15;}
+  .subtitle{font-size:14px;color:#c8dcdb;margin:0 0 14px;max-width:640px;line-height:1.5;}
+  .meta-line{font-size:13px;color:#a9c7c6;display:flex;flex-wrap:wrap;gap:6px 18px;}
+  .meta-line b{color:#fff;font-weight:600;}
+
+  /* ---------- Layout ---------- */
+  .layout{display:grid;grid-template-columns:250px minmax(0,1fr);gap:26px;align-items:start;}
+  .sidebar{
+    position:sticky;top:20px;
+    max-height:calc(100vh - 40px);
+    overflow-y:auto;
+    overflow-x:hidden;
+    padding-right:4px;
+    scrollbar-width:thin;
+    scrollbar-color:var(--line) transparent;
+    min-width:0;
+  }
+  .sidebar::-webkit-scrollbar{width:6px;}
+  .sidebar::-webkit-scrollbar-track{background:transparent;}
+  .sidebar::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px;}
+  .sidebar::-webkit-scrollbar-thumb:hover{background:var(--faint);}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:16px;}
+  .panel-label{font-family:var(--font-body);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);margin-bottom:10px;display:block;}
+  .juris-list{display:flex;flex-direction:column;gap:3px;}
+  .juris-btn{
+    display:flex;align-items:center;gap:9px;background:none;border:none;text-align:left;
+    padding:7px 8px;border-radius:6px;cursor:pointer;font-family:var(--font-body);font-size:13.5px;color:var(--ink);
+    width:100%;
+  }
+  .juris-btn:hover{background:var(--teal-soft);}
+  .juris-btn.active{background:var(--teal-dark);color:#fff;}
+  .juris-mini{width:20px;height:20px;border-radius:50%;border:1.5px solid currentColor;flex:none;position:relative;opacity:.85;}
+  .juris-count{margin-left:auto;font-family:var(--font-body);font-size:11px;font-weight:600;opacity:.7;}
+  .type-row{display:flex;align-items:center;gap:8px;padding:5px 2px;font-size:13px;cursor:pointer;}
+  .type-row input{accent-color:var(--teal-deep);width:14px;height:14px;}
+  .stance-row{display:flex;align-items:center;gap:8px;padding:5px 2px;font-size:12.5px;cursor:pointer;}
+  .stance-row input{width:14px;height:14px;flex:none;}
+  .stance-dot{width:10px;height:10px;border-radius:50%;flex:none;box-shadow:0 0 0 1px rgba(22,32,31,.3);}
+  .stance-row.off{opacity:.45;}
+  .stance-row.off .stance-dot{opacity:.5;}
+  .clear-btn{font-family:var(--font-body);font-size:12px;font-weight:600;color:var(--restrictive);background:none;border:none;cursor:pointer;text-decoration:underline;padding:0;margin-top:8px;}
+
+  /* ---------- People panel ---------- */
+  .people-search-input{
+    width:100%;padding:8px 10px;border:1px solid var(--line-strong);border-radius:7px;background:var(--card);
+    font-family:var(--font-body);font-size:13px;color:var(--ink);margin-bottom:8px;box-sizing:border-box;
+  }
+  .people-search-input:focus{outline:2px solid var(--teal);outline-offset:1px;border-color:var(--teal);}
+  .people-sort-row{display:flex;gap:6px;margin-bottom:8px;}
+  .sort-btn{
+    font-family:var(--font-body);font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;
+    background:var(--card);border:1px solid var(--line-strong);color:var(--muted);
+    padding:4px 9px;border-radius:6px;cursor:pointer;
+  }
+  .sort-btn.active{background:var(--teal-dark);color:#fff;border-color:var(--teal-dark);}
+  .sort-btn:hover:not(.active){border-color:var(--muted);}
+  .party-tag{
+    font-family:var(--font-body);font-size:9px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;
+    width:13px;height:13px;border-radius:3px;border:1px solid currentColor;color:var(--faint);
+    margin-left:-2px;vertical-align:middle;flex:none;
+  }
+  .people-stance-dots{display:flex;gap:2px;flex:none;margin:0 6px;}
+  .mini-dot{width:6px;height:6px;border-radius:50%;flex:none;box-shadow:0 0 0 1px rgba(22,32,31,.25);}
+  .people-list{max-height:230px;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:var(--line) transparent;width:100%;box-sizing:border-box;}
+  .people-list::-webkit-scrollbar{width:6px;}
+  .people-list::-webkit-scrollbar-track{background:transparent;}
+  .people-list::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px;}
+  .people-group-label{font-family:var(--font-body);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);margin:8px 0 3px;padding-top:4px;border-top:1px solid var(--line);}
+  .people-group-label:first-child{margin-top:0;padding-top:0;border-top:none;}
+  .people-item{
+    display:flex;align-items:baseline;gap:6px;width:100%;max-width:100%;box-sizing:border-box;background:none;border:none;text-align:left;
+    padding:5px 7px;border-radius:6px;cursor:pointer;font-family:var(--font-body);font-size:12.5px;color:var(--ink);
+    min-width:0;overflow:hidden;
+  }
+  .people-item:hover{background:var(--teal-soft);}
+  .people-item.active{background:var(--teal-dark);color:#fff;}
+  .people-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .people-count{font-family:var(--font-body);font-size:10.5px;font-weight:600;color:var(--faint);flex:none;}
+  .people-item.active .people-count{color:#fff;opacity:.75;}
+  .people-item.active .party-tag{color:#fff;}
+  .people-item.active .mini-dot{box-shadow:0 0 0 1px rgba(255,255,255,.5);}
+  .people-empty{font-size:12px;color:var(--faint);padding:8px 6px;font-style:italic;}
+
+  .person-chip-wrap{margin:-4px 0 14px;}
+  .person-chip{
+    display:inline-flex;align-items:center;gap:8px;background:var(--teal-dark);color:#fff;
+    font-family:var(--font-body);font-size:12.5px;font-weight:600;padding:6px 8px 6px 12px;border-radius:20px;
+  }
+  .person-chip button{
+    background:rgba(255,255,255,.18);border:none;color:#fff;cursor:pointer;
+    width:18px;height:18px;border-radius:50%;font-size:13px;line-height:1;display:flex;align-items:center;justify-content:center;
+  }
+  .person-chip button:hover{background:rgba(255,255,255,.32);}
+
+  .actor-link{background:none;border:none;padding:0;font:inherit;color:inherit;cursor:pointer;text-decoration:underline;text-decoration-color:var(--line);text-decoration-thickness:1px;}
+  .actor-link:hover{color:var(--teal);text-decoration-color:var(--teal);}
+
+  /* ---------- Main / search ---------- */
+  .search-bar{display:flex;gap:10px;margin-bottom:14px;}
+  .search-bar input{
+    flex:1;padding:11px 14px;border:1px solid var(--line-strong);border-radius:8px;background:var(--card);
+    font-family:var(--font-body);font-size:14px;color:var(--ink);
+  }
+  .search-bar input:focus{outline:2px solid var(--teal);outline-offset:1px;border-color:var(--teal);}
+  .results-count{font-family:var(--font-body);font-size:12px;font-weight:600;color:var(--faint);margin-bottom:16px;}
+
+  .group-header{
+    display:flex;align-items:center;gap:10px;margin:26px 0 8px;padding-bottom:6px;border-bottom:2px solid var(--line-strong);
+  }
+  .group-header:first-child{margin-top:0;}
+  .group-title{font-family:var(--font-display);font-weight:600;font-size:19px;color:var(--teal-dark);}
+  .group-count{font-family:var(--font-body);font-size:11.5px;font-weight:600;color:var(--faint);}
+
+  .entry{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--line-strong);border-radius:8px;padding:14px 16px;margin-bottom:10px;transition:box-shadow .15s ease,border-color .15s ease;}
+  .entry:hover{box-shadow:0 4px 16px rgba(22,32,31,.08);}
+  .entry-head{display:flex;align-items:flex-start;gap:10px;cursor:pointer;}
+  .stance-chip{width:9px;height:9px;border-radius:50%;flex:none;margin-top:6px;box-shadow:0 0 0 1px rgba(22,32,31,.25);}
+  .entry-main{flex:1;min-width:0;}
+  .entry-toprow{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;}
+  .type-tag{
+    font-family:var(--font-body);font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;
+    background:var(--card-tint);color:var(--teal-dark);padding:2px 8px;border-radius:5px;flex:none;
+  }
+  .entry-title{font-family:var(--font-display);font-weight:600;font-size:16px;line-height:1.3;min-width:0;}
+  .entry-date{font-family:var(--font-body);font-size:11.5px;color:var(--faint);margin-left:auto;white-space:nowrap;padding-left:8px;}
+  .entry-actors{font-size:12.5px;color:var(--muted);margin-top:2px;}
+  .entry-dek{font-size:13.5px;margin-top:4px;color:var(--ink);}
+  .chevron{font-family:var(--font-body);color:var(--faint);flex:none;margin-top:5px;transition:transform .15s;}
+  .entry.expanded .chevron{transform:rotate(90deg);}
+  .entry-detail{display:none;padding:12px 0 2px 19px;font-size:13.5px;line-height:1.55;border-left:2px solid var(--line);margin-left:0;margin-top:10px;}
+  .entry.expanded .entry-detail{display:block;}
+  .entry-status{font-family:var(--font-body);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;margin-bottom:8px;display:inline-block;padding:3px 9px;border-radius:5px;}
+  .entry-quote-preview{font-family:var(--font-display);font-style:italic;font-size:13px;margin-top:8px;padding:8px 12px;background:var(--teal-soft);border-left:3px solid var(--teal-deep);border-radius:0 6px 6px 0;color:var(--ink);line-height:1.45;}
+  .entry-quote-preview-attr{font-family:var(--font-body);font-style:normal;font-size:10.5px;color:var(--muted);}
+  .entry-tags{margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;}
+  .entry-tags span{font-family:var(--font-body);font-size:10.5px;font-weight:600;color:var(--teal-dark);background:var(--card-tint);padding:3px 9px;border-radius:5px;}
+  .entry-source{margin-top:10px;font-size:12.5px;color:var(--muted);}
+  .entry-source a{text-decoration:underline;}
+
+  .empty-state{padding:50px 20px;text-align:center;color:var(--muted);font-family:var(--font-display);font-size:16px;}
+  .empty-state span{display:block;font-family:var(--font-body);font-size:12px;color:var(--faint);margin-top:8px;}
+
+  footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);line-height:1.6;}
+  footer p{margin:0 0 8px;max-width:760px;}
+  footer a{color:var(--teal-deep);}
+
+  @media (max-width:860px){
+    .layout{grid-template-columns:minmax(0,1fr);}
+    .sidebar{position:static;}
+    h1.title{font-size:26px;}
+    .entry-date{margin-left:0;padding-left:0;}
+    .entry-toprow{flex-direction:column;align-items:stretch;gap:4px;}
+    .entry-toprow .entry-title{width:100%;display:block;}
+    .entry-toprow .type-tag{align-self:flex-start;width:auto;}
+    .entry-toprow .entry-date{align-self:stretch;white-space:normal;width:100%;margin-left:0;padding-left:0;}
+  }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="mast-inner">
+    <a class="hub-crumb" href="./index.html">&larr; Boundary Stone Partners Hub</a>
+    <p class="kicker">Boundary Stone Partners</p>
+    <h1 class="title">Watershed</h1>
+    <p class="subtitle">Who's saying what about data center cooling and water — federal politicians plus Arizona, Texas, California, New Mexico &amp; Nevada. Bills, executive actions, hearings, statements, and local rulings, compiled from public sources.</p>
+    <div class="meta-line">
+      <span><b id="total-count">—</b> tracked items</span>
+      <span><b>Compiled</b> July 16, 2026</span>
+      <span><b>Coverage</b> Federal + 5 priority states</span>
+      <span>Verify current status before relying on this for decisions</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="layout">
+    <div class="sidebar">
+      <div class="panel">
+        <span class="panel-label">Browse by person</span>
+        <input type="text" id="people-search" class="people-search-input" placeholder="Find a politician or official…">
+        <div class="people-sort-row">
+          <button class="sort-btn active" id="people-sort-alpha">A–Z</button>
+          <button class="sort-btn" id="people-sort-count">Most active</button>
+        </div>
+        <div id="people-list" class="people-list"></div>
+      </div>
+      <div class="panel">
+        <span class="panel-label">Jurisdiction</span>
+        <div class="juris-list" id="juris-list"></div>
+      </div>
+      <div class="panel">
+        <span class="panel-label">Type</span>
+        <div id="type-list"></div>
+      </div>
+      <div class="panel">
+        <span class="panel-label">Stance / posture</span>
+        <div id="stance-list"></div>
+        <button class="clear-btn" id="clear-filters">Reset all filters</button>
+      </div>
+    </div>
+
+    <div class="main">
+      <div class="search-bar">
+        <input type="text" id="search-input" placeholder="Search bill names, people, counties, keywords…">
+      </div>
+      <div id="person-chip-row"></div>
+      <div class="results-count" id="results-count"></div>
+      <div id="results"></div>
+    </div>
+  </div>
+
+  <footer>
+    <p><strong>How to use this.</strong> Click any card to expand it. Filter by jurisdiction, type, or stance on the left, or search directly. Use "Browse by person" to pull up everything a specific politician or official has said, signed, sponsored, or enacted — sort alphabetically or by who's most active on this issue, and watch for the small letter next to a name marking party. A quoted line under an entry's summary means someone said something on the record; click any name inside an entry to jump straight to their full history.</p>
+    <p>"Stance/posture" describes what the action or statement <em>does</em> — enables buildout, restricts or adds cost, focuses on transparency, or is genuinely mixed/procedural — as a characterization for research purposes, not a judgment. Compiled from public statements, legislative text, agency filings, and news coverage as of July 16, 2026. Legislative status changes quickly; bill numbers, sponsors, and outcomes should be re-verified against Congress.gov or the relevant state legislature before use in any external-facing material. This is a research aid, not legal advice.</p>
+    <p>Notice an error or an outdated entry? <a href="mailto:tjanous@boundarystone.com?subject=Watershed%20tracker%20correction">Report it here</a> and we'll review it.</p>
+  </footer>
+
+</div>
+
+<script>
+const JURISDICTIONS = [
+  {id:'Federal', mark:'US', color:'--mixed'},
+  {id:'Arizona', mark:'AZ', color:'--teal'},
+  {id:'Texas', mark:'TX', color:'--restrictive'},
+  {id:'California', mark:'CA', color:'--transparency'},
+  {id:'New Mexico', mark:'NM', color:'--teal'},
+  {id:'Nevada', mark:'NV', color:'--restrictive'},
+];
+const TYPES = ['Bill','Executive action','Statement','Hearing / investigation','Local action','Agency / regulatory'];
+const STANCES = [
+  {id:'enabling', label:'Enabling / industry-aligned', color:'--teal'},
+  {id:'restrictive', label:'Restrictive / cautionary', color:'--restrictive'},
+  {id:'transparency', label:'Transparency / study', color:'--transparency'},
+  {id:'mixed', label:'Mixed / procedural', color:'--mixed'},
+];
+
+// Entry field key: j=jurisdiction, t=type, ti=title, d=date, st=status,
+// sta=stance, ac=actors, dk=dek, de=detail, q=quote, qa=quote attribution,
+// tg=tags, sn=source name, su=source url
+const DATA = [
+
+/* ================= FEDERAL ================= */
+{j:'Federal', t:'Bill', ti:"Liquid Cooling for AI Act of 2025 (S.3269 / H.R.5332)",
+ d:'Introduced Sep–Nov 2025', st:'Referred to committee', sta:'enabling',
+ ac:['Sen. Dave McCormick (R-PA)','Sen. Chris Coons (D-DE)','Sen. Ted Budd (R-NC)','Sen. Adam Schiff (D-CA)','Rep. Jay Obernolte (R-CA-23)','Rep. Josh Gottheimer (D-NJ)'],
+ dk:'Often referred to informally as the "Advanced Liquid Cooling for AI Act," though no bill carries that exact name — the actual legislation is the Liquid Cooling for AI Act of 2025.',
+ de:'This is a study-and-guidance bill, not a mandate. It directs the GAO to assess R&D needs and market/regulatory conditions around liquid cooling for AI data centers, has DOE evaluate those findings and report to Congress, and creates an advisory committee of industry, national-lab, and academic experts to set voluntary federal best practices. The Senate and House versions are companions; the House bill was referred to Energy & Commerce and Science, Space & Technology. It is heavily backed by cooling-technology and chemicals suppliers (Chemours, Vertiv, Schneider Electric, Accelsius, the AI Supply Chain Alliance) rather than by hyperscalers directly. Worth flagging plainly: most of the bill\u2019s own sponsors — McCormick, Coons, and Budd among them — pitch it publicly as an energy-bill-and-grid-strain fix first, not a water bill. Schiff\u2019s introduction statement is the one that actually foregrounds the cooling technology and its thermal performance on its own terms, rather than treating cooling purely as a cost lever.',
+ q:'A critical and sustainable method of cooling that improves energy efficiency and thermal performance.', qa:'Sen. Adam Schiff, on the bill\u2019s introduction',
+ tg:['liquid cooling','GAO study','DOE','direct-to-chip','bipartisan'],
+ sn:'Sen. McCormick press release / FedScoop', su:'https://www.mccormick.senate.gov/news/press-releases/senators-mccormick-coons-introduce-bill-to-boost-u-s-ai-leadership-with-energy-efficient-liquid-cooling-technology/'},
+
+{j:'Federal', t:'Bill', ti:'Data Center Water and Energy Transparency Act of 2026 (S.4213)',
+ d:'March 25, 2026', st:'Introduced', sta:'transparency',
+ ac:['Sen. Dick Durbin (D-IL)'],
+ dk:'Durbin\u2019s bill would require data centers to disclose their water and energy usage directly, citing rising utility bills tied to AI buildout.',
+ de:'Durbin frames this around consumer utility costs rather than environmental protection per se — the pitch is that ratepayers deserve an "honest analysis" before further buildout, not that buildout should stop. It cites IEA estimates that a 100-megawatt data center can use roughly as much water as 2,600 households, and notes some operators have locked in decades-long water and power rights.',
+ q:'Illinoisans deserve an honest analysis of the electricity and water needs of these data centers.', qa:'Sen. Dick Durbin',
+ tg:['disclosure','ratepayers','water rights'],
+ sn:"Sen. Durbin press release", su:'https://www.durbin.senate.gov/newsroom/press-releases/as-utility-costs-rise-durbin-introduces-new-legislation-to-bring-transparency-to-energy-and-water-consumption-by-data-centers'},
+
+{j:'Federal', t:'Bill', ti:'POWER Act — Public Oversight of Water and Energy Reporting Act',
+ d:'May 2026', st:'Introduced', sta:'transparency',
+ ac:['Rep. Chip Roy (R-TX)'],
+ dk:'A Texas Republican\u2019s bill ties water/energy reporting specifically to data centers benefiting from the administration\u2019s fast-track permitting order, distinguishing closed-loop from open-loop water users.',
+ de:'The POWER Act would require DOE, with EPA, to report to Congress on resource use by any data center that qualifies for the accelerated federal permitting created by a July 2025 executive order fast-tracking data center construction. It explicitly separates facilities using closed-loop recycling from those on open-loop municipal draw, and excludes federally-owned/operated data centers. Roy frames it as a fiscal-conservative, drought-state argument: don\u2019t let Washington subsidize water-intensive projects that wouldn\u2019t otherwise be viable.',
+ q:'The construction and operation of data centers should not come at the sacrifice of our nation\u2019s water resources.', qa:'Text of the POWER Act, per Rep. Roy\u2019s office',
+ tg:['drought','closed-loop','open-loop','DOE','EPA','subsidy accountability'],
+ sn:'Texas Scorecard', su:'https://texasscorecard.com/federal/rep-roy-files-legislation-to-track-data-center-water-and-energy-use/'},
+
+{j:'Federal', t:'Bill', ti:'PERMIT Act — Promoting Efficient Review for Modern Infrastructure Today Act (H.R.3898)',
+ d:'Passed House Dec 11, 2025 (221-205)', st:'Pending in Senate', sta:'enabling',
+ ac:['Rep. Mike Collins (R-GA)','Rep. Sam Graves (R-MO)'],
+ dk:'Not written about data centers specifically, but this Clean Water Act rewrite matters enormously to them: it narrows what counts as a federally regulated water at all.',
+ de:'The PERMIT Act redefines "navigable waters" to exclude ephemeral streams, groundwater, prior-converted cropland, and waste-treatment systems; limits states\u2019 Section 401 veto power over federally permitted projects; sets 60-day litigation deadlines; and extends nationwide dredge-and-fill permits to ten years. Combined with the 2023 Supreme Court Sackett ruling, this is part of why most Southwest data centers — including all of Arizona\u2019s — have not needed a federal Clean Water Act permit at all, leaving water regulation almost entirely to states, counties, and cities. Passed with six Democrats in favor; awaits Senate action.',
+ tg:['Clean Water Act','WOTUS','permitting','Sackett'],
+ sn:'E&E News / Congress.gov H.R.3898', su:'https://www.eenews.net/articles/clean-water-act-permitting-bill-clears-the-house/'},
+
+{j:'Federal', t:'Statement', ti:'Sen. Mark Kelly (D-AZ) on balancing water, power, and communities',
+ d:'2026', st:'Ongoing position', sta:'mixed',
+ ac:['Sen. Mark Kelly (D-AZ)'],
+ dk:'Arizona\u2019s senior senator has staked out a deliberately balanced position: don\u2019t let data centers become "a burden," but don\u2019t reject the industry either.',
+ de:'Kelly has paired this framing with an "AI for America" roadmap and has separately introduced the Community Water Project Acceleration Act (S.4120, March 2026), which speeds federal approval of local water infrastructure projects generally — relevant background capacity-building even though it is not a data-center-specific bill. He sits on the Armed Services and Commerce committees, not ENR, so his influence here is more rhetorical than legislative so far.',
+ q:'We can lead in AI and still do this the right way.', qa:'Sen. Mark Kelly (D-AZ)',
+ tg:['Arizona delegation','balance framing','water infrastructure'],
+ sn:'Sen. Kelly, public statement', su:'https://x.com/SenMarkKelly/status/2036843817068830764'},
+
+{j:'Federal', t:'Statement', ti:'Rep. Gabe Vasquez (D-NM) calls for county-level moratorium',
+ d:'May 26, 2026', st:'Statement', sta:'restrictive',
+ ac:['Rep. Gabe Vasquez (D-NM-02)'],
+ dk:'A sitting member of Congress weighing in directly on a local, not federal, decision — pushing a New Mexico county toward pausing data center approvals.',
+ de:'Vasquez represents southern New Mexico, where Project Jupiter (the Oracle/Stack Infrastructure hyperscale campus in Doña Ana County) has been the flashpoint. His intervention shows how thin the line is between "federal politician" and "local advocate" on this issue in New Mexico specifically, where there is no state law yet and nearly all the action is at the county level.',
+ tg:['New Mexico delegation','Project Jupiter','county government'],
+ sn:'Source New Mexico', su:'https://sourcenm.com/2026/07/07/climate-advocacy-org-urges-new-mexico-leaders-to-adopt-data-center-moratorium/'},
+
+{j:'Federal', t:'Hearing / investigation', ti:'House hearing: Ocasio-Cortez and Watson Coleman press EPA on data center water impacts',
+ d:'May 20, 2026', st:'EPA agreed to "look into" it, but explicitly declined to call this a formal investigation', sta:'restrictive',
+ ac:['Rep. Alexandria Ocasio-Cortez (D-NY)','Jessica Kramer, EPA Assistant Administrator for Water','Rep. Bonnie Watson Coleman (D-NJ)'],
+ dk:'Not a Southwest example, but the most-watched federal water moment of the year: AOC brought jars of well water to a House Energy and Commerce Oversight and Investigations Subcommittee hearing to confront EPA\u2019s top water official over a Meta data center\u2019s effect on a Georgia community\u2019s drinking water.',
+ de:'Ocasio-Cortez said she\u2019d visited Morgan County, Georgia during a congressional recess, where clear-cutting and blasting for Meta\u2019s Stanton Springs data center campus had coincided with dropping water pressure, discolored well water, and appliance damage for nearby residents, who she said had turned to bottled water; she cited an expected 33% increase in local water bills, and noted the facility accounts for roughly 10% of the area\u2019s total daily water use. Kramer, EPA\u2019s Assistant Administrator for Water, said she was aware of general concerns about water availability near large facilities but had not personally fielded a water-quality complaint tied to this site, and agreed on the spot to look into it once back at her office. Rep. Bonnie Watson Coleman (D-NJ) followed with her own state\u2019s version of the same tension, noting families are being asked to conserve water while nearby facilities expand. Two caveats worth carrying forward: EPA later clarified in a statement that "looking into a matter and gathering facts is not the same as opening a formal investigation" — Region 4 staff simply contacted Georgia\u2019s environmental regulators and Morgan County officials for more information — and Meta maintains a third-party groundwater study found no connection between its operations and the well complaints. The underlying water-quality claim remains contested; the clearly-established fact is the exchange itself and EPA\u2019s narrow, non-committal follow-through.',
+ q:'I think both of us can agree that neither one of these things is drinkable.', qa:'Rep. Alexandria Ocasio-Cortez, holding up the water samples',
+ tg:['EPA oversight','Georgia','Meta','water contamination','contested claim'],
+ sn:'Rep. Ocasio-Cortez, House.gov / CBS News Atlanta', su:'https://ocasio-cortez.house.gov/media/press-releases/ocasio-cortez-presses-epa-assistant-administrator-kramer-jeopardizing-clean'},
+
+{j:'Federal', t:'Statement', ti:'Rep. Mike Collins (R-GA) responds to water complaints in his own district',
+ d:'May 2026', st:'On-record statement to local press', sta:'mixed',
+ ac:['Rep. Mike Collins (R-GA)'],
+ dk:'The Republican whose district actually contains the Meta plant AOC spotlighted took a notably more cautious, reactive posture than she did — but didn\u2019t dismiss the water complaints outright.',
+ de:'Asked by a local Georgia paper about his district becoming the center of a national data center fight, Collins said he was "unaware" of AOC\u2019s remarks or the water complaints from his own constituents near the Stanton Springs facility, but committed to look into it and talk with local officials. His framing — skepticism of federal overreach, paired with a genuine commitment to check the facts locally — is a useful contrast to AOC\u2019s posture on the exact same well water, and a reminder that district-level pressure can reach a member regardless of party once local press starts asking direct questions.',
+ q:'I want to make sure the federal government doesn\u2019t overreach, but I\u2019ll take a look at it.', qa:'Rep. Mike Collins (R-GA)',
+ tg:['Georgia delegation','Stanton Springs','reactive response'],
+ sn:'Northwest Georgia News / Morgan County Citizen', su:'https://www.northwestgeorgianews.com/rome/news/local/aoc-shines-national-spotlight-on-georgia-county-over-meta-data-center-fight/article_8f0246e9-a837-57e5-9864-8aa32e08323d.html'},
+
+{j:'Federal', t:'Bill', ti:'Data Infrastructure Energy Measurement and Standards Act (H.R.9372)',
+ d:'Introduced June 18, 2026; passed committee 34-1 on June 25', st:'Reported out of House Science Committee, nearly unanimous', sta:'transparency',
+ ac:['Rep. Suhas Subramanyam (D-VA-10)','Rep. Jay Obernolte (R-CA-23)','Rep. Valerie Foushee (D-NC)','Rep. Zoe Lofgren (D-CA)'],
+ dk:'The most bipartisan federal water-measurement bill in this database: a 34-1 committee vote to direct NIST, working with DOE, to build the country\u2019s first standardized way to measure how much water — not just energy — a data center actually uses.',
+ de:'Subramanyam represents Loudoun County, Virginia\u2019s "Data Center Alley" and the single most data-center-dense district in the country; his own framing is explicit that the water half of the bill matters as much as the energy half. The bill directs NIST to develop best practices for measuring data center energy use and to study data availability for demand forecasting, with Foushee and Science Committee Ranking Member Zoe Lofgren both specifically citing "water use" in their supporting statements, not just energy. It passed the House Science, Space, and Technology Committee by a 34-1 vote on June 25, 2026 — about as close to consensus as this subject gets in the current Congress — and now awaits a floor vote.',
+ q:'We need a simple way to track how much power and water these facilities use.', qa:'Rep. Suhas Subramanyam, on introduction',
+ tg:['NIST','Data Center Alley','34-1 vote','measurement standards'],
+ sn:'Rep. Subramanyam press release / Daily Energy Insider', su:'https://subramanyam.house.gov/media/press-releases/reps-subramanyam-obernolte-foushee-introduce-legislation-create-first-its-kind'},
+
+{j:'Federal', t:'Statement', ti:'Rep. Subramanyam (D-VA) makes his own district "a cautionary tale"',
+ d:'Town halls Dec 2025; House Oversight testimony April 2025', st:'Ongoing district advocacy', sta:'restrictive',
+ ac:['Rep. Suhas Subramanyam (D-VA-10)'],
+ dk:'Representing more data centers than any other district in the country, Subramanyam has made water impacts a named, recurring part of his public advocacy — not just a line item in the bill above.',
+ de:'At a House Committee on Oversight and Government Reform hearing in April 2025, Subramanyam explicitly called his district "a cautionary tale," citing JLARC findings and community outreach showing data center growth would raise utility bills, require new power lines through neighborhoods, and consume green space and water. He later launched a "District Dialogues" town hall series specifically on data centers, opening the first session by naming noise, environmental impact, water, and utility bills together as the concerns he\u2019s hearing directly from constituents in Loudoun County. He was joined at that town hall by state and local officials, all of whom agreed it was time to slow new development in a county already hosting roughly 200 data centers.',
+ q:'You\u2019re seeing the impact on the environment, on water.', qa:'Rep. Suhas Subramanyam, at his first "District Dialogues" town hall',
+ tg:['Loudoun County','town hall','House Oversight testimony','cautionary tale'],
+ sn:'Loudoun Now / Blue Ridge Leader', su:'https://www.loudounnow.com/news/health-security-environmental-impacts-of-data-centers-raised-during-subramanyam-town-hall/article_93cfbedd-285b-4bc8-9663-c3c485ac86e2.html'},
+
+{j:'Federal', t:'Statement', ti:'ITIF: federal water mandates would be "a mistake"',
+ d:'July 6, 2026', st:'Policy report', sta:'restrictive',
+ ac:['Information Technology and Innovation Foundation (ITIF)'],
+ dk:'A center-right-leaning tech policy think tank\u2019s explicit case against federal water regulation for data centers — reinforcing, from a very different political direction than the environmental groups, the same "this is a state issue" conclusion.',
+ de:'ITIF argues water stress is inherently local — "the problems and solutions for water in Arizona are completely different from those in Pennsylvania" — and recommends states require standardized disclosure, watershed-level review, and technology-neutral performance standards instead. It notes California and Arizona already require water-efficiency evaluation in power-plant siting, and points to Ohio\u2019s Great Lakes Compact rules as a model for consumption-based (not just withdrawal-based) permits. The report also puts hard numbers on the national picture: over 200 data center bills introduced across all states in 2025 (40+ enacted), bans or moratoriums under active discussion in 20+ states as of mid-2026, and over $130 billion in projects delayed or abandoned in Q1 2026 alone.',
+ q:'The problems and solutions for water in Arizona are completely different from those in Pennsylvania.', qa:'ITIF report, "The Data Center Water Problem Is Soluble"',
+ tg:['think tank','state-led model','watershed review','national statistics'],
+ sn:'ITIF', su:'https://itif.org/publications/2026/07/06/the-data-center-water-problem-is-soluble/'},
+
+{j:'Federal', t:'Bill', ti:'AI Data Center Moratorium Act (Sanders/Ocasio-Cortez)',
+ d:'Announced March 25, 2026', st:'Introduced in both chambers; not expected to advance', sta:'restrictive',
+ ac:['Sen. Bernie Sanders (I-VT)','Rep. Alexandria Ocasio-Cortez (D-NY)'],
+ dk:'The broadest federal proposal on the table leans on liquid cooling as a literal legal threshold: the moratorium only covers facilities over 20MW that use liquid cooling with racks rated 20kW or higher, and it requires DOE to report on water consumption every quarter.',
+ de:'Beyond the cooling-specific coverage test, the bill would require the Department of Energy to issue quarterly public reports to Congress on data centers\u2019 water consumption, electricity demand and costs, pollution, wastewater discharges, and noise. Any covered project would need to prove it won\u2019t raise nearby utility bills or pollution before proceeding, plus secure local approval, forgo government subsidies, and use union labor. Sanders and Ocasio-Cortez frame it as buying time for Congress to catch up on AI oversight generally — water is one of several harms cited, not the sole focus, but it is explicitly named and measured rather than left as an afterthought.',
+ q:'Congress has a moral obligation to stand with the American people.', qa:'Rep. Alexandria Ocasio-Cortez, on introduction',
+ tg:['liquid cooling threshold','moratorium','quarterly DOE reporting','progressive'],
+ sn:'Data Center Dynamics / Sen. Sanders press release', su:'https://www.sanders.senate.gov/press-releases/news-sanders-ocasio-cortez-announce-ai-data-center-moratorium-act/'},
+
+{j:'Federal', t:'Bill', ti:'Data Center Transparency Act (H.R.6984)',
+ d:'Jan 2026', st:'Referred to committee', sta:'transparency',
+ ac:['Rep. Robert Menendez Jr. (D-NJ)','Rep. Greg Casar (D-TX)'],
+ dk:'Mostly an electricity-reporting bill, but it carries a specific, highlighted water provision: a required federal report on how data centers affect local water systems, including pollutant discharges under the Clean Water Act.',
+ de:'The bill\u2019s headline mechanism is EIA reporting on electricity use every six months, which is why it reads as an energy bill first. But Section-level detail directs a companion report on cumulative effects on local water systems and air quality in "overburdened communities" — the water-quality piece is real, specific, and distinct from the energy-reporting piece, even though the two ride in the same bill. Menendez has framed the bill around New Jersey households\u2019 20% electricity increase, so don\u2019t expect his public statements to lead with water; the bill text is where the water provision shows up.',
+ tg:['water quality study','Clean Water Act discharges','EIA','mostly-energy bill'],
+ sn:'Congress.gov, H.R.6984 text / Rep. Menendez press release', su:'https://www.congress.gov/bill/119th-congress/house-bill/6984/text'},
+
+{j:'Federal', t:'Executive action', ti:'EO — Ensuring a National Policy Framework for Artificial Intelligence',
+ d:'December 11, 2025', st:'In effect; litigation task force stood up', sta:'mixed',
+ ac:['President Trump'],
+ dk:'The big federal AI-preemption order is almost entirely about algorithmic-bias and content-moderation laws — but its own text carves out one specific protection: state and local water and data-center-infrastructure rules are explicitly exempted from the preemption push.',
+ de:'The order creates a DOJ "AI Litigation Task Force" to sue states over "onerous" AI laws, directs FCC/FTC to explore preemption tools, and conditions broadband (BEAD) grant eligibility on states not enforcing conflicting AI laws — none of that is about water. The highlighted water point is narrower and easy to miss: the order\u2019s own text instructs that any recommended federal AI legislation should NOT preempt state laws on AI compute and data center infrastructure (among other carve-outs), which White House AI advisor David Sacks has called the "communities" piece of a "4 C\u2019s" framework. In practice, this is the closest thing to an explicit federal commitment that water ordinances, zoning fights, and county moratoriums are not preemption targets, even while the same administration pushes hard on other AI regulations.',
+ tg:['preemption carve-out','water rules protected','DOJ Litigation Task Force','4 Cs'],
+ sn:'White House / Center for American Progress analysis', su:'https://www.whitehouse.gov/presidential-actions/2025/12/eliminating-state-law-obstruction-of-national-artificial-intelligence-policy/'},
+
+{j:'Federal', t:'Executive action', ti:'EO — Accelerating Federal Permitting of Data Center Infrastructure',
+ d:'July 23, 2025', st:'In effect', sta:'enabling',
+ ac:['President Trump'],
+ dk:'Framed around speed, not water — but one of the three permitting tracks this order fast-tracks is Clean Water Act review, which is the specific mechanism that determines whether a data center needs a federal water permit at all.',
+ de:'Part of the "AI Action Plan" package, the order directs EPA, the Army Corps, and CEQ to fast-track environmental review for large ("Qualifying") AI data center and power projects across three tracks: NEPA, the Clean Air Act, and the Clean Water Act. It revokes the prior administration\u2019s AI-infrastructure order and pushes agencies toward NEPA categorical exclusions. The CWA track matters most for this database: combined with the 2023 Supreme Court Sackett ruling narrowing federal water jurisdiction, this order is a big part of why most Southwest data centers haven\u2019t needed a federal water permit at all — water regulation has been pushed almost entirely down to states, counties, and cities as a direct result.',
+ tg:['Clean Water Act track','NEPA','FAST-41','AI Action Plan'],
+ sn:'The White House', su:'https://www.whitehouse.gov/presidential-actions/2025/07/accelerating-federal-permitting-of-data-center-infrastructure/'},
+
+{j:'Federal', t:'Hearing / investigation', ti:'House Energy & Commerce: "AI and the Grid" hearing',
+ d:'April 29, 2026', st:'Held; seven bills discussed', sta:'mixed',
+ ac:['Rep. Bob Latta (R-OH), Subcommittee Chair','Rep. Kathy Castor (D-FL), Ranking Member','Rep. John James (R-MI)','Nick Myers, Chairman, Arizona Corporation Commission'],
+ dk:'A hearing about ratepayer and transmission bills that nonetheless produced one clean, quotable water moment: a Republican member naming water protection as a condition for hosting data centers, on the record, in a hearing about the grid.',
+ de:'The seven bills discussed (Load Forecasting Enhancement Act, Affordable Innovation for the Grid Act, Ratepayer Protection Act, Fair Allocation of Interstate Rates Act, High-Capacity Grid Act, and others) are genuinely about transmission and rates, not water. The highlighted exception: Rep. John James (R-MI) explicitly listed "protect our water" alongside local control and farmland preservation as a bipartisan condition for hosting data centers — a sign the water framing has spread even into hearings nominally about energy. The Arizona Corporation Commission\u2019s sitting chairman, Nick Myers, also testified, mostly on grid and rate matters, giving this hearing a direct Arizona connection.',
+ q:'Local control, brownfields before farmland, protect our water, and keep electric bills low.', qa:'Rep. John James (R-MI)',
+ tg:['ACC testimony','ratepayers','one water mention','committee hearing'],
+ sn:'House Energy & Commerce Committee', su:'https://energycommerce.house.gov/posts/energy-subcommittee-holds-hearing-on-meeting-growing-power-demand-while-protecting-ratepayers'},
+
+{j:'Federal', t:'Executive action', ti:'Sen. Warnock secures $50M for water and energy pressure from data centers',
+ d:'2026', st:'Enacted as part of FY2026 government funding', sta:'restrictive',
+ ac:['Sen. Raphael Warnock (D-GA)'],
+ dk:'Georgia\u2019s senator didn\u2019t write a water-specific bill, but he did secure real federal money explicitly tied to data centers\u2019 water pressure — not just energy — in the annual funding process.',
+ de:'The $50 million provision, passed as part of FY2026 government funding legislation, is earmarked for communities facing increased pressure on both water and energy sources from economic development projects including data centers. Georgia hosts an estimated 100-200 data centers, and Warnock\u2019s own framing keeps water and energy paired rather than treating this as purely an electricity ask — the funding is explicitly for "resilient energy and water resources," not energy alone.',
+ q:'Relief from the energy and water pressures of new resource-intensive projects.', qa:'Sen. Raphael Warnock',
+ tg:['appropriations','Georgia','federal funding','paired energy-water'],
+ sn:'Sen. Warnock press release', su:'https://www.warnock.senate.gov/?p=77497'},
+
+{j:'Federal', t:'Hearing / investigation', ti:'Ossoff and Warnock press Interior over Georgia water quality office closure',
+ d:'April – June 2026', st:'DOI reversed the closure after pressure', sta:'restrictive',
+ ac:['Sen. Jon Ossoff (D-GA)','Sen. Raphael Warnock (D-GA)'],
+ dk:'Not written as a data-center bill, but the underlying stakes are directly about data-center-era water monitoring capacity: Georgia\u2019s two senators forced the Trump administration to reverse a DOGE-driven plan to close a USGS water quality testing office in a metro-Atlanta data center corridor.',
+ de:'Ossoff and Warnock wrote Interior Secretary Doug Burgum in the spring demanding answers after DOGE moved to terminate the USGS Water Science Center\u2019s lease in Norcross, Georgia — a facility that tests drinking-water safety and maintains the stream gauges local officials use to manage withdrawals from Lake Lanier, the source of most of metro Atlanta\u2019s drinking water. After being pressed publicly in a hearing and receiving no response for six weeks, the administration reversed the termination. The office\u2019s work is general water-quality monitoring, not data-center-specific regulation, but it sits squarely in the region absorbing the state\u2019s data center boom, and its closure would have cut exactly the kind of baseline water data that any future data-center water policy would depend on.',
+ q:'Staff at this office test water quality to ensure that Georgians don\u2019t drink contaminated water.', qa:'Sen. Jon Ossoff',
+ tg:['USGS','water quality monitoring','Georgia','DOGE reversal'],
+ sn:'Sen. Ossoff press release', su:'https://www.ossoff.senate.gov/es/press-releases/watch-sen-ossoff-presses-president-trumps-interior-secretary-to-reverse-closure-of-georgia-water-quality-office'},
+
+{j:'Federal', t:'Statement', ti:'Rep. Julia Letlow (R-LA) praises Meta\u2019s water and energy cost commitment',
+ d:'July 13, 2026', st:'Statement on record', sta:'enabling',
+ ac:['Rep. Julia Letlow (R-LA)'],
+ dk:'A clean example of the "enabling" side of this issue: a member of Congress praising a $50 billion expansion specifically because the company committed to cover water and energy infrastructure costs itself.',
+ de:'Letlow\u2019s district includes Richland Parish, where Meta more than doubled its planned AI data center to 5 gigawatts of capacity. Her statement leads with the jobs and tax-revenue story, but the specific detail she chose to highlight was Meta\u2019s commitment to cover the full cost of energy, water, and related infrastructure — not leave it to ratepayers, which is precisely the concern that drives restrictive bills elsewhere in this database. Worth noting for context: Meta separately told a Baton Rouge industry conference the site is designed to use roughly the same water volume as the irrigated farmland it replaced, with a wastewater treatment partnership and a 2030 water-positive pledge.',
+ q:'I\u2019m thrilled that Meta is committing to cover the full cost, protecting ratepayers.', qa:'Rep. Julia Letlow',
+ tg:['Richland Parish','Meta expansion','ratepayer protection'],
+ sn:'CenLANow / Rep. Letlow press release', su:'https://www.cenlanow.com/news/state-news/congresswoman-julia-letlow-responds-to-metas-50-billion-richland-parish-expansion/'},
+
+{j:'Federal', t:'Statement', ti:'Rep. Steve Cohen (D-TN) presses xAI to finish its water recycling plant',
+ d:'April 2026', st:'Public pressure; company reaffirmed commitment', sta:'restrictive',
+ ac:['Rep. Steve Cohen (D-TN-09)'],
+ dk:'A representative treating a specific piece of cooling infrastructure — a wastewater recycling plant meant to replace aquifer withdrawal — as a firm promise that must be kept, not a nice-to-have.',
+ de:'xAI\u2019s $80 million Colossus Water Recycling Plant broke ground in October 2025, designed to use recycled greywater from a nearby treatment plant to cool Musk\u2019s Memphis supercomputer instead of drawing from the Memphis Sand Aquifer. When reports surfaced in April that construction had quietly stalled, Cohen — a longtime overseer of Memphis\u2019s public utility MLGW — issued a public demand for "rock-solid, airtight assurances" the plant would be completed, name-checking the aquifer directly. xAI publicly reaffirmed the plant was still planned, just deprioritized behind finishing its second Colossus site; Memphis Mayor Paul Young separately pressed the company for the same commitment.',
+ q:'The Memphis Sand Aquifer is one of our most vital resources and must be protected.', qa:'Rep. Steve Cohen',
+ tg:['xAI Colossus','greywater recycling','Memphis Sand Aquifer'],
+ sn:'WREG Memphis / Cohen press statement', su:'https://wreg.com/news/local/xai-memphis/mayor-mlgw-push-xai-to-complete-water-recycling-facility/'},
+
+{j:'Federal', t:'Bill', ti:'Sen. Ed Markey (D-MA) unveils a national data-center-harm framework',
+ d:'July 13, 2026', st:'Discussion draft, not yet formally introduced', sta:'restrictive',
+ ac:['Sen. Ed Markey (D-MA)'],
+ dk:'Names water alongside air, energy bills, and quality of life as one of four things communities are "organizing and demanding action" to protect — from an EPW Committee member and Environmental Justice Caucus co-chair.',
+ de:'Markey\u2019s draft would require data centers to fund community capacity to monitor and mitigate air, water, and noise impacts; require them to pay for necessary grid infrastructure; and require renewable energy and storage investment rather than on-site diesel backup. It is explicitly framed as a first attempt at a single federal framework rather than the current state-by-state patchwork, positioning Markey as a likely lead voice if federal water/environmental regulation of data centers gains momentum.',
+ q:'Communities are organizing and demanding action to protect their air, water, energy bills, and quality of life.', qa:'Sen. Ed Markey',
+ tg:['EPW Committee','Environmental Justice Caucus','national framework','discussion draft'],
+ sn:'Sen. Markey press release', su:'https://www.markey.senate.gov/news/press-releases/senator-markey-releases-discussion-draft-of-legislation-to-create-a-national-framework-to-address-data-center-harm'},
+
+{j:'Federal', t:'Statement', ti:'Sen. Ron Wyden (D-OR) presses Google, Apple, Meta, and Amazon on closed-loop cooling',
+ d:'April 30, 2026', st:'Letters sent; responses requested by May 29', sta:'restrictive',
+ ac:['Sen. Ron Wyden (D-OR)'],
+ dk:'The most technically detailed federal document in this database that isn\u2019t a bill: seven specific questions to four CEOs about exactly when and how closed-loop cooling actually works.',
+ de:'Wyden wrote directly to Sundar Pichai, Tim Cook, Mark Zuckerberg, and Andy Jassy, citing Oregon\u2019s 100-plus data centers and persistent drought. His letter states large data centers can use up to 5 million gallons a day — equivalent to a town of 10,000 to 50,000 people — and asks each company to specify how it\u2019s using "best available technologies to minimize groundwater withdrawals," under what conditions closed-loop systems succeed, whether they\u2019re already deployed in Oregon, how concentrated contaminants are being managed, and how the public can track actual water use during permitting and operation. This is a pure oversight letter — no bill attached — aimed squarely at cooling technology choice rather than energy costs.',
+ q:'Many communities in my state are concerned about how these centers could contribute to water scarcity.', qa:'Sen. Ron Wyden',
+ tg:['closed-loop cooling','Big Tech letters','Oregon drought','groundwater'],
+ sn:'Sen. Wyden press release', su:'https://www.wyden.senate.gov/news/press-releases/wyden-demands-big-tech-execs-answer-questions-about-data-centers-water-impact'},
+
+{j:'Federal', t:'Statement', ti:'Former Sen. Kyrsten Sinema (I-AZ) lobbies for a Chandler data center — and loses, 7-0',
+ d:'Fall 2025 – Feb 2026', st:'Project rejected unanimously by Chandler City Council', sta:'enabling',
+ ac:['Former Sen. Kyrsten Sinema (I-AZ)'],
+ dk:'A former U.S. senator turned paid AI-industry lobbyist made water cost the center of her own pitch — proposing data centers pay the same per-gallon rate households do — and it still wasn\u2019t enough to save the project.',
+ de:'Now a senior adviser at Hogan Lovells and co-chair of the industry-founded AI Infrastructure Coalition, Sinema spent months courting the Chandler City Council and its planning commission on behalf of developer Active Infrastructure, at one point warning that the Trump administration would override local zoning if Chandler didn\u2019t approve the project. She separately proposed a specific water-fairness fix: charge data centers the same roughly one-cent-per-gallon rate Arizona households pay, funneling the difference into a Colorado River Protection Fund. Neither argument worked — residents packed council chambers with "No More Data Centers" signs, more than 200 public comments opposed the project against 8 in favor, and the council voted 7-0 to reject it, with Sinema notably absent from the final vote.',
+ q:'Make data centers pay their fair share for the water they use.', qa:'Former Sen. Kyrsten Sinema',
+ tg:['Chandler','AI Infrastructure Coalition','pay-per-gallon','revolving door'],
+ sn:'Phoenix New Times / E&E News / Deseret News', su:'https://www.phoenixnewtimes.com/news/chandler-city-council-unanimously-kills-sinema-backed-data-center-40628102/'},
+
+{j:'Federal', t:'Statement', ti:'Rep. Harriet Hageman (R-WY) demands answers after a Meta cooling system contaminates Cheyenne\u2019s water',
+ d:'July 9, 2026', st:'Letter sent to Meta CEO', sta:'restrictive',
+ ac:['Rep. Harriet Hageman (R-WY)'],
+ dk:'A rare case in this database where a specific cooling-related contamination event, not a hypothetical, prompted a direct congressional letter — and the culprit was explicitly "the system marketed to reduce a data center\u2019s water consumption."',
+ de:'Cheyenne\u2019s Board of Public Utilities revoked a contractor\u2019s industrial discharge privileges in March after finding the bacterium Cupriavidus gilardii in the city\u2019s wastewater reuse system, tracing it to an $800 million Meta data center; the reuse system was taken offline for months, and residents weren\u2019t told the source was Meta until July. Hageman, Wyoming\u2019s lone House member, sent a letter to Mark Zuckerberg demanding answers, writing she was "deeply concerned" and that residents deserve prompt notification of contamination events tied to data center expansion in the state.',
+ q:'The system marketed to reduce a data center\u2019s water consumption caused this contamination.', qa:'Rep. Harriet Hageman',
+ tg:['Cheyenne','wastewater contamination','Meta','notification delay'],
+ sn:'Cowboy State Daily / Rep. Hageman press release', su:'https://hageman.house.gov/media/press-releases/hageman-demands-answers-meta-over-data-center-water-contamination'},
+
+{j:'Federal', t:'Hearing / investigation', ti:'Sen. Blumenthal\u2019s Permanent Subcommittee probes NDAs blocking water-use disclosure',
+ d:'March 31, 2026', st:'Inquiry letters sent to state utility commissions', sta:'restrictive',
+ ac:['Sen. Richard Blumenthal (D-CT)'],
+ dk:'A formal Senate investigative subcommittee, not just a press release: Blumenthal used his Permanent Subcommittee on Investigations post to ask state utility regulators directly whether data centers are using non-disclosure agreements to hide water access and infrastructure strain from the public.',
+ de:'As Ranking Member of the Senate Homeland Security Permanent Subcommittee on Investigations, Blumenthal sent letters to state public service commissions — including Alabama\u2019s — requesting documents on any NDAs or other restrictions that prevent public disclosure of "energy usage, water access, infrastructure strain, or related environmental and economic effects" tied to data centers. It\u2019s a narrower, more investigatory tool than a bill: rather than mandating disclosure by statute, it uses subpoena-adjacent subcommittee authority to find out how much is already being hidden.',
+ tg:['Permanent Subcommittee on Investigations','NDA secrecy','state utility commissions'],
+ sn:'Senate Homeland Security & Governmental Affairs Committee', su:'https://www.hsgac.senate.gov/wp-content/uploads/2026-03-31-Letters-from-Ranking-Member-Blumenthal-to-Public-Utility-Commissions.pdf'},
+
+{j:'Federal', t:'Hearing / investigation', ti:'Rep. Sarah McBride (D-DE) secures a commitment to explore federal liquid-cooling funding',
+ d:'January 15, 2026', st:'Verbal commitment from OSTP Director', sta:'enabling',
+ ac:['Rep. Sarah McBride (D-DE)'],
+ dk:'A direct exchange that moved beyond just raising concerns: McBride got the White House\u2019s own science and technology policy director to commit, on the record, to look into federal funding specifically for liquid cooling technology.',
+ de:'Questioning OSTP Director Michael Kratsios at a House Science, Space, and Technology Subcommittee hearing on the AI Action Plan, McBride relayed what she\u2019s hearing directly from Delaware constituents: data centers "straining our energy and water supply and increasing the cost of utilities for all of us." Rather than stopping at the complaint, she pushed specifically for federal support for liquid cooling as a mitigation technology and secured a commitment from Kratsios to explore funding options — a rare instance of a cooling-technology ask getting a concrete administration response in real time.',
+ q:'Straining our energy and water supply and increasing the cost of utilities for all of us.', qa:'Rep. Sarah McBride',
+ tg:['OSTP','liquid cooling funding','AI Action Plan hearing'],
+ sn:'Rep. McBride press release', su:'https://mcbride.house.gov/media/press-releases/rep-mcbride-presses-trump-administration-data-center-impacts-secures'},
+
+{j:'Federal', t:'Bill', ti:'Reps. Jim Costa (D-CA) and Blake Moore (R-UT) seek a federal study on data centers and rural communities',
+ d:'September 2025', st:'Introduced', sta:'transparency',
+ ac:['Rep. Jim Costa (D-CA)','Rep. Blake Moore (R-UT)'],
+ dk:'A bipartisan pair — one from California\u2019s Central Valley — asking the federal government to formally study how the AI data center boom is hitting rural communities specifically, water included alongside land and infrastructure.',
+ de:'The bill would require an interagency federal study on the effects of rapid AI data center growth on rural areas, an intentionally broader lens than the usual metro-hyperscale-corridor framing. Costa\u2019s Central Valley district gives this a direct California angle distinct from the Bay Area or Imperial County fights already in this database; Moore\u2019s Utah district sits amid its own fast-growing data center corridor. Coverage of the bill specifically noted that "many modern data centers are mitigating [water strain] by using alternative water sources and more efficient cooling" as the framing problem the study is meant to actually document rather than assume.',
+ tg:['rural communities','interagency study','Central Valley','bipartisan'],
+ sn:'Agri-Pulse', su:'https://www.agri-pulse.com/articles/24729-water-woes-unleash-congressional-calls-for-data-center-scrutiny'},
+
+{j:'Federal', t:'Statement', ti:'Reps. Sanford Bishop (D-GA) and Austin Scott (R-GA) call for guardrails before data centers arrive',
+ d:'July 17, 2026', st:'Joint public statement', sta:'restrictive',
+ ac:['Rep. Sanford Bishop (D-GA)','Rep. Austin Scott (R-GA)'],
+ dk:'The freshest entry in this entire database: two South Georgia representatives, one from each party, telling residents to demand water and power guarantees before their communities say yes to a data center that hasn\u2019t been built yet.',
+ de:'With data centers reportedly eyeing Southwest Georgia, Bishop and Scott used a joint local-news interview to get ahead of the decision rather than react after the fact. Bishop\u2019s framing centered specifically on transparency about resource use: "the public has a right to know about the water consumption, the power consumption." Scott\u2019s framing centered on cost allocation — data center operators should pay their own energy costs and "protect their water supply" and "power supply" so existing residents don\u2019t absorb higher bills. Notable for being proactive, bipartisan, and entirely statement-based — no bill has been introduced yet.',
+ q:'The public has a right to know about the water consumption, the power consumption.', qa:'Rep. Sanford Bishop',
+ tg:['Southwest Georgia','proactive guardrails','bipartisan','pre-construction'],
+ sn:'WALB News', su:'https://www.walb.com/2026/07/17/south-georgia-congressmen-say-data-centers-need-guardrails-before-moving-forward/?outputType=amp'},
+
+{j:'Federal', t:'Statement', ti:'Sen. John Curtis (R-UT) and Rep. Blake Moore (R-UT) respond to the Great Salt Lake backlash',
+ d:'June 2026', st:'Ongoing positions, no federal bill introduced', sta:'mixed',
+ ac:['Sen. John Curtis (R-UT)','Rep. Blake Moore (R-UT)'],
+ dk:'The federal elected officials from the state at the center of the country\u2019s biggest community-vs-data-center water fight: both present at the governor\u2019s press conference after he reversed course, and both calling it a local issue rather than a federal one.',
+ de:'Curtis toured the Great Salt Lake by boat with EPA Administrator Zeldin specifically to highlight water threats to the ecosystem and area watersheds, then was direct about his own knowledge gap on the Stratos Project: "I have almost no data on the water usage. I\u2019ve heard it\u2019s closed-loop, but I don\u2019t know that. I don\u2019t know anything about the water rights." He called it "a local issue" while floating a LEED-style certification system as a potential federal role: "I think a system like that would really help both the AI builders and the communities, because right now they don\u2019t trust what the AI developers are saying." Moore, whose congressional district includes Box Elder County where the Stratos project sits, stood beside Cox at his executive-order press conference and said he was "encouraged by the public scrutiny of the project" even while not believing it would harm the lake.',
+ q:'I have almost no data on the water usage. I\u2019ve heard it\u2019s closed-loop, but I don\u2019t know that.', qa:'Sen. John Curtis',
+ tg:['Great Salt Lake','Stratos Project','Box Elder County','local vs. federal tension'],
+ sn:'Roll Call / Utah News Dispatch', su:'https://rollcall.com/2026/06/11/data-center-uproar-utah-congress-watching-waiting/'},
+
+{j:'Federal', t:'Statement', ti:'Sen. Josh Hawley (R-MO) names water wells directly as a constituent concern',
+ d:'June 2026 (op-ed) and ongoing', st:'Stated position; no water-specific bill', sta:'restrictive',
+ ac:['Sen. Josh Hawley (R-MO)'],
+ dk:'A Republican senator explicitly naming wells running dry — not just electricity bills — as the commonsense constituent question driving his push for guardrails, in a Free Press op-ed and a Roll Call interview in the same week.',
+ de:'In a Free Press op-ed, Hawley wrote that families watching construction trucks roll in are asking two obvious questions: "Will my electric bill double? Will my well run dry?" In a follow-up Roll Call interview, he said "local voters have got to have control" over who comes into their communities, and that federal law should require data centers to build their own power supplies — "no more data centers" without that commitment. He added: "I just think that that\u2019s commonsense stuff. Nothing I\u2019ve said here is controversial in the real world. It\u2019s controversial in this building, because there\u2019s so much AI money around this building." Hawley\u2019s water framing is notable because he\u2019s a Missouri senator whose state has significant data center activity and groundwater concerns, but he\u2019s been more associated with the electricity-rates fight than the water one — this interview shows the two are merging in his public positioning.',
+ q:'Will my electric bill double? Will my well run dry?', qa:'Sen. Josh Hawley, in a Free Press op-ed',
+ tg:['constituent wells','rural water','Missouri','Republican skeptic'],
+ sn:'Roll Call / The Free Press', su:'https://rollcall.com/2026/06/11/data-center-uproar-utah-congress-watching-waiting/'},
+
+{j:'Federal', t:'Statement', ti:'Sen. Lisa Blunt Rochester (D-DE) working on legislation about data center water consumption',
+ d:'June 2026', st:'Bill in preparation, no introduction date yet', sta:'transparency',
+ ac:['Sen. Lisa Blunt Rochester (D-DE)'],
+ dk:'Delaware\u2019s senior senator has confirmed she is drafting legislation specifically about data center environmental impacts including water — one of the few senators publicly flagging this as an active legislative priority rather than a concern to study eventually.',
+ de:'Blunt Rochester made the disclosure in an emailed statement to Roll Call after the magazine asked about the Utah/Great Salt Lake fight and Congress\u2019s response: "As AI becomes more prolific in our lives, I am working on legislation to better understand the impact data centers will have on our environment — including on water consumption." No timeline was given. Delaware hosts several major data center campuses including operations in Newark that have faced constituent questions about water and electricity, and Blunt Rochester has been active on the Senate Commerce Committee on adjacent AI oversight questions, which may be the legislative home for whatever bill emerges.',
+ q:'I am working on legislation to better understand the impact data centers will have on our environment — including on water consumption.', qa:'Sen. Lisa Blunt Rochester',
+ tg:['pending legislation','water consumption','Commerce Committee','statement of intent'],
+ sn:'Roll Call', su:'https://rollcall.com/2026/06/11/data-center-uproar-utah-congress-watching-waiting/'},
+
+{j:'Federal', t:'Statement', ti:'EPA Administrator Zeldin declines to set federal data center water standards',
+ d:'June 10, 2026', st:'Statement at Politico Energy Summit', sta:'enabling',
+ ac:['EPA Administrator Lee Zeldin'],
+ dk:'At a nationally-watched policy summit, the head of EPA laid out an explicitly anti-federal-standard position on data center water and environmental review — citing local variation as the reason federal rules can\u2019t work.',
+ de:'Asked about the growing push for EPA or federal agencies to set nationwide environmental standards for data centers, Zeldin said at the Politico Energy Summit: "You can\u2019t, across the board, act as if every data center project is equal. I\u2019m not going to sit inside of an agency building in Washington, D.C., and say that we know that local community in Georgia or Florida or Arizona or elsewhere, better than everyone there locally." This is the clearest statement of the administration\u2019s position on what federal water/environmental review of data centers will and won\u2019t look like: deference to states and localities, even as EPA\u2019s July 2025 permitting executive order fast-tracks the same projects at the federal level. The internal tension — federal permitting made faster, federal oversight standards not set — is one of the core fault lines in this entire policy space.',
+ q:'I\u2019m not going to sit inside of an agency building in Washington, D.C., and say that we know that local community in Georgia or Florida or Arizona or elsewhere better than everyone there locally.', qa:'EPA Administrator Lee Zeldin, at the Politico Energy Summit',
+ tg:['federal standards declined','local deference','Politico Energy Summit','internal tension'],
+ sn:'Roll Call / Politico Energy Summit', su:'https://rollcall.com/2026/06/11/data-center-uproar-utah-congress-watching-waiting/'},
+
+{j:'Federal', t:'Statement', ti:'Rep. Rashida Tlaib (D-MI) calls Gov. Whitmer\u2019s data center support "disgusting"',
+ d:'June 1, 2026', st:'Statement on X', sta:'restrictive',
+ ac:['Rep. Rashida Tlaib (D-MI-12)'],
+ dk:'A sitting member of Congress publicly attacking her own state\u2019s governor, from the same party, over a data center groundbreaking \u2014 one of the sharpest intra-party breaks in this entire database.',
+ de:'Whitmer appeared alongside OpenAI CEO Sam Altman and Oracle\u2019s Clay Magouyrk at the June 1 groundbreaking for a 1.4-gigawatt data center in Saline Township, a project the township board had originally voted against before settling a developer lawsuit. Tlaib, whose district doesn\u2019t include Saline Township but who has been a vocal critic of the buildout statewide, posted on X: "So disappointed in Governor Whitmer\u2019s support of data center expansions in our state especially when so many Michiganders are opposed." The remark came the same week Progress Michigan polling found Michiganders\u2019 top data center concern was water use, ahead of energy costs. Former township treasurer Jennifer Zink had resigned in May citing death threats over the same project \u2014 a sign of how heated the underlying fight had become before Whitmer\u2019s appearance.',
+ q:'So disappointed in Governor Whitmer\u2019s support of data center expansions in our state especially when so many Michiganders are opposed.', qa:'Rep. Rashida Tlaib, on X',
+ tg:['Saline Township','intra-party split','X statement','2026 midterms'],
+ sn:'Planet Detroit', su:'https://planetdetroit.org/2026/06/whitmer-data-center-backlash-2026-election/'},
+
+
+/* ================= ARIZONA ================= */
+{j:'Arizona', t:'Statement', ti:'Gov. Hobbs floats a per-gallon water surcharge',
+ d:'Early 2026', st:'Proposal, not enacted', sta:'restrictive',
+ ac:['Gov. Katie Hobbs (D)'],
+ dk:"Hobbs has proposed charging data centers roughly one cent per gallon of water used — an idea Republican legislators warn could push projects to friendlier states.",
+ de:"This sits alongside a live public debate over whether water is even the right thing to worry about: one widely cited environmental analyst calculated Maricopa County data centers used about 905 million gallons in 2025 versus roughly 29 billion gallons for golf courses, arguing electricity — not water — is the more serious long-run constraint given Arizona Public Service's acknowledged shortfall in generation and transmission capacity.",
+ tg:['surcharge','Maricopa County','water-vs-energy debate'],
+ sn:'AZFamily', su:'https://www.azfamily.com/2026/02/26/data-centers-arent-water-villains-you-think-they-are-environmentalist-says/'},
+
+{j:'Arizona', t:'Bill', ti:'HB 2893 — water conservation fee (2025, failed)',
+ d:'2025', st:'Failed', sta:'restrictive',
+ ac:['Arizona Legislature'],
+ dk:'Would have directed revenue from data center tax relief toward water conservation and agricultural irrigation-efficiency programs — a "make them pay into the system they strain" approach that did not pass.',
+ de:'Cited nationally by water-policy researchers as an example of the "collect fees to fund conservation" model, alongside similar (also-stalled) proposals in Illinois and West Virginia. Its failure in 2025 is part of the backdrop to the broader tax-incentive moratorium that did pass in 2026.',
+ tg:['conservation fee','agriculture','failed bill'],
+ sn:'Climate-XChange webinar recap', su:'https://climate-xchange.org/2026/04/webinar-recap-data-center-water-impacts/'},
+
+{j:'Arizona', t:'Statement', ti:'Sen. Ruben Gallego (D-AZ) — data centers as a "necessary evil"',
+ d:'May 2026', st:'Ongoing position', sta:'restrictive',
+ ac:['Sen. Ruben Gallego (D-AZ)'],
+ dk:'Arizona\u2019s junior senator has taken the most pointed federal-level position on data centers found in this research: not opposed to them existing, but actively pushing to strip the state tax breaks that brought them.',
+ de:'Gallego calls data centers a "necessary evil" needed to compete with China on AI, but says the volume arriving in Arizona has become "a problem," warning the state may not have enough water or power generation "to be able to hold harmless everyone else." He has called some Phoenix-area projects "abusive" for using state tax incentives to build low-job-count facilities in valuable areas without long-term regard for local water and power impact, arguing operators should bring their own energy or compensate ratepayers directly rather than receive tax breaks, and that state and local governments should have more say over siting. This is a notably harder line than his Senate colleague Mark Kelly\u2019s more measured "balance" framing, despite both being Arizona Democrats.',
+ q:'I fear that we may not have enough water and we may not have enough power generation to be able to hold harmless everyone else.', qa:'Sen. Ruben Gallego',
+ tg:['tax incentive repeal','necessary evil','Arizona delegation'],
+ sn:'Phoenix New Times', su:'https://www.phoenixnewtimes.com/news/arizona-sen-gallego-supports-nixing-tax-breaks-data-centers-40665119/'},
+
+{j:'Arizona', t:'Bill', ti:'Water-limiting bills die in crossover week',
+ d:'Feb 2026', st:'Failed to advance', sta:'restrictive',
+ ac:['Arizona Legislature'],
+ dk:'The clearest sign that water lost ground to the tax-incentive fight this session: of 13 data-center-related bills introduced, the ones that would have directly capped daily water use failed to survive crossover week.',
+ de:'The surviving, successful policy action this session — a three-year pause on Arizona\u2019s data center sales/use tax exemption, negotiated into the budget — is about incentives and cost allocation, not water consumption caps. The Democratic-sponsored bills that would have limited daily water usage specifically did not make it out of their chamber of origin, even as Hobbs\u2019s water-surcharge proposal (this time reported as $0.10 per gallon in her executive budget, projected to raise about $6.5 million a year for Colorado River conservation) continued to circulate as a separate, softer mechanism. The takeaway: the water angle is not dead in Arizona, but as of this session it lost out to the tax-incentive fight for legislative bandwidth.',
+ tg:['crossover week','failed bills','water cap'],
+ sn:'Arizona Capitol Times', su:'https://azcapitoltimes.com/news/2026/02/28/legislatures-data-center-conversations-miss-water-angle/'},
+
+{j:'Arizona', t:'Local action', ti:'Tucson\u2019s Large Quantity Water User Ordinance and the "Project Blue" fallout',
+ d:'Adopted Aug 19, 2025', st:'In effect; amendments under review', sta:'restrictive',
+ ac:['City of Tucson'],
+ dk:'Passed in direct response to the "Project Blue" data center proposal, which drew a packed, contentious public meeting in August 2025 and became a statewide flashpoint.',
+ de:'The ordinance imposes water-use thresholds, conservation-plan requirements, and monitoring obligations on large facilities; Tucson directed staff to gather community input and consider amendments within six months of adoption, with final thresholds expected by mid-2026. Tucson is separately drafting large-scale data center zoning regulations through its Unified Development Code, expected to reach the Planning Commission and Mayor/Council in 2026 — likely to become a template other Arizona cities watch closely.',
+ tg:['Project Blue','Tucson','water ordinance','zoning'],
+ sn:'Server Country policy tracker', su:'https://servercountry.org/policy/arizona/'},
+
+{j:'Arizona', t:'Bill', ti:'Rep. Neal Carter (R) sponsors the tax-sunset bill Hobbs wants',
+ d:'January 2026', st:'Introduced; folded into the eventual budget moratorium', sta:'restrictive',
+ ac:['Rep. Neal Carter (R-San Tan Valley)'],
+ dk:'The Republican Speaker pro tempore\u2019s constituents gave him a two-part complaint about data centers, and he led with water: "they think they\u2019re ugly" and "they think they use a lot of water" is how he described the calls to Capitol Media Services.',
+ de:'Carter\u2019s bill would have cut off new applications to Arizona\u2019s data center sales-tax exemption at the end of 2026, well ahead of its scheduled 2033 sunset — giving Gov. Hobbs a rare Republican partner on the incentive fight, even though his bill itself doesn\u2019t address water use directly (that piece was Hobbs\u2019s separate per-gallon surcharge proposal). His framing is a useful data point on its own: even the fiscal-conservative case against the tax break, from a Republican district, arrives bundled with a constituent water complaint, not a purely budgetary one.',
+ q:'They think they use a lot of water.', qa:'Rep. Neal Carter (R-San Tan Valley)',
+ tg:['tax sunset','constituent pressure','San Tan Valley','bipartisan'],
+ sn:'Capitol Media Services, via Tucson.com', su:'https://tucson.com/news/state-regional/government-politics/article_fcd329d7-35f8-4e01-8f5c-dc419439f4f8.html'},
+
+{j:'Arizona', t:'Statement', ti:'Senate Minority Leader Sundareshan (D) lays out a water-first agenda for 2027',
+ d:'February – July 2026', st:'Ongoing position; stated priority for next session', sta:'restrictive',
+ ac:['Sen. Priya Sundareshan (D)'],
+ dk:'Now leading Senate Democrats, Sundareshan has made water — not just ratepayer costs — her explicit, named priority for data centers heading into next session, tied directly to the Colorado River\u2019s unresolved multi-state negotiations.',
+ de:'In a February interview she framed the stakes plainly: "With data centers expanding and Colorado River negotiations ongoing, we have been trying to figure out how we are going to meet the state\u2019s water needs for the next 10, 20, 30, or 40 years." She has backed bills covering the tax exemption, large-load cost responsibility, and — specifically — monitoring water use and requiring data centers to pay their fair share of it. In a July session-recap interview she named unfinished water work directly: understanding actual data center water use, ensuring fair payment for it, and modernizing groundwater law that "a lot of things have changed since 1980" — a reference to Arizona\u2019s original Groundwater Management Act. She paired this with energy and heat-wave concerns, but water specifically is the piece she named first and named most often.',
+ q:'I want us to be seriously finally grappling with our water situation and protecting our groundwater.', qa:'Sen. Priya Sundareshan, Senate Minority Leader',
+ tg:['Senate Minority Leader','Colorado River','groundwater','2027 agenda'],
+ sn:'Arizona Capitol Times / Deseret News', su:'https://azcapitoltimes.com/news/2026/07/09/data-centers-water-and-vouchers-democrats-unfinished-work-in-sundareshans-words/'},
+
+
+/* ================= TEXAS ================= */
+{j:'Texas', t:'Bill', ti:'Senate Bill 7 & House Joint Resolution 7 — water infrastructure fund',
+ d:'2025, voter-approved', st:'In effect', sta:'enabling',
+ ac:['Texas Legislature','Texas voters'],
+ dk:'A multi-billion-dollar, voter-approved investment in water infrastructure and conservation — broad-based, not targeted at data centers, but the backdrop against which their water use is being debated.',
+ de:'Houston Advanced Research Center estimates existing Texas data centers will use about 25–49 billion gallons of water by the end of 2025 (roughly 0.4% of state use), potentially rising to 2.7%–6.6% of total water use by 2030 depending on the estimate. SB 7/HJR 7 funds the infrastructure side of that equation but does not specifically regulate or track data center draw.',
+ tg:['water infrastructure','voter-approved','HARC estimates'],
+ sn:'Nixon Peabody / Texas Tribune', su:'https://www.texastribune.org/2025/09/25/texas-data-center-water-use/'},
+
+{j:'Texas', t:'Executive action', ti:'Gov. Abbott — cost allocation directive and recirculation-system recommendation',
+ d:'2026', st:'Ongoing', sta:'mixed',
+ ac:['Gov. Greg Abbott (R)'],
+ dk:'Abbott has directed the PUC to ensure data center infrastructure costs aren\u2019t passed to other ratepayers, and separately recommended the legislature require data centers to use costlier, more water-efficient recirculation cooling systems.',
+ de:'This marks a shift from Texas\u2019s earlier posture of aggressively courting data centers toward tightening oversight — while still not touching the tax and permitting incentives that made Texas the country\u2019s fastest-growing data center market (on pace to overtake Virginia).',
+ tg:['PUC','recirculation cooling','ratepayers'],
+ sn:'Houston Public Media / Texas Tribune', su:'https://www.houstonpublicmedia.org/articles/news/energy-environment/2026/06/24/555390/texas-data-centers-puc-water-survey/'},
+
+{j:'Texas', t:'Statement', ti:'State Sen. Charles Perry (R) — plans 2027 "guardrail" bills, downplays current risk',
+ d:'2026', st:'Stated intent for 2027 session', sta:'mixed',
+ ac:['State Sen. Charles Perry (R-Lubbock)'],
+ dk:'The Republican chair of the Senate Water, Agriculture and Rural Affairs Committee says he\u2019ll propose water-use guardrail bills in 2027 — while currently arguing data center water narratives are overstated.',
+ de:'Perry frames current cooling technology as already efficient enough that alarm is premature, a position that puts him closer to industry (Data Center Coalition, developers like Skybox) than to colleagues pushing immediate mandates. His committee chairmanship makes him the single most important gatekeeper for any Texas water-specific data center bill going forward.',
+ q:'Their water use is significantly less than the narrative out there.', qa:'State Sen. Charles Perry',
+ tg:['Senate Water Committee','2027 session','industry-aligned'],
+ sn:'E&E News', su:'https://www.eenews.net/articles/texas-water-plan-ignores-data-center-surge-2/'},
+
+{j:'Texas', t:'Agency / regulatory', ti:'PUC/TWDB voluntary water-use survey — widely ignored',
+ d:'2024–2026', st:'Ongoing, low compliance', sta:'transparency',
+ ac:['Public Utility Commission of Texas','Texas Water Development Board'],
+ dk:'A joint state survey asking data center operators to disclose water use, cooling systems, and power sourcing — voluntary, and largely unanswered: 33% responded in 2024, just 17% in 2025.',
+ de:'Penalties for noncompliance are trivial (a Class C misdemeanor, maximum $500 fine), and officials admit there\u2019s no real incentive for operators to participate. State Rep. Brad Buckley (R-Salado) called the resulting dataset "bad data, bad study" at a June 2026 hearing; Rep. Jeffrey Barry (R-Pearland) separately warned against setting long-term water policy on "sparse" information. This is arguably the single clearest evidence gap in the entire Southwest picture.',
+ q:'Bad data, bad study.', qa:'State Rep. Brad Buckley (R-Salado)',
+ tg:['voluntary survey','compliance gap','TWDB'],
+ sn:'Texas Tribune / Houston Public Media', su:'https://www.texastribune.org/2026/06/23/texas-data-centers-puc-water-survey/'},
+
+{j:'Texas', t:'Statement', ti:'Texas GOP resolution — apply oil-and-gas water protocols to AI data centers',
+ d:'December 2025', st:'Party resolution, not law', sta:'mixed',
+ ac:['Republican Party of Texas'],
+ dk:'A grassroots-party resolution — not legislation — calling on the legislature to require AI data centers to follow the same water-recycling protocols as the oil and gas industry, and to prioritize recycled/produced water over fresh aquifer draw.',
+ de:'It is industry-adjacent rather than anti-industry: the ask is for parity with an already-regulated sector and for heat-to-power technology, not for limits on growth. It signals where rank-and-file Texas Republican sentiment sits — comfortable with growth, uncomfortable with data centers getting an environmental pass that drillers don\u2019t get.',
+ tg:['produced water','oil and gas parity','party resolution'],
+ sn:'Republican Party of Texas', su:'https://texasgop.org/resolution-to-require-artificial-intelligence-data-centers-to-adhere-to-oil-and-gas-industry-water-protocols-and-use-recycled-water/'},
+
+{j:'Texas', t:'Hearing / investigation', ti:'2026 legislative interim charges — five committees studying data centers',
+ d:'Assigned March 2026', st:'Studies underway ahead of 2027 session', sta:'mixed',
+ ac:['House Speaker Dustin Burrows','Lt. Gov. Dan Patrick'],
+ dk:'Texas leadership assigned data center issues across five separate House committees for the interim study period — State Affairs (streamlining regulation), Natural Resources (total water usage and "water-efficient" development), and three others covering grid reliability, tax incentives, and economic costs.',
+ de:'The State Affairs charge to both "streamline regulations" and "enable communities to plan and manage growth responsibly" is a genuine tension baked into the assignment itself — a preview of how contested the 2027 session is likely to be.',
+ tg:['interim charges','2027 session','State Affairs Committee'],
+ sn:'Texas Observer', su:'https://www.texasobserver.org/texas-legislature-data-center-boom-water/'},
+
+{j:'Texas', t:'Statement', ti:'Rep. Erin Zwiener (D) forms a county working group and asks "what\'s in the water?"',
+ d:'Working group announced late March 2026', st:'Active; feeding into 2027 session', sta:'restrictive',
+ ac:['State Rep. Erin Zwiener (D-Driftwood)'],
+ dk:'The most granular, technically-specific water question found from any state legislator in this database: not just how much water, but what\u2019s dissolved in it, and what happens if a closed-loop system leaks.',
+ de:'Zwiener represents fast-growing Hays County south of Austin and formed the Hays County Data Center Working Group in response to constituent alarm over rising municipal and private water rates and, in some cases, wells running dry. She has pressed developers directly on cooling-system chemistry: additives meant to improve cooling efficiency, and what happens if that water escapes the system. She distinguishes between marquee developers (Google, Samsung, OpenAI) who publicly commit to closed-loop cooling and the much larger number of smaller, less accountable developers assembling land deals on speculation, which she says causes the most trouble in her district. Her read on local leverage is blunt: counties can only offer tax-break carrots to induce closed-loop over evaporative cooling — they have no stick.',
+ q:'I couldn\u2019t get a straight answer.', qa:'State Rep. Erin Zwiener, on asking developers what\u2019s in their cooling water',
+ tg:['Hays County','cooling chemistry','closed-loop leverage','working group'],
+ sn:'The Texas Observer', su:'https://www.texasobserver.org/texas-legislature-data-center-boom-water/'},
+
+{j:'Texas', t:'Hearing / investigation', ti:'House State Affairs Committee — industry "closed-loop" testimony',
+ d:'2026', st:'Testimony on record', sta:'enabling',
+ ac:['Skybox Datacenters (Haynes Strader)','Lancium (Michael McNamara)','Google (Liz Schwab)','Data Center Coalition (Dan Diorio)'],
+ dk:'At a nearly five-hour hearing not even formally about water, developers told lawmakers newer closed-loop systems mean their facilities use less water than a handful of households — while acknowledging only about 20% of Texas\u2019s 800MW of large data center capacity has moved off evaporative cooling so far.',
+ de:'Google\u2019s representative said the company only pursues water cooling where local supplies are healthy and resilient; Skybox said a full charge of its closed-loop system uses roughly what a backyard pool holds. Industry consistently frames Texas and Arizona data centers as using less water than golf courses, beverage manufacturing, or the semiconductor industry — a comparison water advocates argue obscures local, not aggregate, strain.',
+ tg:['closed-loop cooling','industry testimony','evaporative cooling'],
+ sn:'Inside Climate News', su:'https://insideclimatenews.org/news/10042026/texas-data-center-developers-play-offense-on-water-claiming-huge-cuts-in-usage/'},
+
+{j:'Texas', t:'Hearing / investigation', ti:'House Natural Resources Committee — dedicated data center water-use hearing',
+ d:'June 23, 2026', st:'Hearing held; feeds into 2027 session planning', sta:'transparency',
+ ac:['State Rep. Cody Harris (R-Palestine)','State Rep. Mary Gonzalez (D-San Elizario)','Temple McKinnon, Texas Water Development Board','Beau Schilz (Amazon Web Services)','Ben Townsend (Google)','Misty Allen (Vantage Data Centers)'],
+ dk:'A hearing devoted entirely to data center water use — not energy, not tax incentives — where the Texas Water Development Board revealed that reporting compliance is getting worse, not better, even as the number of data centers surveyed grew from 22 in 2023 to 341 in 2025.',
+ de:'TWDB water supply planning director Temple McKinnon testified that 83% of surveyed data centers failed to report their water trends in 2025 (up from 68% in 2023), against a normal nonresponse rate of about 30% for this kind of survey. Committee chair Cody Harris opened by naming two developers, Diode Ventures and Calypso LLC, who were invited to testify and declined. Rep. Mary Gonzalez (D-San Elizario) separately pointed out that Meta belongs to the Data Center Coalition — which promotes community engagement — yet has been unresponsive to local officials and residents. TCEQ\u2019s Robert Sadler described the state\u2019s role monitoring discharge from closed-loop cooling systems for contaminants not listed in original permits. On the industry side, Amazon Web Services\u2019 Beau Schilz said the company builds only where long-term water supply is sufficient and relies primarily on recycled water; Google\u2019s Ben Townsend outlined five corporate water commitments; and Vantage Data Centers\u2019 Misty Allen said her company\u2019s facilities run strictly on air cooling and closed-loop water cooling, with a goal of replacing more water than they consume.',
+ q:'They declined to give testimony because they did not want to answer hard questions.', qa:'State Rep. Cody Harris (R-Palestine)',
+ tg:['Natural Resources Committee','TWDB','closed-loop cooling','reporting compliance','2027 session'],
+ sn:'Texas Scorecard / Community Impact / The Texan', su:'https://texasscorecard.com/state/texas-house-committee-probes-data-centers-strain-on-water/'},
+
+{j:'Texas', t:'Local action', ti:'San Marcos City Council votes 4-3 to ban data centers citywide \u2014 citing water',
+ d:'June 16, 2026', st:'In effect; legal challenge threatened', sta:'restrictive',
+ ac:['San Marcos City Council','Council Member Amanda Rodriguez'],
+ dk:'The first Texas city to ban data centers outright \u2014 a direct community-pressure outcome after residents packed city hall repeatedly over a proposed 200-acre facility that would have drawn up to 70,000 gallons of water a day from local aquifers.',
+ de:'The council\u2019s vote amended the Land Use Matrix to make data centers ineligible in every zoning district, citing the high water demand of facilities proposed for Hays County\u2019s drought-stressed aquifers. Council member Amanda Rodriguez captured what San Marcos represents nationally: "You\u2019re seeing a lot of cities in the age of preemption being creative about things." Council member Taylor Burge of nearby Lockhart put the stakes plainly: "All cities are watching what happens to San Marcos." Mayor Jane Hughson voted against the ban, saying she wanted to preserve the council\u2019s ability to weigh proposals case-by-case rather than close the door entirely. The February backstory: residents packed city hall after a developer proposed a facility that would consume more than 25 million gallons annually from local aquifers \u2014 the council rejected the developer\u2019s annexation request, then went further to ban the entire category.',
+ q:'You\u2019re seeing a lot of cities in the age of preemption being creative about things.', qa:'Council Member Amanda Rodriguez, San Marcos',
+ tg:['first Texas city ban','Hays County aquifer','zoning ban','home rule'],
+ sn:'Texas Tribune / CBS Austin', su:'https://www.texastribune.org/2026/06/30/texas-san-marcos-data-center-ban-zoning-laws/'},
+
+{j:'Texas', t:'Local action', ti:'Hays County Judge Becerra passes "one of the strongest industrial high-water resolutions in Texas"',
+ d:'June 23, 2026', st:'In effect through Dec. 31, 2026; petitioned Abbott for special session', sta:'restrictive',
+ ac:['Hays County Judge Ruben Becerra','Commissioner Debbie Gonzales Ingalsbe (Precinct 1)','Commissioner Morgan Hammer (Precinct 3)'],
+ dk:'A county judge who had been pushing this since February finally got it passed unanimously \u2014 a community-response story: hundreds of residents packed two months of commissioner court meetings before the vote.',
+ de:'The resolution creates a 180-day emergency water-protection review period on high-water-use industrial projects (primarily data centers) in unincorporated Hays County, establishes a High Water Demand Development Review Board, requires transparency reports and independent environmental surveys from developers, and petitions Gov. Abbott to call a special legislative session to expand county authority to regulate industrial water use. Becerra was careful about legal exposure after neighboring Hill County rescinded its moratorium under a $100 million developer lawsuit: unlike Hill County\u2019s blunt moratorium, this resolution targets "discretionary approvals" like tax abatements rather than outright blocking permits. He named the resolution as a template: "We have 254 counties in the state, so other counties that want to follow suit and follow the same roadmap now can easily grab what we\u2019ve done." Over 99% of Hays County was in severe or extreme drought at the time.',
+ q:'Our water is not limitless, our environment is precious, and our future is worth fighting for.', qa:'Hays County Judge Ruben Becerra',
+ tg:['Hays County','drought','county template','discretionary approvals','special session petition'],
+ sn:'CBS Austin / KXAN / KUT', su:'https://cbsaustin.com/news/local/hays-county-passes-industrial-high-water-resolution-targeting-data-center-impacts'},
+
+{j:'Texas', t:'Statement', ti:'State Sen. Paul Bettencourt (R) threatens to challenge San Marcos ban as unlawful',
+ d:'Late June 2026', st:'Challenge threatened; no lawsuit filed as of July 2026', sta:'enabling',
+ ac:['State Sen. Paul Bettencourt (R-Houston)'],
+ dk:'The Republican chair of the Senate Committee on Local Government has already forced Hood County to rescind a data center moratorium and is openly threatening to do the same to San Marcos \u2014 a signal that the 2027 session will be a direct fight between local water-protection authority and state preemption.',
+ de:'Bettencourt argues San Marcos\u2019 zoning ban violates both HB 2559 (which limits indefinite property moratoriums to 180 days) and the 2023 "Death Star" law restricting municipalities from contradicting state law. Legal experts largely disagree \u2014 San Marcos used zoning code changes, not a moratorium, and home-rule cities have broader authority. He\u2019s been consistent: when Hood County passed a moratorium, Bettencourt asked for an AG opinion; the county pulled the moratorium rather than fight. When Hill County passed one, a developer sued for $100 million and won. The contrast with State Sen. Zaffirini (who represents San Marcos) is instructive: two senators, same city, opposite positions.',
+ q:'They should not use zoning to ban anything everywhere in the city of San Marcos because that\u2019s not lawful under the state of Texas guidelines. A ban doesn\u2019t work here, and this will get challenged.', qa:'State Sen. Paul Bettencourt',
+ tg:['Death Star law','preemption','Home Rule','local control fight'],
+ sn:'KXAN / Texas Tribune', su:'https://www.kxan.com/news/local/san-marcos/state-senator-plans-to-challenge-san-marcos-data-center-ban-says-city-lacks-legal-authority/'},
+
+{j:'Texas', t:'Statement', ti:'State Sen. Judith Zaffirini (D) defends San Marcos ban as reflecting statewide community concerns',
+ d:'June 2026', st:'Statement on record', sta:'restrictive',
+ ac:['State Sen. Judith Zaffirini (D-San Marcos)'],
+ dk:'San Marcos\u2019 own state senator, directly contrasting her colleague Bettencourt: the city acted "decisively and appropriately" and its decision "reflects concerns that many communities across Texas share."',
+ de:'Zaffirini, who represents the district in which San Marcos sits, publicly backed the council\u2019s decision in a statement to the Texas Tribune \u2014 putting her squarely opposite the Republican senator threatening to undo it. Her framing is notably community-generalization rather than water-specific: she treats the San Marcos case as representative of a broader pattern of Texas communities being asked to absorb data center water and power demands without adequate recourse. That framing directly sets up the 2027 legislative fight over whether Texas will expand or restrict local authority to regulate data centers.',
+ q:'The city acted decisively and appropriately, and that decision reflects concerns that many communities across Texas share.', qa:'State Sen. Judith Zaffirini',
+ tg:['San Marcos','community concerns','2027 preemption fight'],
+ sn:'Texas Tribune', su:'https://www.texastribune.org/2026/06/30/texas-san-marcos-data-center-ban-zoning-laws/'},
+
+
+/* ================= CALIFORNIA ================= */
+{j:'California', t:'Bill', ti:'AB 93 (2025) — water-use disclosure, vetoed',
+ d:'Vetoed Oct 2025', st:'Vetoed', sta:'restrictive',
+ ac:['Asm. Diane Papan (D-San Mateo)','Gov. Gavin Newsom (D)'],
+ dk:'Would have required data centers to disclose estimated water use when applying for a business license and actual use when renewing — passed both Democratic-controlled chambers, then vetoed by Newsom.',
+ de:'Newsom\u2019s veto message said he was "reluctant to impose rigid reporting requirements about operational details on this sector without understanding the full impact on businesses and the consumers of their technology" — a rationale nearly identical to the one New Jersey\u2019s governor used to veto a similar bill the same year. It is the clearest example of the "sign growth, veto disclosure" pattern flagged at the top of this tracker.',
+ q:'Reluctant to impose rigid reporting requirements about operational details on this sector.', qa:'Gov. Gavin Newsom, veto message',
+ tg:['veto','disclosure','business license'],
+ sn:'Data Center Dynamics / CalMatters', su:'https://www.datacenterdynamics.com/en/news/california-governor-vetos-data-center-water-use-bill-report/'},
+
+{j:'California', t:'Bill', ti:'AB 2469 (2026) — Papan\u2019s renewed disclosure bill',
+ d:'2026 session', st:'Advancing through committee', sta:'restrictive',
+ ac:['Asm. Diane Papan (D-San Mateo)'],
+ dk:'Papan\u2019s second attempt reprises AB 93\u2019s water-use disclosure requirement and adds reporting to the city and county, plus a new requirement that operators distinguish consumptive from non-consumptive water use.',
+ de:'It cleared a key committee vote in spring 2026 over opposition from the Data Center Coalition and the California State Association of Counties, the latter arguing (while conceding "the problems this bill is seeking to address are real") that it would burden local permitting processes better handled through collaborative, non-mandatory data-gathering.',
+ tg:['disclosure','consumptive use','committee vote'],
+ sn:'CalMatters / Assembly committee analysis', su:'https://calmatters.org/environment/water/2026/05/california-data-centers-water-transparency/'},
+
+{j:'California', t:'Bill', ti:'Papan\u2019s second 2026 bill — conditioning local approval on disclosure',
+ d:'2026 session', st:'Advancing', sta:'restrictive',
+ ac:['Asm. Diane Papan (D-San Mateo)'],
+ dk:'A companion bill would bar local governments from approving new or expanded data centers unless developers disclose water use and plans, and would restrict development in overdrafted groundwater basins like the San Joaquin Valley absent state water manager sign-off.',
+ de:'Together with AB 2469, this represents Papan\u2019s two-track strategy after last year\u2019s veto: disclosure-as-a-condition-of-doing-business (this bill) plus disclosure-as-a-standalone-requirement (AB 2469). Both face the same industry and local-government pushback that sank AB 93.',
+ q:'If they run out of water, guess what happens? And they can\u2019t cool their systems.', qa:'Asm. Diane Papan',
+ tg:['groundwater basins','San Joaquin Valley','local permitting'],
+ sn:'CalMatters', su:'https://calmatters.org/environment/water/2026/05/california-data-centers-water-transparency/'},
+
+{j:'California', t:'Statement', ti:'Data Center Coalition\u2019s opposition to granular reporting',
+ d:'2026', st:'Ongoing advocacy position', sta:'enabling',
+ ac:['Khara Boender, Director of State Policy, Data Center Coalition'],
+ dk:'The industry\u2019s main trade group argues data centers "used significantly less water than other essential industries" in 2025 — agriculture, power generation, food and beverage, and semiconductors — while offering no public data to substantiate the comparison.',
+ de:'Researchers at UC Berkeley have pushed back on the framing directly, arguing that aggregate comparisons miss the point: what matters for any given community is the scale of new local demand against locally available supply, not how data centers rank against agriculture statewide.',
+ tg:['industry position','aggregate vs local','UC Berkeley research'],
+ sn:'CalMatters', su:'https://calmatters.org/environment/water/2026/05/california-data-centers-water-transparency/'},
+
+{j:'California', t:'Statement', ti:'Asm. Diane Papan\u2019s committee-chair advocacy',
+ d:'Ongoing', st:'Ongoing position', sta:'restrictive',
+ ac:['Asm. Diane Papan (D-San Mateo)'],
+ dk:'As the committee chair with direct jurisdiction, Papan has become California\u2019s central legislative voice on this issue, describing an unregulated "water rush we can\u2019t really see or plan for right now."',
+ de:'Her framing — help the industry help itself by disclosing early, rather than face a crisis later — is a deliberate contrast to blanket-restriction approaches being discussed in New Mexico and Nevada.',
+ q:'We\u2019ve got a water rush we can\u2019t really see or plan for right now.', qa:'Asm. Diane Papan',
+ tg:['committee chair','water rush framing'],
+ sn:'E&E News', su:'https://www.eenews.net/articles/states-push-to-end-secrecy-over-data-center-water-use/'},
+
+{j:'California', t:'Local action', ti:'Imperial County mega-project controversy',
+ d:'2026', st:'Proposed', sta:'restrictive',
+ ac:['Unnamed developer','Imperial County'],
+ dk:'A proposed $10 billion, 330-megawatt data center in Imperial County — one of California\u2019s more water-stressed agricultural regions — could use as much as 750,000 gallons of water per day, according to legislative analysis.',
+ de:'Cited directly in the AB 2469 committee analysis as the kind of project current law can\u2019t adequately evaluate before approval; alongside Central Valley projects, it anchors the "spreading into overtapped groundwater basins" argument that Next10 and Santa Clara University researchers have made in a widely cited 2026 report.',
+ tg:['Imperial County','groundwater stress','mega-project'],
+ sn:'Assembly committee analysis (AB 2469)', su:'https://awpw.assembly.ca.gov/system/files/2026-04/ab-2469-papan.pdf'},
+
+
+/* ================= NEW MEXICO ================= */
+{j:'New Mexico', t:'Bill', ti:'Proposed statewide moratorium for the 2027 session',
+ d:'Announced July 2026', st:'Planned introduction, 2027 session', sta:'restrictive',
+ ac:['State Rep. Micaela Lara Cadena (D-Mesilla)','State Rep. Angelica Rubio (D-Las Cruces)','State Rep. Eleanor Chávez (D-Albuquerque)','State Sen. Carrie Hamblen (D-Las Cruces)'],
+ dk:'Four Democratic legislators from southern New Mexico announced plans to introduce a statewide pause on large-scale data centers while the state builds a framework to evaluate water, energy, emissions, ratepayer, and community-benefit impacts.',
+ de:'Modeled partly on a bipartisan Maine bill that passed but was vetoed by that state\u2019s Democratic governor; sponsors say they consulted directly with Maine legislators. It would be paired with closing a "microgrid loophole" and adding data-security protections. No Republicans are currently listed as co-sponsors, though opposition to data centers polls high across party lines nationally (roughly 63% of Republicans and 75% of Democrats oppose local construction, per Gallup).',
+ q:'We are watching this industry move faster than our laws, our water systems, and our communities can keep up with.', qa:'State Rep. Angelica Rubio',
+ tg:['statewide moratorium','Maine precedent','2027 session'],
+ sn:'KOB / Source New Mexico', su:'https://www.kob.com/new-mexico/proposed-moratorium-on-data-centers-to-come-up-in-2027-legislative-session/'},
+
+{j:'New Mexico', t:'Statement', ti:'2026 gubernatorial race — Haaland vs. Hull on the moratorium', d:'July 2026', st:'Campaign positions', sta:'mixed',
+ ac:['Deb Haaland (D), candidate for Governor','Gregg Hull (R), candidate for Governor'],
+ dk:'With Lujan Grisham term-limited, both major-party nominees to succeed her have staked out contrasting — but not diametrically opposed — positions on the proposed moratorium.',
+ de:'Haaland says she supports pausing new development while the state writes real guardrails, framing it around safeguarding water and ensuring companies "add value" rather than extract it. Hull opposes a moratorium outright, warning it would signal New Mexico is "closed for economic diversification," but explicitly rejects a "blank check" too, calling for siting decisions grounded in local infrastructure capacity and real accountability for water and energy impact. The overlap — both want accountability, disagree only on whether to pause first — is more instructive than the headline disagreement.',
+ q:'New Mexico is not a piggy bank.', qa:'Deb Haaland',
+ tg:['gubernatorial race','2026 election','bipartisan overlap'],
+ sn:'Source New Mexico', su:'https://sourcenm.com/2026/07/07/climate-advocacy-org-urges-new-mexico-leaders-to-adopt-data-center-moratorium/'},
+
+{j:'New Mexico', t:'Local action', ti:'Bernalillo County — "Data Center Guardrails Resolution"',
+ d:'Adopted Feb 2026', st:'Adopted', sta:'mixed',
+ ac:['Commissioner Eric Olivas'],
+ dk:'Rather than banning data centers, Bernalillo County set conditions for any project seeking economic-development incentives: full self-supply of electricity and water, "living wage" pay floors, and minimum county payments.',
+ de:'Olivas pointed to Meta\u2019s existing Los Lunas campus — which he said runs on fully renewable energy paid for by the company, reuses all its water, and hires roughly 85% of workers from New Mexico — as the model other projects should be measured against, rather than treating all data centers as interchangeable.',
+ tg:['incentive conditions','Meta Los Lunas','living wage'],
+ sn:'City Desk ABQ', su:'https://citydesk.org/2026/02/11/bernco-commission-oks-data-center-restrictions/'},
+
+{j:'New Mexico', t:'Local action', ti:'Doña Ana County approves Project Jupiter despite opposition',
+ d:'Approved 2025', st:'Under construction; litigation pending', sta:'enabling',
+ ac:['Doña Ana County Board of Commissioners','Oracle / Stack Infrastructure (developer)'],
+ dk:'The county approved the largest data center project in New Mexico history — up to $165 billion in investment, 1,400 acres, 2.5 gigawatts of power — after a commission vote residents say came with less than a month\u2019s public notice.',
+ de:'Developers say the project and an associated fuel-cell system will use about 11 million gallons of non-potable, closed-loop-recycled water, with 960,000 gallons needed just to charge the system initially. State Rep. Micaela Lara Cadena has been the leading legislative critic, arguing the state engineer\u2019s groundwater assurances came too fast given the region\u2019s drought and the scale of the commitment; separate reporting has found residents\u2019 names falsely appeared on letters supporting the project\u2019s air-quality permits, with related litigation still pending.',
+ q:'That\u2019s exactly what happens when speed replaces scrutiny, and when deals are made with dishonesty and deception.', qa:'State Rep. Micaela Lara Cadena',
+ tg:['Project Jupiter','Oracle','groundwater','litigation'],
+ sn:'NPR / Source New Mexico', su:'https://www.npr.org/2026/06/12/nx-s1-5786551/worries-over-water-as-a-giant-data-center-moves-into-the-new-mexico-desert'},
+
+{j:'New Mexico', t:'Local action', ti:'Santa Fe County — one-year moratorium effort',
+ d:'2026', st:'Adopted', sta:'restrictive',
+ ac:['Commissioner Lisa Cacari Stone','Commissioner Hank Hughes'],
+ dk:'Santa Fe County acted preemptively — it has not yet received an actual data center proposal — amending its ordinance to drop the "large-scale" qualifier so it covers a broader range of potential projects.',
+ de:'Commissioners frame the year as time to study energy and water usage, air quality, and economic impact before any project arrives, explicitly citing Doña Ana County\u2019s Project Jupiter as the cautionary example they want to avoid repeating.',
+ q:'We\u2019re about protecting what\u2019s sacred to us, and that\u2019s land, and water, and people.', qa:'Commissioner Lisa Cacari Stone',
+ tg:['preemptive moratorium','no active proposal'],
+ sn:'KRQE', su:'https://www.krqe.com/news/new-mexico/santa-fe-county-commissioners-aim-to-pause-data-center-projects-in-the-county/'},
+
+{j:'New Mexico', t:'Bill', ti:'House Bill 207 & Senate Memorial 11 — produced water for data centers',
+ d:'2026', st:'Advanced past germaneness hurdle', sta:'enabling',
+ ac:['New Mexico Legislature','Sen. Bobby Gonzales (Taos)'],
+ dk:'Would direct the Water Quality Control Commission to allow treated oil-and-gas wastewater ("produced water") to be discharged and used for industrial purposes including data centers, road dust control, and hydrogen production.',
+ de:'Framed by sponsors as protecting scarce fresh water; opposed by environmental groups (Amigos Bravos, Western Environmental Law Center) who argue the treatment science for removing salts, heavy metals, and proprietary chemicals from produced water remains unproven. Notably advanced despite being ruled "non-germane" to the 30-day budget session — only proceeding after the governor\u2019s office allowed it to be considered.',
+ q:'Industry still uses far too much water from our aquifers for fracking.', qa:'Sarah Knopp, Amigos Bravos',
+ tg:['produced water','oil and gas','WQCC'],
+ sn:'Western Environmental Law Center', su:'https://westernlaw.org/house-bill-207-would-require-discharge-of-oilfield-wastewater-to-new-mexico-waters-crops-industrial-applications/'},
+
+{j:'New Mexico', t:'Statement', ti:'Food & Water Watch report urges statewide moratorium',
+ d:'July 2026', st:'Advocacy report', sta:'restrictive',
+ ac:['Food & Water Watch'],
+ dk:'A national advocacy group\u2019s report specifically calling on New Mexico to pause new data center development, citing air pollution and water-use projections and directly naming Project Jupiter as emblematic of the risk.',
+ de:'The report lands days before the four-legislator moratorium announcement above and is explicitly cited by at least one candidate (Haaland) shaping 2026 campaign positioning — a reminder that advocacy research and electoral politics are moving in lockstep on this issue in New Mexico specifically.',
+ tg:['advocacy report','Project Jupiter','air pollution'],
+ sn:'Big Energy News', su:'https://bigenergynews.com/2026/07/new-report-calls-for-new-mexico-data-center-moratorium-over-environmental-concerns/'},
+
+{j:'New Mexico', t:'Executive action', ti:'Gov. Lujan Grisham\u2019s wastewater-reuse framing',
+ d:'Ongoing; term-limited through end of 2026', st:'Administration priority', sta:'mixed',
+ ac:['Gov. Michelle Lujan Grisham (D)'],
+ dk:'Her office frames "safe and responsible wastewater reuse" — including the produced-water rules above — as a long-standing, science-based priority for easing pressure on freshwater supplies, distinct from either an anti- or pro-data-center stance per se.',
+ de:'This is the backdrop for her 50-Year Water Action Plan and a new public water-security dashboard launched in May 2026, both of which predate the current data center boom but are now being stretched to cover it. Her successor (Haaland or Hull) inherits this framework directly.',
+ tg:['50-Year Water Action Plan','wastewater reuse','dashboard'],
+ sn:"Office of the Governor", su:'https://www.governor.state.nm.us/2026/05/01/new-mexico-launches-dashboard-to-track-water-security-plan-progress/'},
+
+{j:'New Mexico', t:'Statement', ti:'Land Commissioner Garcia Richard: "In New Mexico, we truly mean it when we say water is life"',
+ d:'July 14\u201315, 2026', st:'Second pipeline denial issued; Project Jupiter blocked again', sta:'restrictive',
+ ac:['Commissioner Stephanie Garcia Richard, NM State Land Office'],
+ dk:'The most quotable water statement from any state official in this database \u2014 and a concrete blocking action to back it up, issued twice: the Land Commissioner denied the Project Jupiter gas pipeline in March and again on July 14 after the developer asked her to reconsider.',
+ de:'Energy Transfer, a Texas-based natural gas subsidiary of the developers behind Project Jupiter (Oracle and OpenAI\u2019s data center campus in Santa Teresa), applied for rights-of-way to run a 0.6-mile portion of a 17-mile gas pipeline across state trust land. Garcia Richard denied it in March citing water burden and emissions concerns; they asked her to reconsider; she denied it again in a July 14 letter, calling the new request "functionally identical." Her spokesperson was equally direct: "Commissioner Garcia Richard has serious concerns about the tremendous strain that some data centers put on water systems and other natural resources. Any data center projects that proceed must have robust environmental guardrails in place." Worth noting the political context: Garcia Richard is a Democrat running to fill a lieutenant governor ballot vacancy, endorsed by Deb Haaland, in a race where the Project Jupiter fight is a live campaign issue.',
+ q:'In New Mexico, we truly mean it when we say \u201Cwater is life.\u201D We can\u2019t live without it and we know how precious and rare it is in our dry climate.', qa:'Commissioner Stephanie Garcia Richard',
+ tg:['Project Jupiter','pipeline blocked','state trust land','lieutenant governor race'],
+ sn:'NM State Land Office / Source New Mexico', su:'https://www.nmstatelands.org/2026/07/15/commissioner-garcia-richard-again-denies-request-to-run-portion-of-project-jupiter-pipeline-through-state-lands/'},
+
+
+/* ================= NEVADA ================= */
+{j:'Nevada', t:'Hearing / investigation', ti:'Interim legislative study — no state law yet',
+ d:'2026, ongoing', st:'Studying ahead of 2027 session', sta:'transparency',
+ ac:['Nevada Legislature — interim committees on Natural Resources and on Growth & Infrastructure'],
+ dk:'Nevada has zero comprehensive statewide data center water or energy law. Interim committees held a joint hearing gathering testimony from industry, utilities, researchers, and tribal leaders to inform a possible 2027 bill.',
+ de:'Lawmakers deliberately scoped the hearing to water and energy only, explicitly excluding Nevada\u2019s tax abatement program from discussion — even as other states (Arizona, Illinois, Georgia) are actively scaling back similar incentives. NV Energy\u2019s 2024 resource plan shows 12 proposed data centers could raise the state\u2019s energy load by nearly 50%, potentially threatening its 2030 clean-energy mandate.',
+ q:'At the end of the day, we need to be able to reassure our communities that there\u2019s a certain standard moving forward.', qa:'Assemblymember Howard Watts III (D-Las Vegas)',
+ tg:['no state law','interim committee','clean energy mandate'],
+ sn:'Nevada Current / Las Vegas Review-Journal', su:'https://nevadacurrent.com/2026/03/26/lawmakers-in-driest-state-weigh-excessive-water-and-energy-needs-of-data-centers-they-court/'},
+
+{j:'Nevada', t:'Statement', ti:'Assemblymembers Watts and Anderson push for statewide standards',
+ d:'2026', st:'Ongoing position', sta:'restrictive',
+ ac:['Assemblymember Howard Watts III (D-Las Vegas)','Assemblymember Natha Anderson (D), Chair, Natural Resources Committee'],
+ dk:'Both have signaled support for turning Southern Nevada\u2019s de facto water restriction (below) into an explicit statewide model rather than leaving the issue to a patchwork of local utility policies.',
+ de:'Anderson\u2019s decision to keep the tax-incentive question off the agenda was deliberate — a sign the coalition pushing for water/energy standards is trying to avoid conflating that fight with the separate incentive debate, unlike Arizona where they became one budget negotiation.',
+ tg:['statewide standard','Natural Resources Committee'],
+ sn:'Nevada Current', su:'https://nevadacurrent.com/2026/03/26/lawmakers-in-driest-state-weigh-excessive-water-and-energy-needs-of-data-centers-they-court/'},
+
+{j:'Nevada', t:'Local action', ti:'Reno City Council rejects data center regulations',
+ d:'February 2025', st:'Rejected', sta:'enabling',
+ ac:['Reno City Council'],
+ dk:'The Council voted against adding regulations on data center water use, power use, and noise — a permissive baseline that current state-level advocacy is now trying to move past.',
+ de:'A moratorium proposal championed by local advocate Manny Becerra had cleared Reno\u2019s planning commission earlier in 2025 but stalled once it reached the full council — an early sign that economic-development priorities were outweighing precautionary concerns in the fastest-growing part of the state\u2019s data center market.',
+ tg:['rejected regulation','permissive baseline'],
+ sn:'Nevada Legislature LCB memo', su:'https://www.leg.state.nv.us/App/InterimCommittee/REL/Document/33075'},
+
+{j:'Nevada', t:'Agency / regulatory', ti:'Southern Nevada\u2019s de facto restriction on new cooling water demand',
+ d:'Ban dates to 2023; ongoing', st:'In effect regionally', sta:'restrictive',
+ ac:['John Entsminger, General Manager, Southern Nevada Water Authority'],
+ dk:'This is firmer than a "signal": in 2023 the Southern Nevada Water Authority banned evaporative cooling outright in all new commercial and industrial buildings, which functionally forces new data centers in the Las Vegas Valley onto air-cooling and closed-loop designs.',
+ de:'Ten existing Southern Nevada facilities using evaporative cooling drew 352.6 million gallons last year, per the Las Vegas Valley Water District — and that number is now a ceiling, not a trend, since no new facility can add to it under the ban. Google\u2019s Henderson data center alone used more than 404 million gallons in 2024 to cool its servers, water the utility says is not reclaimable because it\u2019s lost to mist during the cooling process; Google says it funds offsetting sustainability projects across the valley. Both Assemblymember Watts and Pyramid Lake Paiute Tribal Chair Steven Wadsworth have pointed to the Southern Nevada approach as a possible template for statewide policy.',
+ q:'We\u2019re seeing a lot of plans for data centers, and that\u2019s fine. They can be built without consuming any more water.', qa:'John Entsminger, Southern Nevada Water Authority',
+ tg:['Las Vegas Valley','evaporative cooling ban','air cooling','Google Henderson'],
+ sn:'Las Vegas Review-Journal / FOX5 Las Vegas', su:'https://www.reviewjournal.com/news/politics-and-government/nevada/the-data-center-tsunami-has-flooded-nevada-are-lawmakers-too-late-to-regulate-3729604/'},
+
+{j:'Nevada', t:'Statement', ti:'Teresa Benitez-Thompson (D): "you fight for gold, but you kill for water"',
+ d:'April 2026', st:'Campaign statement (candidate for U.S. House)', sta:'restrictive',
+ ac:['Teresa Benitez-Thompson (D)'],
+ dk:'The former Nevada Assembly Speaker, now running for Congress, put Nevada\u2019s data center boom through the state\u2019s oldest resource hierarchy — and water won.',
+ de:'Benitez-Thompson invoked a Nevada saying to explain her skepticism of rapid data center growth in the north of the state: gold is worth fighting for, but water is worth killing for. She went on to say data centers don\u2019t currently look like a strategic fit given how she sees Nevada\u2019s resource constraints — a notably more cautious framing than most Democratic officials courting the industry\u2019s investment and jobs, and a sign the water argument carries real weight even in intra-party primary politics.',
+ q:'You fight for gold, but you kill for water.', qa:'Teresa Benitez-Thompson',
+ tg:['U.S. House candidate','northern Nevada','resource hierarchy'],
+ sn:'Nevada Newsmakers', su:'http://www.nevadanewsmakers.com/RayHagar/article.asp?ID=540'},
+
+
+{j:'Nevada', t:'Statement', ti:'Sierra Club Toiyabe Chapter — pushing an Oregon-style POWER Act',
+ d:'2026', st:'Advocacy position', sta:'restrictive',
+ ac:['Olivia Tanager, Executive Director, Sierra Club Toiyabe Chapter'],
+ dk:'Advocates for Nevada to adopt its own version of Oregon\u2019s POWER Act in the 2027 session — a law that creates a separate utility customer class for large loads and requires them to pay for grid expansion — plus tougher standards on backup generators.',
+ de:'Tanager warns that without transparency requirements, Nevada risks attracting what she calls "Dollar Store data centers" — low-quality operators cutting corners on water and energy commitments that better-capitalized hyperscalers make voluntarily. Not to be confused with the similarly-named federal POWER Act from Rep. Chip Roy, which is a reporting bill, not a rate-structure bill.',
+ q:'We\u2019re going to attract what we\u2019re referring to as Dollar Store data centers.', qa:'Olivia Tanager, Sierra Club Toiyabe Chapter',
+ tg:['Oregon POWER Act','utility rate class','advocacy'],
+ sn:'Nevada Current', su:'https://nevadacurrent.com/2026/03/26/lawmakers-in-driest-state-weigh-excessive-water-and-energy-needs-of-data-centers-they-court/'},
+
+{j:'Nevada', t:'Statement', ti:'Pyramid Lake Paiute Tribe opposition',
+ d:'Ongoing', st:'Ongoing opposition', sta:'restrictive',
+ ac:['Chairman Steven Wadsworth, Pyramid Lake Paiute Tribe'],
+ dk:'The Tribe has a documented history of fighting groundwater pumping tied to the Tahoe-Reno Industrial Center — in 2019, state regulators sided with the Tribe against a business park\u2019s pumping plans — and now warns new data centers could tap the same river system feeding Pyramid Lake.',
+ de:'Wadsworth\u2019s critique is specifically about time horizon: he argues state and local officials are evaluating projects on 2–3 year windows when the relevant water impacts play out over decades.',
+ q:'Everybody\u2019s only focused on what\u2019s going to happen this year, and the next two, three years.', qa:'Chairman Steven Wadsworth',
+ tg:['tribal water rights','Pyramid Lake','groundwater'],
+ sn:'Colorado Public Radio / Mountain West News Bureau', su:'https://www.cpr.org/2025/10/14/reno-nevada-ai-data-center-water/'},
+
+{j:'Nevada', t:'Statement', ti:'Great Basin Water Network — "tail wagging the dog"',
+ d:'2025', st:'Advocacy position', sta:'restrictive',
+ ac:['Kyle Roerink, Executive Director, Great Basin Water Network'],
+ dk:'A regional water-advocacy nonprofit\u2019s blunt framing of the core policy risk: that data center demand is starting to drive water-management decisions, rather than water availability constraining data center siting.',
+ de:'Roerink\u2019s organization works across Nevada and Utah and has been among the more prominent independent (non-tribal, non-industry) voices raising alarms about the secrecy around actual facility footprints, energy needs, and water draws.',
+ q:'We just don\u2019t want to be in a situation where the tail is wagging the dog.', qa:'Kyle Roerink, Great Basin Water Network',
+ tg:['water advocacy','secrecy','siting policy'],
+ sn:'MIT Technology Review', su:'https://www.technologyreview.com/2025/05/20/1116287/ai-data-centers-nevada-water-reno-computing-environmental-impact/'},
+
+{j:'Nevada', t:'Statement', ti:'Gov. Joe Lombardo (R) requires closed-loop cooling as the price of admission',
+ d:'2026, recurring position', st:'Standing administration policy via abatement review', sta:'mixed',
+ ac:['Gov. Joe Lombardo (R)'],
+ dk:'The most technically specific cooling-technology mandate found from any governor in this database: Lombardo says data centers only get state economic-development support if they run closed-loop systems with minimal evaporation.',
+ de:'In a Reno Gazette Journal guest column and multiple follow-up statements, Lombardo has been explicit and consistent: companies must bring their own water and energy solutions, and cooling systems must recycle water in a closed loop rather than consume it. He frames this as the mechanism that lets Nevada court the industry without the water and energy costs falling on residents. Critics, including The Nevada Independent\u2019s editorial board, note he doesn\u2019t address the state\u2019s own clean-energy targets or the fact that data center water-consumption statistics remain contested and largely self-reported — his closed-loop requirement is a policy position, not an independently verified outcome.',
+ q:'The water must be recycled and reused at minimum evaporation so that we are not using excessive amounts of water.', qa:'Gov. Joe Lombardo',
+ tg:['closed-loop mandate','bring-your-own-solutions','abatement review','contested statistics'],
+ sn:'Nevada Appeal / Nevada Current', su:'https://www.nevadaappeal.com/news/2026/jun/27/jim-hartman-nevadas-data-center-bonanza/'},
+
+{j:'Nevada', t:'Statement', ti:'2026 governor\u2019s race: Ford and Hill break with Lombardo from the left',
+ d:'April – June 2026', st:'Active campaign positions', sta:'mixed',
+ ac:['Attorney General Aaron Ford (D)','Washoe County Commissioner Alexis Hill (D)','Gov. Joe Lombardo (R)'],
+ dk:'On the narrow question of "should ratepayers foot the bill," Nevada\u2019s top three gubernatorial contenders actually agree; the real daylight opens up on how far to go beyond that, and Lombardo\u2019s own energy interventions became a campaign issue.',
+ de:'Ford, campaigning for governor, said in an 8 News Now interview he\u2019d require data center companies to pay for the energy they consume and build out any additional grid infrastructure themselves, and pointed to Boulder City\u2019s organized opposition as a model of communities being heard. Hill, running in the same Democratic primary, went further and turned Lombardo\u2019s own record into a target: she publicly criticized his February letter backing a natural gas pipeline expansion for data centers, telling Nevada Current she "would not have intervened" to expand gas capacity for that purpose and calling it evidence he was "selling his office to billionaires and corporations." Nevada Week (PBS) summarized the practical alignment: Lombardo and Ford "don\u2019t agree on a lot" but do agree data centers shouldn\u2019t raise water or electricity costs for existing residents — while Hill has staked out the most comprehensive, most skeptical platform of the three.',
+ q:'I would not have intervened to expand natural gas capacity, especially if the driver is data centers.', qa:'Washoe County Commissioner Alexis Hill',
+ tg:['2026 governor\u2019s race','gas pipeline','Boulder City','campaign contrast'],
+ sn:'Nevada Current / The Nevada Independent / PBS Nevada Week', su:'https://nevadacurrent.com/2026/06/04/lombardo-backs-natural-gas-pipeline-expansion-for-data-centers/'},
+
+{j:'Nevada', t:'Hearing / investigation', ti:'Rep. Dina Titus (D) demands answers after BLM fast-tracks a Boulder City data center',
+ d:'July 8–15, 2026', st:'Letter sent; Boulder City voted to appeal', sta:'restrictive',
+ ac:['Rep. Dina Titus (D-NV)'],
+ dk:'The freshest federal statement in this entire database, and a pure oversight letter with no bill attached: after a developer abandoned a local Boulder City proposal and got the same data center approved on adjacent federal land instead, Titus went straight at the Bureau of Land Management.',
+ de:'Townsite Solar 2 LLC\u2019s data center was headed for defeat at the Boulder City Council after the Planning Commission voted against it and over 1,500 residents signed a petition; the developer then switched the project onto an adjacent BLM parcel, where the agency approved it with no public comment process. Titus\u2019s July 8 letter to BLM\u2019s national and Nevada directors named water resources specifically among her concerns, alongside energy usage and the environment, and demanded to know what public consultation occurred and whether hearings would be held before final approval. She also posted the letter to X, framing it as the administration fast-tracking projects around, not through, local input. Boulder City\u2019s Council voted unanimously days later to file a formal appeal.',
+ q:'Data centers potentially can affect our scant water resources, energy usage and the overall environment.', qa:'Rep. Dina Titus (D-NV)',
+ tg:['BLM','federal land','Boulder City','public land transparency'],
+ sn:'Nevada Current / Las Vegas Review-Journal', su:'https://nevadacurrent.com/briefs/titus-demands-answers-on-blm-data-center-approval-process/'},
+
+];
+
+/* ================= RENDER / FILTER LOGIC ================= */
+
+function esc(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+const state = {
+  jurisdiction: 'all',
+  types: new Set(TYPES),
+  stances: new Set(STANCES.map(s=>s.id)),
+  query: '',
+  person: null,
+  peopleQuery: '',
+  peopleSort: 'alpha'
+};
+
+function stanceColor(id){
+  const s = STANCES.find(x=>x.id===id);
+  return s ? `var(${s.color})` : 'var(--faint)';
+}
+function stanceSoftColor(id){
+  const s = STANCES.find(x=>x.id===id);
+  return s ? `var(${s.color}-soft)` : 'var(--card-tint)';
+}
+
+/* ---- People / actor indexing ---- */
+// Actor strings that represent institutions/collectives rather than a named individual.
+// Anything not in this list is treated as a browsable "person" in the People panel.
+const INSTITUTION_ACTORS = new Set([
+  'Arizona Legislature','City of Tucson','Doña Ana County Board of Commissioners',
+  'Food & Water Watch','Imperial County','Information Technology and Innovation Foundation (ITIF)',
+  'Nevada Legislature — interim committees on Natural Resources and on Growth & Infrastructure',
+  'New Mexico Legislature','Public Utility Commission of Texas','Reno City Council',
+  'Republican Party of Texas','Texas Legislature','Texas Water Development Board',
+  'Texas voters','Unnamed developer'
+]);
+
+function isPersonActor(name){ return !INSTITUTION_ACTORS.has(name); }
+
+function personSortKey(raw){
+  // "Some Org (Full Person Name)" — sort by the parenthetical person's last name
+  const parenName = raw.match(/\(([A-Z][a-zà-ÿ'-]+(?:\s[A-Z][a-zà-ÿ'-]+){1,3})\)\s*$/);
+  if (parenName && !/^[A-Z][a-z]*-[A-Z]/.test(parenName[1])) {
+    const words = parenName[1].split(/\s+/);
+    return words[words.length-1].toLowerCase();
+  }
+  let s = raw.replace(/^(Sen\.|Senator|Rep\.|Representative|Gov\.|Governor|President|Asm\.|Assemblymember|State Sen\.|State Rep\.|Commissioner|Chairman|Chair|Mayor|Lt\. Gov\.|House Speaker|EPA Administrator|EPA Assistant Administrator|FERC Chairman)\s+/i, '');
+  s = s.split(/[,(]/)[0].trim();
+  s = s.replace(/\s+(Jr\.|Sr\.|III|II|IV)\.?$/i, '');
+  const words = s.split(/\s+/).filter(Boolean);
+  const last = words.length ? words[words.length-1] : s;
+  return last.toLowerCase();
+}
+
+function partyOf(name){
+  const m = name.match(/\((D|R|I)(?:-[^)]+)?\)/);
+  return m ? m[1] : null;
+}
+
+function getActorIndex(){
+  const counts = new Map();
+  const stancesByActor = new Map();
+  const datesByActor = new Map();
+  DATA.forEach((e,idx) => (e.ac||[]).forEach(a => {
+    counts.set(a, (counts.get(a)||0) + 1);
+    if(!stancesByActor.has(a)) stancesByActor.set(a, []);
+    if(!stancesByActor.get(a).includes(e.sta)) stancesByActor.get(a).push(e.sta);
+    if(!datesByActor.has(a)) datesByActor.set(a, []);
+    datesByActor.get(a).push(idx);
+  }));
+  const all = Array.from(counts.entries()).map(([name,count]) => ({
+    name, count, isPerson: isPersonActor(name), sortKey: personSortKey(name),
+    party: partyOf(name), stances: stancesByActor.get(name) || [], entryIdxs: datesByActor.get(name) || []
+  }));
+  all.sort((a,b) => a.sortKey.localeCompare(b.sortKey));
+  return all;
+}
+const ACTOR_INDEX = getActorIndex();
+
+function buildSidebar(){
+  const jl = document.getElementById('juris-list');
+  const counts = {};
+  DATA.forEach(e=>counts[e.j]=(counts[e.j]||0)+1);
+  let html = `<button class="juris-btn ${state.jurisdiction==='all'?'active':''}" data-j="all">
+    <span class="juris-mini"></span> All jurisdictions <span class="juris-count">${DATA.length}</span></button>`;
+  JURISDICTIONS.forEach(j=>{
+    html += `<button class="juris-btn ${state.jurisdiction===j.id?'active':''}" data-j="${esc(j.id)}">
+      <span class="juris-mini" style="border-color:var(${j.color});color:var(${j.color})"></span>
+      ${esc(j.id)} <span class="juris-count">${counts[j.id]||0}</span></button>`;
+  });
+  jl.innerHTML = html;
+  jl.querySelectorAll('.juris-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{ state.jurisdiction = btn.dataset.j; buildSidebar(); render(); });
+  });
+
+  const tl = document.getElementById('type-list');
+  tl.innerHTML = TYPES.map(t=>`
+    <label class="type-row">
+      <input type="checkbox" data-type="${esc(t)}" ${state.types.has(t)?'checked':''}>
+      ${esc(t)}
+    </label>`).join('');
+  tl.querySelectorAll('input').forEach(cb=>{
+    cb.addEventListener('change', ()=>{
+      if(cb.checked) state.types.add(cb.dataset.type); else state.types.delete(cb.dataset.type);
+      render();
+    });
+  });
+
+  const sl = document.getElementById('stance-list');
+  sl.innerHTML = STANCES.map(s=>`
+    <label class="stance-row ${state.stances.has(s.id)?'':'off'}" data-id="${s.id}">
+      <input type="checkbox" data-stance="${s.id}" ${state.stances.has(s.id)?'checked':''} style="accent-color:var(${s.color})">
+      <span class="stance-dot" style="background:var(${s.color})"></span>
+      ${esc(s.label)}
+    </label>`).join('');
+  sl.querySelectorAll('input').forEach(cb=>{
+    cb.addEventListener('change', ()=>{
+      const id = cb.dataset.stance;
+      if(cb.checked) state.stances.add(id); else state.stances.delete(id);
+      cb.closest('.stance-row').classList.toggle('off', !cb.checked);
+      render();
+    });
+  });
+}
+
+function matches(e, opts){
+  opts = opts || {};
+  if(!opts.ignoreJurisdiction && state.jurisdiction!=='all' && e.j!==state.jurisdiction) return false;
+  if(!state.types.has(e.t)) return false;
+  if(!state.stances.has(e.sta)) return false;
+  if(state.person && !(e.ac||[]).includes(state.person)) return false;
+  if(state.query){
+    const hay = [e.ti,e.dk,e.de,(e.ac||[]).join(' '),(e.tg||[]).join(' '),e.j].join(' ').toLowerCase();
+    if(!hay.includes(state.query.toLowerCase())) return false;
+  }
+  return true;
+}
+
+function updateJurisdictionCounts(){
+  const countsByJ = {};
+  let totalCount = 0;
+  DATA.forEach(e=>{
+    if(!matches(e, {ignoreJurisdiction:true})) return;
+    countsByJ[e.j] = (countsByJ[e.j]||0) + 1;
+    totalCount++;
+  });
+  const allCountEl = document.querySelector('.juris-btn[data-j="all"] .juris-count');
+  if(allCountEl) allCountEl.textContent = totalCount;
+  JURISDICTIONS.forEach(j=>{
+    const el = document.querySelector('.juris-btn[data-j="'+j.id+'"] .juris-count');
+    if(el) el.textContent = countsByJ[j.id] || 0;
+  });
+}
+
+function entryHtml(e, idx){
+  const stanceLabel = STANCES.find(s=>s.id===e.sta);
+  const actorsHtml = (e.ac||[]).map(a =>
+    `<button class="actor-link" data-actor="${esc(a)}" onclick="event.stopPropagation();selectPerson(this.dataset.actor)">${esc(a)}</button>`
+  ).join(' · ');
+  return `
+  <div class="entry" id="entry-${idx}" style="border-left-color:${stanceColor(e.sta)}">
+    <div class="entry-head" onclick="toggleEntry(${idx})">
+      <span class="stance-chip" style="background:${stanceColor(e.sta)}" title="${esc(stanceLabel?stanceLabel.label:'')}"></span>
+      <div class="entry-main">
+        <div class="entry-toprow">
+          <span class="type-tag">${esc(e.t)}</span>
+          <span class="entry-title">${esc(e.ti)}</span>
+          <span class="entry-date">${esc(e.d)}</span>
+        </div>
+        <div class="entry-actors">${actorsHtml}</div>
+        <div class="entry-dek">${esc(e.dk)}</div>
+        ${e.q?`<div class="entry-quote-preview">\u201C${esc(e.q)}\u201D <span class="entry-quote-preview-attr">— ${esc(e.qa||'')}</span></div>`:''}
+      </div>
+      <span class="chevron">›</span>
+    </div>
+    <div class="entry-detail">
+      <span class="entry-status" style="background:${stanceSoftColor(e.sta)};color:var(--ink);border:1px solid ${stanceColor(e.sta)}">${esc(e.st||'')}</span>
+      <div>${esc(e.de||'')}</div>
+      <div class="entry-tags">${(e.tg||[]).map(t=>`<span>${esc(t)}</span>`).join('')}</div>
+      <div class="entry-source">Source: ${esc(e.sn||'')}${e.su?` — <a href="${esc(e.su)}" target="_blank" rel="noopener">view</a>`:''}</div>
+    </div>
+  </div>`;
+}
+
+function toggleEntry(idx){
+  const el = document.getElementById('entry-'+idx);
+  if(el) el.classList.toggle('expanded');
+}
+
+function render(){
+  const filtered = DATA.filter(e => matches(e));
+  const results = document.getElementById('results');
+  const countEl = document.getElementById('results-count');
+  document.getElementById('total-count').textContent = DATA.length;
+  updateJurisdictionCounts();
+
+  const chipRow = document.getElementById('person-chip-row');
+  if(state.person){
+    chipRow.innerHTML = `<div class="person-chip-wrap"><span class="person-chip">Showing items mentioning: ${esc(state.person)}
+      <button onclick="clearPerson()" title="Clear person filter" aria-label="Clear person filter">×</button></span></div>`;
+  } else {
+    chipRow.innerHTML = '';
+  }
+
+  if(filtered.length===0){
+    results.innerHTML = `<div class="empty-state">No entries match these filters.
+      <span>Try clearing the search box or resetting filters on the left.</span></div>`;
+    countEl.textContent = '0 results';
+    return;
+  }
+
+  countEl.textContent = `${filtered.length} of ${DATA.length} items`;
+
+  let html = '';
+  const globalIndex = new Map();
+  DATA.forEach((e,i)=>globalIndex.set(e,i));
+
+  if(state.jurisdiction==='all'){
+    JURISDICTIONS.forEach(j=>{
+      const group = filtered.filter(e=>e.j===j.id);
+      if(group.length===0) return;
+      html += `<div class="group-header"><span class="group-title">${esc(j.id)}</span><span class="group-count">${group.length}</span></div>`;
+      group.forEach(e=>{ html += entryHtml(e, globalIndex.get(e)); });
+    });
+  } else {
+    html += `<div class="group-header"><span class="group-title">${esc(state.jurisdiction)}</span><span class="group-count">${filtered.length}</span></div>`;
+    filtered.forEach(e=>{ html += entryHtml(e, globalIndex.get(e)); });
+  }
+  results.innerHTML = html;
+}
+
+function selectPerson(name){
+  state.person = name;
+  buildPeoplePanel();
+  render();
+  const resultsEl = document.getElementById('results');
+  if(resultsEl) resultsEl.scrollIntoView({behavior:'smooth', block:'start'});
+}
+function clearPerson(){
+  state.person = null;
+  buildPeoplePanel();
+  render();
+}
+
+function buildPeoplePanel(){
+  const listEl = document.getElementById('people-list');
+  const q = state.peopleQuery.trim().toLowerCase();
+  let items = ACTOR_INDEX.slice();
+  if(q){
+    items = items.filter(p => p.name.toLowerCase().includes(q));
+  }
+  if(state.peopleSort === 'count'){
+    items.sort((a,b) => b.count - a.count || a.sortKey.localeCompare(b.sortKey));
+  } else {
+    items.sort((a,b) => a.sortKey.localeCompare(b.sortKey));
+  }
+  if(items.length===0){
+    listEl.innerHTML = `<div class="people-empty">No match. Try a last name or state.</div>`;
+    return;
+  }
+  const people = items.filter(p=>p.isPerson);
+  const orgs = items.filter(p=>!p.isPerson);
+  let html = '';
+  const row = p => `<button class="people-item ${state.person===p.name?'active':''}" data-actor="${esc(p.name)}" title="${esc(p.name)}" onclick="selectPerson(this.dataset.actor)">
+      <span class="people-name">${esc(p.name)}</span>
+      ${p.party?`<span class="party-tag party-${p.party}">${p.party}</span>`:''}
+      <span class="people-stance-dots">${p.stances.map(s=>`<span class="mini-dot" style="background:${stanceColor(s)}"></span>`).join('')}</span>
+      <span class="people-count">${p.count}</span></button>`;
+  if(people.length){
+    html += `<div class="people-group-label">People (${people.length})</div>`;
+    html += people.map(row).join('');
+  }
+  if(orgs.length){
+    html += `<div class="people-group-label">Agencies &amp; organizations (${orgs.length})</div>`;
+    html += orgs.map(row).join('');
+  }
+  listEl.innerHTML = html;
+}
+
+document.getElementById('people-sort-alpha').addEventListener('click', ()=>{
+  state.peopleSort = 'alpha';
+  document.getElementById('people-sort-alpha').classList.add('active');
+  document.getElementById('people-sort-count').classList.remove('active');
+  buildPeoplePanel();
+});
+document.getElementById('people-sort-count').addEventListener('click', ()=>{
+  state.peopleSort = 'count';
+  document.getElementById('people-sort-count').classList.add('active');
+  document.getElementById('people-sort-alpha').classList.remove('active');
+  buildPeoplePanel();
+});
+
+document.getElementById('search-input').addEventListener('input', (e)=>{
+  state.query = e.target.value;
+  render();
+});
+document.getElementById('people-search').addEventListener('input', (e)=>{
+  state.peopleQuery = e.target.value;
+  buildPeoplePanel();
+});
+document.getElementById('clear-filters').addEventListener('click', ()=>{
+  state.jurisdiction='all';
+  state.types = new Set(TYPES);
+  state.stances = new Set(STANCES.map(s=>s.id));
+  state.query='';
+  state.person=null;
+  state.peopleQuery='';
+  document.getElementById('search-input').value='';
+  document.getElementById('people-search').value='';
+  buildSidebar(); buildPeoplePanel(); render();
+});
+
+buildSidebar();
+buildPeoplePanel();
+render();
+</script>
+</body>
+</html>

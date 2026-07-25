@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Boundary Stone Partners — Research Hub</title>
+<style>
+  :root{
+    --teal-dark:#1A4444; --teal:#2ABFBF; --teal-deep:#14807f;
+    --ink:#16201f; --muted:#5f6b6a; --faint:#8a9594;
+    --line:#e3e8e7; --line-strong:#cfd6d5;
+    --bg:#f6f8f8; --card:#ffffff;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.5;-webkit-font-smoothing:antialiased;}
+  .serif{font-family:Georgia,"Iowan Old Style","Times New Roman",serif;}
+  a{color:var(--teal-deep);}
+
+  /* ── Masthead ─────────────────────────────────── */
+  header.masthead{background:var(--teal-dark);color:#fff;padding:30px 24px 26px;}
+  .mast-inner{max-width:1240px;margin:0 auto;}
+  .kicker{font-size:12px;letter-spacing:3px;text-transform:uppercase;
+    color:var(--teal);margin:0 0 8px;font-weight:600;}
+  header.masthead h1{margin:0 0 10px;font-size:31px;font-weight:600;line-height:1.15;
+    font-family:Georgia,"Iowan Old Style","Times New Roman",serif;}
+  .mast-desc{margin:0 0 16px;font-size:14.5px;color:#cfe4e3;max-width:620px;line-height:1.55;}
+  .mast-meta{font-size:13px;color:#bcd4d3;display:flex;flex-wrap:wrap;gap:6px 18px;}
+  .mast-meta b{color:#fff;font-weight:600;}
+
+  /* ── Toolbar ──────────────────────────────────── */
+  .toolbar{background:var(--card);border-bottom:1px solid var(--line);
+    position:sticky;top:0;z-index:30;}
+  .tools-inner{max-width:1240px;margin:0 auto;padding:14px 24px;
+    display:flex;flex-wrap:wrap;gap:12px;align-items:center;}
+  input[type=text],select{font-size:14px;padding:9px 12px;border:1px solid var(--line-strong);
+    border-radius:8px;font-family:inherit;background:#fff;color:var(--ink);}
+  input#search{min-width:220px;flex:1 1 220px;max-width:320px;}
+  select{cursor:pointer;}
+  .tool-spacer{flex:1 1 auto;}
+  .hint{font-size:12px;color:var(--faint);}
+
+  main{max-width:1240px;margin:0 auto;padding:22px 24px 70px;}
+
+  /* ── Project cards ─────────────────────────────── */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;
+    border-top:4px solid var(--teal);padding:18px 18px 15px;
+    transition:box-shadow .15s ease,transform .15s ease;
+    display:flex;flex-direction:column;gap:0;text-decoration:none;color:inherit;}
+  .card:hover{box-shadow:0 6px 22px rgba(20,40,40,.10);transform:translateY(-2px);}
+  .card:focus-visible{outline:2px solid var(--teal);outline-offset:2px;}
+  .card-top{display:flex;align-items:center;gap:12px;margin-bottom:2px;}
+  .card-badge{flex-shrink:0;width:44px;height:44px;border-radius:50%;
+    background:var(--teal-dark);color:#fff;display:flex;align-items:center;justify-content:center;
+    font-size:14px;font-weight:700;letter-spacing:.5px;font-family:Georgia,serif;}
+  .card h3{margin:0;font-size:18.5px;font-weight:600;line-height:1.3;}
+  .card-synth{margin:12px 0 0;font-size:13.5px;color:var(--muted);line-height:1.5;
+    display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+  .card-divider{border:0;border-top:1px solid var(--line);margin:14px 0 12px;}
+  .card-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:auto;padding-bottom:2px;}
+  .tag{font-size:10.5px;font-weight:600;letter-spacing:.3px;text-transform:uppercase;
+    background:#eef2f1;color:#48605f;padding:3px 8px;border-radius:5px;
+    display:inline-block;width:fit-content;}
+  .card-foot{display:flex;align-items:center;gap:10px;margin-top:14px;padding-top:12px;
+    border-top:1px solid var(--line);font-size:12px;}
+  .card-status{color:var(--muted);font-weight:600;}
+  .card-cta{margin-left:auto;color:var(--teal-deep);font-weight:700;white-space:nowrap;}
+
+  .empty{padding:40px;text-align:center;color:var(--faint);font-size:14px;}
+
+  footer{max-width:1240px;margin:0 auto;padding:26px 24px;font-size:12px;color:var(--muted);
+    border-top:1px solid var(--line);}
+  footer p{margin:0 0 6px;max-width:760px;}
+
+  @media(max-width:600px){
+    input#search{max-width:none;}
+  }
+  @media(prefers-reduced-motion:reduce){*{transition:none !important;}}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="mast-inner">
+    <p class="kicker">Boundary Stone Partners</p>
+    <h1>Research Hub</h1>
+    <p class="mast-desc">A running library of our public trackers and practice comparisons. Open any project below for its full detail and sourcing.</p>
+    <div class="mast-meta">
+      <span><b id="m-count">—</b> projects</span>
+      <span>Updated as new work is published</span>
+    </div>
+  </div>
+</header>
+
+<div class="toolbar">
+  <div class="tools-inner">
+    <input id="search" type="text" placeholder="Search projects…" oninput="render()">
+    <select id="f-tag" onchange="render()"></select>
+    <span class="tool-spacer"></span>
+    <span class="hint">Tap any project to open it</span>
+  </div>
+</div>
+
+<main id="main"></main>
+
+<footer>
+  <p><strong>About this hub.</strong> This page indexes Boundary Stone Partners' standalone trackers and
+  comparisons. Each project below is self-contained — open one for its full sourcing and detail. New
+  projects are added here as they're published.</p>
+  <p>Notice a broken link or an out-of-date project? <a href="mailto:tjanous@boundarystone.com?subject=Hub%20feedback">Let us know</a>.</p>
+</footer>
+
+<script>
+/* ── PROJECT REGISTRY ─────────────────────────────────────
+   Add a new project by adding one object below. That's it —
+   the grid, search box, and topic filter all update themselves
+   from this array; nothing else in this file needs to change.
+
+   Required:
+     id       unique slug (used internally, e.g. element ids)
+     title    display name
+     tagline  1–2 sentence description shown on the card
+     href     relative path to the project's HTML file — keep
+              every project file in this same folder
+     tags     array of short topic labels. Also drives the
+              "topic" filter dropdown and card search, so reuse
+              existing tags across projects where they fit
+     status   short meta text for the card footer, e.g.
+              "Compiled July 2026" or "Live · weekly scan"
+
+   Optional:
+     initials 1–2 letter badge override (auto-derived from the
+              title if you omit this — only set it if the
+              auto version looks odd)
+     live     { supabaseUrl, supabaseAnon } — only for projects
+              that read from a live Supabase table, like the
+              2028 tracker. If present, the card fetches a real
+              row count on load instead of showing a fixed
+              number, so it can't go stale. Leave this out
+              entirely for static/compiled projects.
+────────────────────────────────────────────────────────── */
+const PROJECTS = [
+  {
+    id: 'bsp-2028-tracker',
+    title: '2028 Presidential Energy & Transportation Tracker',
+    tagline: 'Non-partisan tracker of energy and transportation positions for likely 2028 presidential candidates, sourced to primary documents.',
+    href: './bsp-2028-tracker.html',
+    tags: ['Politics','Energy','Transportation'],
+    status: 'Live · weekly deep scan',
+    live: {
+      supabaseUrl: 'https://ugkkggcawakvexazzurw.supabase.co',
+      supabaseAnon: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVna2tnZ2Nhd2FrdmV4YXp6dXJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4MzYzMDUsImV4cCI6MjA5ODQxMjMwNX0.NVjBdsh2aKgYcpt1u1iLJ8gGqp7IdGNRe-ZJD5h1ZkA'
+    }
+  },
+  {
+    id: 'data-center-comparison',
+    title: 'Data Center Development: Practice Comparison',
+    tagline: 'Side-by-side comparison of model and cautionary data center development practices, for client and community conversations.',
+    href: './data-center-practice-comparison.html',
+    tags: ['Data Centers','Community','Energy'],
+    status: 'Compiled July 2026 · 8 projects compared'
+  },
+  {
+    id: 'watershed-water-policy',
+    title: 'Watershed — Data Center Cooling & Water Policy Tracker',
+    tagline: "Who's saying what about data center cooling and water, across federal politicians and five priority states — bills, executive actions, hearings, and statements, sourced to primary documents.",
+    href: './watershed-water-policy-tracker.html',
+    tags: ['Water','Data Centers','Policy'],
+    initials: 'WS',
+    status: '79 tracked items · compiled July 16, 2026'
+  },
+  {
+    id: 'bsp-hyperscaler-ppa',
+    title: 'Hyperscaler PPA & Community Impact Database',
+    tagline: 'Deal-by-deal comparison of how Google, Microsoft, Amazon, Meta, OpenAI, and xAI structure power purchase agreements — approval models, opposition outcomes, and a live regulatory tracker.',
+    href: './bsp-hyperscaler-ppa-database.html',
+    tags: ['Energy','Data Centers','Regulatory'],
+    initials: 'PPA',
+    status: '19 deals · 6 companies · updated June 23, 2026'
+  }
+];
+
+/* ── HELPERS ────────────────────────────────────────────── */
+const $   = (s, el=document) => el.querySelector(s);
+const esc = s => String(s||'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function fmtDate(d){
+  if(!d) return '';
+  const [y,m,da] = d.split('-');
+  return `${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m-1]} ${+da}, ${y}`;
+}
+function autoInitials(title){
+  const words = title.split(/\s+/).filter(w => /^[A-Za-z]/.test(w));
+  const pick  = words.length >= 2 ? words.slice(0,2) : (words.length ? [words[0],words[0]] : ['?']);
+  return pick.map(w => w[0].toUpperCase()).join('');
+}
+const initialsFor = p => (p.initials || autoInitials(p.title)).toUpperCase();
+const allTags      = () => [...new Set(PROJECTS.flatMap(p => p.tags))].sort();
+
+/* ── FILTER + RENDER ────────────────────────────────────── */
+function filtered(){
+  const q  = $('#search').value.trim().toLowerCase();
+  const ft = $('#f-tag').value;
+  return PROJECTS.filter(p =>
+    (!q  || (p.title+' '+p.tagline+' '+p.tags.join(' ')).toLowerCase().includes(q)) &&
+    (!ft || p.tags.includes(ft))
+  );
+}
+
+function cardHTML(p){
+  const statusText = liveStatCache[p.id] || p.status;
+  const tagsHtml   = p.tags.map(t => `<span class="tag">${esc(t)}</span>`).join('');
+  return `<a class="card" href="${esc(p.href)}">
+    <div class="card-top">
+      <span class="card-badge">${esc(initialsFor(p))}</span>
+      <h3 class="serif">${esc(p.title)}</h3>
+    </div>
+    <p class="card-synth">${esc(p.tagline)}</p>
+    <hr class="card-divider">
+    <div class="card-tags">${tagsHtml}</div>
+    <div class="card-foot">
+      <span class="card-status" id="status-${esc(p.id)}">${esc(statusText)}</span>
+      <span class="card-cta">Open project →</span>
+    </div>
+  </a>`;
+}
+
+function render(){
+  const list = filtered();
+  $('#main').innerHTML = list.length
+    ? `<div class="grid">${list.map(cardHTML).join('')}</div>`
+    : `<div class="empty">No projects match these filters.</div>`;
+  list.forEach(p => { if(p.live && !(p.id in liveStatCache)) loadLiveStat(p); });
+}
+
+/* ── LIVE STAT (progressive enhancement — fails silently) ──
+   Only runs for projects with a `live` config. Fetches a
+   candidate count + latest scan date straight from Supabase,
+   same public read the tracker itself already does client-side.
+   If it fails for any reason (offline, key rotated, etc.) the
+   card just keeps showing its static `status` text. */
+const liveStatCache = {};
+
+async function loadLiveStat(p){
+  try{
+    const headers = {
+      apikey: p.live.supabaseAnon,
+      Authorization: `Bearer ${p.live.supabaseAnon}`,
+      Accept: 'application/json'
+    };
+    const [cands, positions] = await Promise.all([
+      fetch(`${p.live.supabaseUrl}/rest/v1/candidates?select=id`, {headers}).then(r => r.ok ? r.json() : null),
+      fetch(`${p.live.supabaseUrl}/rest/v1/positions?select=last_updated`, {headers}).then(r => r.ok ? r.json() : null)
+    ]);
+    if(!cands || !positions) return;
+    const lastScan = positions.reduce((max,x) => (x.last_updated && x.last_updated > max) ? x.last_updated : max, '');
+    const text = `${cands.length} candidates tracked${lastScan ? ` · scanned ${fmtDate(lastScan)}` : ''}`;
+    liveStatCache[p.id] = text;
+    const el = document.getElementById(`status-${p.id}`);
+    if(el) el.textContent = text;
+  }catch(e){ /* keep the static fallback text already on the card */ }
+}
+
+/* ── BOOT ───────────────────────────────────────────────── */
+function boot(){
+  $('#m-count').textContent = PROJECTS.length;
+  const sel = $('#f-tag');
+  sel.innerHTML = '<option value="">All topics</option>' +
+    allTags().map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join('');
+  render();
+}
+boot();
+</script>
+</body>
+</html>
