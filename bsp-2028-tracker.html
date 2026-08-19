@@ -269,6 +269,16 @@
 
   .empty{padding:40px;text-align:center;color:var(--faint);font-size:14px;}
 
+  .about{max-width:1240px;margin:26px auto 0;padding:26px 24px 6px;border-top:1px solid var(--line);}
+  .about h2{font-family:Georgia,"Iowan Old Style","Times New Roman",serif;font-size:21px;
+    font-weight:600;color:var(--teal-dark);margin:0 0 16px;}
+  .about-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;}
+  .about-grid h3{font-size:12px;letter-spacing:1.4px;text-transform:uppercase;
+    color:var(--teal-deep);margin:0 0 6px;font-weight:700;}
+  .about-grid p{font-size:13.5px;color:var(--muted);margin:0;line-height:1.6;}
+  .about-close{font-size:13.5px;color:var(--muted);margin:18px 0 0;max-width:760px;}
+  .mast-meta a.about-link{color:var(--teal);text-decoration:none;font-weight:600;}
+  .mast-meta a.about-link:hover{text-decoration:underline;}
   footer{max-width:1240px;margin:0 auto;padding:26px 24px;font-size:12px;color:var(--muted);
     border-top:1px solid var(--line);}
   footer p{margin:0 0 6px;max-width:760px;}
@@ -293,6 +303,7 @@
       <span><b id="m-cands">—</b> candidates tracked</span>
       <span><b id="m-pos">—</b> documented positions</span>
       <span><b>Cadence</b> deep scan every 2 weeks</span>
+      <span><a class="about-link" href="#about">How this tracker works &darr;</a></span>
     </div>
   </div>
 </header>
@@ -327,6 +338,46 @@
 <main id="main">
   <div class="loading"><div class="spinner"></div><span>Loading tracker data…</span></div>
 </main>
+
+<section class="about" id="about">
+  <h2>How this tracker works</h2>
+  <div class="about-grid">
+    <div>
+      <h3>What this is</h3>
+      <p>A factual, non-partisan reference on where likely 2028 presidential candidates stand on energy
+      and transportation policy, built for professionals who work in those industries. Positions are
+      recorded without evaluation &mdash; nothing here is an endorsement, a score, or a criticism. An entry
+      appears only when it is specific enough to distinguish candidates from one another; generic
+      talking points that every candidate shares are excluded on purpose.</p>
+    </div>
+    <div>
+      <h3>Where entries come from</h3>
+      <p>An automated research scan runs every two weeks across public records: congressional votes,
+      executive actions, signed and sponsored legislation, campaign statements, speeches, and press
+      coverage. Each finding is extracted under strict rules that record what happened, when it
+      happened, and what kind of evidence supports it &mdash; with concrete actions weighted above
+      statements.</p>
+    </div>
+    <div>
+      <h3>The sourcing standard</h3>
+      <p>Every position cites its sources, and every source link is automatically verified to resolve
+      before publication &mdash; if a working source can't back an entry, the entry is not published.
+      Summaries state only what the sources document, never inferences about motives or intent.</p>
+    </div>
+    <div>
+      <h3>What a &ldquo;position shift&rdquo; means</h3>
+      <p>A shift flag marks a documented reversal only: the same yes-or-no policy question answered on
+      opposite sides at two points in time, each side backed by an explicit statement, vote, veto, or
+      signature. Pursuing the same goal more aggressively, adding detail to an existing plan, changing
+      framing or emphasis, or going quiet on an issue is never flagged. Every candidate flag must pass
+      multiple independent automated reviews unanimously, plus structural checks &mdash; and when the
+      evidence is uncertain, the tracker's rule is no flag. The filter is re-tested against a bank of
+      real past examples before any change to it goes live.</p>
+    </div>
+  </div>
+  <p class="about-close">Spot something wrong or outdated? <a href="./bsp-2028-tracker-feedback.html">Report
+  it</a> &mdash; a person reviews every submission, and corrections cite the source you point us to.</p>
+</section>
 
 <footer>
   <p><strong>About this tracker.</strong> Compiled by Boundary Stone Partners as a factual, non-partisan
