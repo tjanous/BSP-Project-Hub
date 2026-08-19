@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>Report an issue — BSP 2028 Tracker</title>
+<title>Report an issue · BSP 2028 Tracker</title>
 <style>
   :root{
     --teal-dark:#1A4444; --teal:#2ABFBF; --teal-deep:#14807f;
@@ -75,13 +75,12 @@
     <a class="hub-crumb" href="./bsp-2028-tracker.html">&larr; Back to the 2028 Tracker</a>
     <p class="kicker">Boundary Stone Partners</p>
     <h1>Report an issue with the tracker</h1>
-    <p class="mast-sub">Spotted something that's wrong, outdated, or missing context? Tell us —
-    every submission gets a human review, and corrections cite the source you point us to.</p>
+    <p class="mast-sub">Spotted something that's wrong, outdated, or missing context? Tell us. Every submission gets a human review, and corrections cite the source you point us to.</p>
   </div>
 </header>
 
 <main>
-  <div class="notice err" id="errbox">Something went wrong sending your report. Please try again in a moment —
+  <div class="notice err" id="errbox">Something went wrong sending your report. Please try again in a moment,
     or email <a href="mailto:tjanous@boundarystone.com?subject=2028%20Tracker%20correction">the tracker team</a> directly.</div>
 
   <form id="reportform" novalidate>
@@ -90,7 +89,7 @@
       <div class="field full">
         <label for="message">What should we take another look at?</label>
         <textarea id="message" required maxlength="5000"
-          placeholder="Tell us what looks wrong or outdated — the more specific, the faster we can check it."></textarea>
+          placeholder="Tell us what looks wrong or outdated. The more specific, the faster we can check it."></textarea>
       </div>
       <div class="row">
         <div class="field">
@@ -158,7 +157,7 @@
 
   <div class="done" id="donebox">
     <div class="check">&#10003;</div>
-    <h2>Thank you — we're on it.</h2>
+    <h2>Thank you. We're on it.</h2>
     <p>Every report gets a human review. If we need more detail, we'll reach out.</p>
     <p style="margin-top:14px;"><a href="./bsp-2028-tracker.html">&larr; Back to the tracker</a></p>
   </div>
@@ -176,7 +175,7 @@ const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 const HDRS = {'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}`};
 
 /* Pre-fill the candidate and issue dropdowns from the live tracker data.
-   If the fetch fails, the form still works — the dropdowns just stay generic. */
+   If the fetch fails, the form still works; the dropdowns just stay generic. */
 (async function fill(){
   try{
     const [cands, issues] = await Promise.all([

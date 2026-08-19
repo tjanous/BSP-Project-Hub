@@ -299,9 +299,9 @@
     <p class="kicker">Boundary Stone Partners</p>
     <h1>2028 Presidential Energy &amp; Transportation Tracker</h1>
     <div class="mast-meta">
-      <span><b>Last scan</b> <span id="m-scan">—</span></span>
-      <span><b id="m-cands">—</b> candidates tracked</span>
-      <span><b id="m-pos">—</b> documented positions</span>
+      <span><b>Last scan</b> <span id="m-scan">…</span></span>
+      <span><b id="m-cands">…</b> candidates tracked</span>
+      <span><b id="m-pos">…</b> documented positions</span>
       <span><b>Cadence</b> deep scan every 2 weeks</span>
       <span><a class="about-link" href="#about">How this tracker works &darr;</a></span>
     </div>
@@ -346,7 +346,7 @@
       <h3>What this is</h3>
       <p>A factual, non-partisan reference on where likely 2028 presidential candidates stand on energy
       and transportation policy, built for professionals who work in those industries. Positions are
-      recorded without evaluation &mdash; nothing here is an endorsement, a score, or a criticism. An entry
+      recorded without evaluation: nothing here is an endorsement, a score, or a criticism. An entry
       appears only when it is specific enough to distinguish candidates from one another; generic
       talking points that every candidate shares are excluded on purpose.</p>
     </div>
@@ -355,13 +355,13 @@
       <p>An automated research scan runs every two weeks across public records: congressional votes,
       executive actions, signed and sponsored legislation, campaign statements, speeches, and press
       coverage. Each finding is extracted under strict rules that record what happened, when it
-      happened, and what kind of evidence supports it &mdash; with concrete actions weighted above
+      happened, and what kind of evidence supports it, with concrete actions weighted above
       statements.</p>
     </div>
     <div>
       <h3>The sourcing standard</h3>
       <p>Every position cites its sources, and every source link is automatically verified to resolve
-      before publication &mdash; if a working source can't back an entry, the entry is not published.
+      before publication. If a working source can't back an entry, the entry is not published.
       Summaries state only what the sources document, never inferences about motives or intent.</p>
     </div>
     <div>
@@ -370,13 +370,13 @@
       opposite sides at two points in time, each side backed by an explicit statement, vote, veto, or
       signature. Pursuing the same goal more aggressively, adding detail to an existing plan, changing
       framing or emphasis, or going quiet on an issue is never flagged. Every candidate flag must pass
-      multiple independent automated reviews unanimously, plus structural checks &mdash; and when the
+      multiple independent automated reviews unanimously, plus structural checks. When the
       evidence is uncertain, the tracker's rule is no flag. The filter is re-tested against a bank of
       real past examples before any change to it goes live.</p>
     </div>
   </div>
   <p class="about-close">Spot something wrong or outdated? <a href="./bsp-2028-tracker-feedback.html">Report
-  it</a> &mdash; a person reviews every submission, and corrections cite the source you point us to.</p>
+  it</a>. A person reviews every submission, and corrections cite the source you point us to.</p>
 </section>
 
 <footer>
@@ -385,7 +385,7 @@
   cites a primary source with a date and reflects documented votes, actions, or stated positions only.</p>
   <p>Positions are presented descriptively. That a candidate supports or opposes a given policy is recorded
   without evaluation. This resource is informational and does not constitute an endorsement.</p>
-  <p>Notice an error or an outdated position? <a href="./bsp-2028-tracker-feedback.html">Report it here</a> &mdash; every submission gets a human review.</p>
+  <p>Notice an error or an outdated position? <a href="./bsp-2028-tracker-feedback.html">Report it here</a>. Every submission gets a human review.</p>
 </footer>
 
 <div class="backdrop" id="backdrop" onclick="if(event.target===this)closeModal()">
@@ -487,7 +487,7 @@ async function loadData(){
     // same underlying field (last_updated) the Latest Scan feed already uses.
     const lastScanDate = positions.reduce((max, p) =>
       (p.last_updated && p.last_updated > max) ? p.last_updated : max, '');
-    document.getElementById('m-scan').textContent = lastScanDate ? fmtDate(lastScanDate) : '—';
+    document.getElementById('m-scan').textContent = lastScanDate ? fmtDate(lastScanDate) : '…';
 
     const sel = document.getElementById('f-issue');
     sel.innerHTML = '<option value="">All issues</option>' +
@@ -562,7 +562,7 @@ function setView(v){
   ['cand','cmp','diff'].forEach(k => $('#v-'+k).classList.remove('active'));
   $('#v-'+(v==='candidates'?'cand':v==='compare'?'cmp':'diff')).classList.add('active');
   $('#toolhint').textContent = v==='candidates' ? 'Tap any card for the full profile'
-    : v==='compare'  ? 'Pick 2–3 candidates — best within the same party'
+    : v==='compare'  ? 'Pick 2–3 candidates (best within the same party)'
     : 'See how same-party candidates diverge on one issue';
   render();
 }
@@ -665,7 +665,7 @@ function feedRowsHtml(items){
     // defensively handled) just renders as plain, unlinked text.
     const src = i.sources.find(s => s.p) || i.sources[0];
     const inner = `<span class="who">${esc(i.name)}</span>
-       <span>${esc(i.issue)}${i.shift?' — <em>position shift</em>':''}</span>
+       <span>${esc(i.issue)}${i.shift?' · <em>position shift</em>':''}</span>
        <span class="when">found ${fmtDate(i.found)}</span>`;
     return src
       ? `<li><a class="feed-row" href="${esc(src.u)}" target="_blank" rel="noopener noreferrer">${inner}</a></li>`
@@ -679,10 +679,10 @@ function updatesFeed(){
   feedShown = Math.min(feedShown, items.length) || 8;
   const remaining = items.length - feedShown;
   return `<div class="feed">
-    <h3>Latest scan — recent activity</h3>
+    <h3>Latest scan · recent activity</h3>
     <ul id="feed-list">${feedRowsHtml(items.slice(0, feedShown))}</ul>
     ${remaining > 0
-      ? `<button class="feed-more" onclick="expandFeed()">Show more — ${remaining} earlier</button>`
+      ? `<button class="feed-more" onclick="expandFeed()">Show more (${remaining} earlier)</button>`
       : ''}
   </div>`;
 }
@@ -694,7 +694,7 @@ function expandFeed(){
   const remaining = items.length - feedShown;
   const btn = document.querySelector('.feed-more');
   if(!btn) return;
-  if(remaining > 0) btn.textContent = `Show more — ${remaining} earlier`;
+  if(remaining > 0) btn.textContent = `Show more (${remaining} earlier)`;
   else btn.remove();
 }
 
@@ -812,7 +812,7 @@ function renderModalDetail(c, issue){
     ${row}`;
   }).join('');
 
-  const closedLabel = `View full record — ${older.length} earlier ${older.length===1?'position':'positions'}`;
+  const closedLabel = `View full record (${older.length} earlier ${older.length===1?'position':'positions'})`;
 
   return topHtml +
     `<button class="history-toggle" onclick="toggleHistory(this)" data-closed-label="${esc(closedLabel)}">
@@ -857,7 +857,7 @@ function renderCompare(){
       .sort((a,b) => RELEVANCE.indexOf(a)-RELEVANCE.indexOf(b));
     const mixed  = new Set(picks.map(c=>c.party)).size > 1;
     table = (mixed
-      ? `<p class="hint" style="margin:0 0 12px">You're comparing across parties — most useful for same-party primary comparisons.</p>`
+      ? `<p class="hint" style="margin:0 0 12px">You're comparing across parties. This view is most useful for same-party comparisons.</p>`
       : '') +
       `<div class="cmp-table" style="--cols:${picks.length}">` +
       picks.map(c => {
@@ -878,7 +878,7 @@ function renderCompare(){
 
   $('#main').innerHTML =
     `<div class="compare-pick">
-       <p><strong>Compare candidates</strong> — choose up to three. Most useful for same-party primary comparisons.</p>
+       <p><strong>Compare candidates</strong>: choose up to three. Most useful for same-party primary comparisons.</p>
        <div class="chk-grid">${checks}</div>
      </div>${table}`;
 }

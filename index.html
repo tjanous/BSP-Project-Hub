@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Boundary Stone Partners — Research Hub</title>
+<title>Boundary Stone Partners · Research Hub</title>
 <style>
   :root{
     --teal-dark:#1A4444; --teal:#2ABFBF; --teal-deep:#14807f;
@@ -88,7 +88,7 @@
     <h1>Research Hub</h1>
     <p class="mast-desc">A running library of our public trackers and practice comparisons. Open any project below for its full detail and sourcing.</p>
     <div class="mast-meta">
-      <span><b id="m-count">—</b> projects</span>
+      <span><b id="m-count">…</b> projects</span>
       <span>Updated as new work is published</span>
     </div>
   </div>
@@ -107,14 +107,14 @@
 
 <footer>
   <p><strong>About this hub.</strong> This page indexes Boundary Stone Partners' standalone trackers and
-  comparisons. Each project below is self-contained — open one for its full sourcing and detail. New
+  comparisons. Each project below is self-contained; open one for its full sourcing and detail. New
   projects are added here as they're published.</p>
   <p>Notice a broken link or an out-of-date project? <a href="mailto:tjanous@boundarystone.com?subject=Hub%20feedback">Let us know</a>.</p>
 </footer>
 
 <script>
 /* ── PROJECT REGISTRY ─────────────────────────────────────
-   Add a new project by adding one object below. That's it —
+   Add a new project by adding one object below. That's it:
    the grid, search box, and topic filter all update themselves
    from this array; nothing else in this file needs to change.
 
@@ -122,7 +122,7 @@
      id       unique slug (used internally, e.g. element ids)
      title    display name
      tagline  1–2 sentence description shown on the card
-     href     relative path to the project's HTML file — keep
+     href     relative path to the project's HTML file. Keep
               every project file in this same folder
      tags     array of short topic labels. Also drives the
               "topic" filter dropdown and card search, so reuse
@@ -132,9 +132,9 @@
 
    Optional:
      initials 1–2 letter badge override (auto-derived from the
-              title if you omit this — only set it if the
+              title if you omit this. Only set it if the
               auto version looks odd)
-     live     { supabaseUrl, supabaseAnon } — only for projects
+     live     { supabaseUrl, supabaseAnon }. Only for projects
               that read from a live Supabase table, like the
               2028 tracker. If present, the card fetches a real
               row count on load instead of showing a fixed
@@ -164,8 +164,8 @@ const PROJECTS = [
   },
   {
     id: 'watershed-water-policy',
-    title: 'Watershed — Data Center Cooling & Water Policy Tracker',
-    tagline: "Who's saying what about data center cooling and water, across federal politicians and five priority states — bills, executive actions, hearings, and statements, sourced to primary documents.",
+    title: 'Watershed: Data Center Cooling & Water Policy Tracker',
+    tagline: "Who's saying what about data center cooling and water, across federal politicians and five priority states: bills, executive actions, hearings, and statements, sourced to primary documents.",
     href: './watershed-water-policy-tracker.html',
     tags: ['Water','Data Centers','Policy'],
     initials: 'WS',
@@ -174,7 +174,7 @@ const PROJECTS = [
   {
     id: 'bsp-hyperscaler-ppa',
     title: 'Hyperscaler PPA & Community Impact Database',
-    tagline: 'Deal-by-deal comparison of how Google, Microsoft, Amazon, Meta, OpenAI, and xAI structure power purchase agreements — approval models, opposition outcomes, and a live regulatory tracker.',
+    tagline: 'Deal-by-deal comparison of how Google, Microsoft, Amazon, Meta, OpenAI, and xAI structure power purchase agreements: approval models, opposition outcomes, and a live regulatory tracker.',
     href: './bsp-hyperscaler-ppa-database.html',
     tags: ['Energy','Data Centers','Regulatory'],
     initials: 'PPA',
@@ -235,7 +235,7 @@ function render(){
   list.forEach(p => { if(p.live && !(p.id in liveStatCache)) loadLiveStat(p); });
 }
 
-/* ── LIVE STAT (progressive enhancement — fails silently) ──
+/* ── LIVE STAT (progressive enhancement, fails silently) ──
    Only runs for projects with a `live` config. Fetches a
    candidate count + latest scan date straight from Supabase,
    same public read the tracker itself already does client-side.
